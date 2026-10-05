@@ -1,0 +1,246 @@
+{
+  "header": {
+    "title": "Plantillas",
+    "subtitle": "Plantillas de entrenamiento"
+  },
+  "list": {
+    "newTemplate": "Nueva plantilla",
+    "search": "Buscar plantilla...",
+    "empty": "Sin plantillas",
+    "emptyHint": "Crea tu primera plantilla de entrenamiento",
+    "count_one": "{{count}} plantilla",
+    "count_other": "{{count}} plantillas",
+    "exercises": "{{count}} ejercicios",
+    "blocks": "{{count}} bloques"
+  },
+  "createModal": {
+    "title": "Nueva Plantilla",
+    "nameLabel": "Nombre *",
+    "namePlaceholder": "Ej: Rutina Full Body",
+    "difficultyLabel": "Dificultad",
+    "descriptionLabel": "Descripción",
+    "descriptionPlaceholder": "Descripción de la plantilla...",
+    "create": "Crear Plantilla"
+  },
+  "editModal": {
+    "title": "Editar Plantilla"
+  },
+  "addExercise": {
+    "title": "Añadir Ejercicio",
+    "createNew": "Crear ejercicio",
+    "copyAndAdd": "Copiar y añadir",
+    "copyAndUse": "Copiar y usar",
+    "copyHint": "Los ejercicios de tus centros se copian a los tuyos antes de usarlos."
+  },
+  "replaceExercise": {
+    "title": "Sustituir Ejercicio"
+  },
+  "metricSelector": {
+    "title": "Métricas del ejercicio",
+    "simpleMetrics": "Métricas simples",
+    "compositeMetrics": "Métricas compuestas",
+    "unit": "Unidad",
+    "byDefault": "por defecto",
+    "selected": "Seleccionadas — arrastra para ordenar",
+    "available": "Disponibles",
+    "resetOrder": "Restablecer orden",
+    "lockedByMode": "Este bloque es Work/Rest: la TV necesita esta medida para cronometrarlo."
+  },
+  "exerciseNameLink": {
+    "clickToOpen": "Haz clic para abrir la ficha completa",
+    "originalName": "Original: {{name}}"
+  },
+  "blockEditor": {
+    "editTitle": "Editar bloque",
+    "newTitle": "Nuevo bloque",
+    "presetsLabel": "Bloques predefinidos",
+    "nameLabel": "Nombre *",
+    "namePlaceholder": "Ej: Calentamiento",
+    "colorLabel": "Color",
+    "descriptionPlaceholder": "Descripción del bloque...",
+    "create": "Crear bloque",
+    "modeLabel": "Tipo de bloque"
+  },
+  "setTypes": {
+    "warmup": "Calentamiento",
+    "approach": "Aproximación",
+    "normal": "Normal",
+    "allOut": "All out",
+    "toFailure": "Al fallo",
+    "drop": "Drop set",
+    "restPause": "Rest-Pause",
+    "cluster": "Cluster"
+  },
+  "setsEditor": {
+    "setType": "Tipo de serie",
+    "choose": "Elegir",
+    "switchToExact": "Cambiar a valor exacto",
+    "switchToRange": "Cambiar a rango",
+    "mode": "Modo",
+    "modes": {
+      "exact": "Exacto",
+      "range": "Rango",
+      "lessThan": "Menor que",
+      "greaterThan": "Mayor que"
+    },
+    "modesShort": {
+      "exact": "Exacto",
+      "range": "Rango",
+      "lessThan": "Menor",
+      "greaterThan": "Mayor"
+    },
+    "modeEditing": {
+      "title": "Modo de comparación",
+      "hint": "Elige cómo se compara cada valor. Usa la cabecera de una columna para aplicar un modo a todas las series.",
+      "notApplicable": "Esta métrica siempre toma un valor exacto",
+      "applyToColumn": "Aplicar un modo a toda la columna"
+    },
+    "addSet": "Añadir serie",
+    "rangePlaceholder": "mín/máx",
+    "rangeSameEnds": "Mismo valor en ambos extremos: esto es un valor exacto, no un rango",
+    "addSetAfter": "Serie nueva",
+    "addSetInside": "Serie dentro del {{type}}"
+  },
+  "blockCard": {
+    "expand": "Expandir bloque",
+    "collapse": "Contraer bloque",
+    "exerciseCount_one": "{{count}} ejercicio",
+    "exerciseCount_other": "{{count}} ejercicios",
+    "editBlock": "Editar bloque",
+    "deleteBlock": "Eliminar bloque",
+    "noExercises": "Sin ejercicios en este bloque",
+    "addExercise": "Añadir ejercicio",
+    "addFirstExercise": "Añade el primer ejercicio a este bloque",
+    "deleteBlockConfirm": "¿Eliminar el bloque \"{{name}}\" y todos sus ejercicios?",
+    "sortBlocks": "Ordenar bloques",
+    "sortExercises": "Ordenar ejercicios",
+    "loose": "Ejercicios sin bloque"
+  },
+  "exerciseEntryCard": {
+    "setCount_one": "{{count}} serie",
+    "setCount_other": "{{count}} series",
+    "manageMetrics": "Gestionar métricas",
+    "metrics": "Métricas",
+    "changeModes": "Cambiar modos",
+    "exitChangeModes": "Terminar de cambiar modos",
+    "removeFromSuperset": "Quitar de la superserie",
+    "notes": "Notas",
+    "notesPlaceholder": "Notas para el cliente o entrenador...",
+    "addMetrics": "Añadir métricas",
+    "addMetricsHint": "Elige las métricas para configurar las series",
+    "removeTitle": "Eliminar ejercicio de la plantilla",
+    "removeConfirm": "¿Quitar \"{{name}}\" de esta plantilla?",
+    "actions": "Más acciones",
+    "replaceExercise": "Sustituir ejercicio",
+    "rename": "Renombrar",
+    "resetName": "Restablecer nombre",
+    "renameDialogTitle": "Renombrar ejercicio",
+    "renameDialogDescription": "Nombre personalizado para este ejercicio solo en esta plantilla. El ejercicio original no se modifica.",
+    "customNameLabel": "Nombre personalizado"
+  },
+  "superSet": {
+    "title": "Superserie",
+    "slotCount_one": "{{count}} serie en la secuencia",
+    "slotCount_other": "{{count}} series en la secuencia",
+    "addSlot": "Añadir serie",
+    "addExercise": "Añadir ejercicio a la superserie",
+    "moveToExercise": "Cambiar qué ejercicio hace esta serie",
+    "removeMember": "Sacar de la superserie",
+    "dissolve": "Deshacer superserie",
+    "dissolveConfirm": "¿Deshacer esta superserie? Los ejercicios y sus series siguen en el bloque, solo dejan de estar enlazados.",
+    "notApplicable": "No se registra en este ejercicio",
+    "lastSlotHint": "Un ejercicio necesita al menos una serie — sácalo de la superserie en su lugar",
+    "create": "Crear superserie",
+    "createTitle": "Crear superserie",
+    "createHint": "Elige los ejercicios que se hacen junto a este. El orden en el que se realizan se define después.",
+    "createCount": "Crear superserie ({{count}})",
+    "origin": "Ejercicio de partida",
+    "alreadyGrouped": "Ya está en otra superserie",
+    "noCandidates": "No hay más ejercicios en este bloque"
+  },
+  "nameStatus": {
+    "checking": "Comprobando disponibilidad...",
+    "taken": "Ya existe una plantilla con este nombre.",
+    "available": "Nombre disponible."
+  },
+  "rpeLegend": {
+    "title": "Leyenda RPE",
+    "feeling": "Sensación",
+    "rir": "RIR aprox.",
+    "rpe1": "Esfuerzo mínimo, casi sin cansancio.",
+    "rpe2": "Muy fácil, podrías seguir durante mucho tiempo.",
+    "rpe3": "Fácil, respiración ligeramente acelerada.",
+    "rpe4": "Moderadamente fácil.",
+    "rpe5": "Trabajo moderado, notas el esfuerzo claramente.",
+    "rpe6": "Bastante duro, pero controlado.",
+    "rpe7": "Difícil; podrías hacer unas pocas repeticiones más.",
+    "rpe8": "Muy difícil; te quedan pocas repeticiones posibles.",
+    "rpe9": "Casi al límite; solo podrías hacer 1 repetición más.",
+    "rpe10": "Esfuerzo máximo; no podrías hacer ninguna repetición adicional con buena técnica.",
+    "rir1": "Muchas más de 10",
+    "rir2": "Más de 10",
+    "rir3": "8-10",
+    "rir4": "6-8",
+    "rir5": "5-6",
+    "rir6": "4-5",
+    "rir7": "3",
+    "rir8": "2",
+    "rir9": "1",
+    "rir10": "0"
+  },
+  "delete": {
+    "title": "Eliminar plantilla",
+    "description": "¿Seguro que quieres eliminar la plantilla \"{{name}}\"? Esta acción no se puede deshacer."
+  },
+  "detail": {
+    "blocks": "Bloques",
+    "blockCount_one": "{{count}} bloque",
+    "blockCount_other": "{{count}} bloques",
+    "showSets": "Mostrar series",
+    "hideSets": "Ocultar series",
+    "expand": "Expandir",
+    "collapse": "Colapsar",
+    "noBlocksYet": "Todavía no tiene ejercicios",
+    "addBlock": "Añadir bloque",
+    "addFirstBlock": "Organízalo por partes: calentamiento, fuerza…",
+    "addExercise": "Añadir ejercicio",
+    "addFirstExercise": "Ejercicios sueltos, sin bloques",
+    "addLooseExercise": "Ejercicio sin bloque"
+  },
+  "status": {
+    "finalize": "Marcar como definitiva",
+    "reopen": "Reabrir",
+    "lockedNotice": "Esta plantilla es definitiva. Reábrela para editarla.",
+    "finalizeTitle": "¿Marcar la plantilla como definitiva?",
+    "finalizeDescription": "«{{name}}» quedará bloqueada: no podrá editarse ni eliminarse hasta que la reabras.",
+    "reopenTitle": "¿Reabrir la plantilla?",
+    "reopenDescription": "«{{name}}» volverá a ser editable.",
+    "finalized": "Plantilla marcada como definitiva",
+    "reopened": "Plantilla reabierta"
+  },
+  "blockMode": {
+    "NORMAL": "Normal",
+    "NORMALHint": "Tabla clásica. El entrenador marca el avance.",
+    "WORK_REST": "Work/Rest",
+    "WORK_RESTHint": "Circuito por tiempo. La TV avanza sola.",
+    "seedNotice": "Se rellenarán Tiempo (30 s) y Descanso (15 s) en las series que no los tengan. Los valores ya escritos no se tocan.",
+    "incomplete": "Sin tiempos",
+    "incompleteHint": "Alguna serie no tiene Tiempo o Descanso. La TV no podrá cronometrarla hasta que los rellenes."
+  },
+  "session": {
+    "current": "En curso",
+    "complete": "Completar",
+    "unmark": "Desmarcar"
+  },
+  "setComment": {
+    "start": "Comentar series",
+    "stop": "Terminar de comentar",
+    "placeholder": "Comentario para esta serie…",
+    "label": "Comentario de la serie"
+  },
+  "rpePicker": {
+    "clear": "Quitar RPE",
+    "rir": "RIR aprox. {{rir}}",
+    "hint": "Esfuerzo percibido, de 0 (reposo) a 10 (máximo)."
+  }
+}

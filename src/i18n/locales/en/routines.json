@@ -1,0 +1,65 @@
+{
+  "header": {
+    "title": "Routines",
+    "subtitle": "Manage your training routines"
+  },
+  "list": {
+    "newRoutine": "New routine",
+    "search": "Search routine...",
+    "empty": "No routines",
+    "emptyHint": "Create your first routine",
+    "count_one": "{{count}} routine",
+    "count_other": "{{count}} routines",
+    "workouts": "{{count}} templates"
+  },
+  "delete": {
+    "title": "Delete routine",
+    "description": "Are you sure you want to delete the routine \"{{name}}\"? This action cannot be undone."
+  },
+  "createModal": {
+    "title": "New Routine",
+    "nameLabel": "Name *",
+    "namePlaceholder": "E.g.: 4-Week Starter Plan",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Routine description...",
+    "create": "Create Routine"
+  },
+  "editModal": {
+    "title": "Edit Routine"
+  },
+  "nameStatus": {
+    "checking": "Checking availability...",
+    "taken": "A routine with this name already exists.",
+    "available": "Name available."
+  },
+  "addWorkout": {
+    "title": "Add Template"
+  },
+  "workoutCard": {
+    "openInNewTab": "Open template in a new tab",
+    "saveChanges": "Save changes",
+    "removeTitle": "Remove template from routine",
+    "removeConfirm": "Remove \"{{name}}\" from this routine?",
+    "actions": "More actions",
+    "sortWorkouts": "Sort workout templates"
+  },
+  "detail": {
+    "addTemplate": "Add template",
+    "noTemplatesYet": "No templates yet",
+    "addFirst": "Add the first one"
+  },
+  "status": {
+    "finalize": "Mark as final",
+    "reopen": "Reopen",
+    "lockedNotice": "This routine is final. Reopen it to edit.",
+    "finalizeTitle": "Mark this routine as final?",
+    "finalizeDescription": "“{{name}}” will be locked: it cannot be edited or deleted until you reopen it.",
+    "reopenTitle": "Reopen this routine?",
+    "reopenDescription": "“{{name}}” will be editable again.",
+    "cascadeLabel": "Also mark its {{count}} workouts as final",
+    "cascadeReopenLabel": "Also reopen its {{count}} workouts",
+    "cascadeSharedWarning": "{{count}} of these workouts are also used by other routines and will be locked there too.",
+    "finalized": "Routine marked as final",
+    "reopened": "Routine reopened"
+  }
+}

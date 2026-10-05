@@ -1,0 +1,175 @@
+{
+  "nav": {
+    "calendar": "Calendario",
+    "routines": "Rutinas",
+    "profile": "Perfil",
+    "logout": "Cerrar sesión",
+    "workouts": "Entrenos",
+    "exercises": "Ejercicios",
+    "portal": "Tu entrenamiento"
+  },
+  "calendar": {
+    "title": "Mis sesiones",
+    "subtitle": "Tus clases y entrenamientos en los centros donde entrenas.",
+    "today": "Hoy",
+    "previous": "Mes anterior",
+    "next": "Mes siguiente",
+    "empty": "No tienes sesiones este mes.",
+    "noSessionsDay": "Nada este día.",
+    "with": "con {{names}}",
+    "finished": "Finalizada",
+    "status": {
+      "PRESENT": "Reservada",
+      "ABSENT": "No asististe",
+      "INJURED": "Lesionado",
+      "CANCELLED": "Cancelada"
+    }
+  },
+  "session": {
+    "when": "Cuándo",
+    "where": "Dónde",
+    "professionals": "Entrenadores",
+    "workout": "Entrenamiento",
+    "noWorkout": "Tu entrenador todavía no ha asignado un entrenamiento a esta sesión.",
+    "online": "Online / sin local",
+    "close": "Cerrar",
+    "trained": "Lo que entrenaste",
+    "openWorkout": "Abrir el entrenamiento"
+  },
+  "routines": {
+    "title": "Rutinas",
+    "subtitle": "Tus rutinas y las que te preparan tus centros.",
+    "own": "Mis rutinas",
+    "ownEmpty": "Aún no tienes rutinas propias. Crea la primera para entrenar por tu cuenta.",
+    "byCompany": "De {{company}}",
+    "new": "Nueva rutina",
+    "edit": "Editar rutina",
+    "newWorkout": "Nuevo entrenamiento"
+  },
+  "workout": {
+    "back": "Volver"
+  },
+  "exercise": {
+    "back": "Volver",
+    "overview": "Descripción",
+    "instructions": "Cómo se hace",
+    "tips": "Consejos",
+    "muscles": "Músculos principales",
+    "secondary": "Músculos secundarios",
+    "equipment": "Material",
+    "difficulty": "Nivel",
+    "copy": "Copiar a mis ejercicios",
+    "copied": "«{{name}}» ya está en tus ejercicios",
+    "centerHint": "Este ejercicio es de {{company}}. Para usarlo en tus propias rutinas, cópialo a tus ejercicios: así seguirá siendo tuyo aunque dejes el centro.",
+    "usages": "Dónde lo usas",
+    "noUsages": "No aparece en ninguno de tus entrenamientos.",
+    "deleteTitle": "Eliminar ejercicio",
+    "deleteConfirm": "¿Eliminar «{{name}}»? No se puede deshacer."
+  },
+  "profile": {
+    "title": "Mi perfil",
+    "subtitle": "Tus datos y los centros donde entrenas.",
+    "alias": {
+      "title": "Apodo",
+      "help": "El nombre con el que te verán en las pantallas de tus centros.",
+      "placeholder": "Sin apodo"
+    },
+    "details": "Tus datos",
+    "detailsNote": "Los ven los centros donde entrenas.",
+    "email": "Email",
+    "phone": "Teléfono",
+    "birthday": "Fecha de nacimiento",
+    "birthdayPlaceholder": "Elige una fecha",
+    "gender": "Género",
+    "genderPlaceholder": "Elige una opción",
+    "save": "Guardar",
+    "saved": "Datos guardados",
+    "error": "No se han podido guardar tus datos.",
+    "companies": "Dónde entrenas",
+    "noCompanies": "Aún no entrenas en ningún centro con Bloom Board.",
+    "online": "Online / sin local",
+    "appearance": "Apariencia",
+    "language": "Idioma"
+  },
+  "errors": {
+    "load": "No se ha podido cargar. Inténtalo de nuevo.",
+    "notFound": "No encontramos lo que buscas."
+  },
+  "activate": {
+    "title": "Activa tu cuenta",
+    "greeting": "Hola, {{name}}. Elige una contraseña para entrar en Bloom Board.",
+    "password": "Contraseña",
+    "confirm": "Repite la contraseña",
+    "submit": "Activar cuenta",
+    "submitting": "Activando…",
+    "tooShort": "La contraseña debe tener al menos 8 caracteres.",
+    "mismatch": "Las contraseñas no coinciden.",
+    "invalid": "Este enlace no es válido o ha caducado. Pide a tu centro que te envíe uno nuevo.",
+    "toLogin": "Ir a iniciar sesión",
+    "ownership": "Al activarla, tu cuenta pasa a ser tuya: tu nombre, email y teléfono solo los podrás cambiar tú."
+  },
+  "exercises": {
+    "title": "Ejercicios",
+    "subtitle": "El catálogo, los tuyos y los de tus centros.",
+    "new": "Nuevo ejercicio",
+    "ownEmpty": "Aún no tienes ejercicios propios.",
+    "sources": {
+      "all": "Todos",
+      "catalog": "Catálogo",
+      "own": "Míos",
+      "centers": "De mis centros"
+    }
+  },
+  "plan": {
+    "title": "Tu plan",
+    "subtitle": "Lo que puedes crear por tu cuenta. Lo que te preparan tus centros no cuenta.",
+    "usage": "{{used}} de {{max}}",
+    "unlimited": "{{used}} · sin límite",
+    "perMonth": "{{price}}/mes",
+    "upgrade": "Pasar a {{plan}}",
+    "comingSoon": "Próximamente",
+    "see": "Ver mi plan"
+  },
+  "limits": {
+    "reachedTitle": "Has llegado al límite de tu plan",
+    "reached": "Con tu plan puedes tener hasta {{max}} {{noun}}. Pásate a Pro para crear sin límite.",
+    "label": {
+      "routines": "Rutinas propias",
+      "workouts": "Entrenamientos propios",
+      "exercises": "Ejercicios propios"
+    },
+    "noun": {
+      "routines_one": "rutina propia",
+      "routines_other": "rutinas propias",
+      "workouts_one": "entrenamiento propio",
+      "workouts_other": "entrenamientos propios",
+      "exercises_one": "ejercicio propio",
+      "exercises_other": "ejercicios propios"
+    },
+    "unlimited": {
+      "routines": "Rutinas ilimitadas",
+      "workouts": "Entrenamientos ilimitados",
+      "exercises": "Ejercicios propios ilimitados"
+    },
+    "upTo": {
+      "routines_one": "Hasta {{count}} rutina",
+      "routines_other": "Hasta {{count}} rutinas",
+      "workouts_one": "Hasta {{count}} entrenamiento",
+      "workouts_other": "Hasta {{count}} entrenamientos",
+      "exercises_one": "Hasta {{count}} ejercicio propio",
+      "exercises_other": "Hasta {{count}} ejercicios propios"
+    }
+  },
+  "sessionControl": {
+    "pill": "Sesión en curso",
+    "open": "Abrir el control de la sesión",
+    "live": "En curso",
+    "session": "Sesión",
+    "allDone": "Completado",
+    "tv": "Televisión",
+    "noTv": "Ninguna",
+    "none": "No tienes ninguna sesión en curso",
+    "noneHint": "Cuando empiece una de tus sesiones, podrás seguir tu entrenamiento desde aquí.",
+    "toCalendar": "Ver mi calendario"
+  }
+}

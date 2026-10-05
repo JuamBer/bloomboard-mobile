@@ -1,0 +1,131 @@
+{
+  "header": {
+    "title": "Ejercicios",
+    "subtitle": "Catálogo de ejercicios"
+  },
+  "list": {
+    "newExercise": "Nuevo ejercicio",
+    "search": "Buscar ejercicio...",
+    "count_one": "{{count}} ejercicio",
+    "count_other": "{{count}} ejercicios",
+    "noResultsHint": "Prueba con otro término de búsqueda o filtro",
+    "pageOf": "Página {{page}} de {{total}}"
+  },
+  "empty": "Sin ejercicios",
+  "aiFill": {
+    "button": "Autorrellenar con IA",
+    "loading": "Generando...",
+    "error": "No se pudieron generar sugerencias. Inténtalo de nuevo."
+  },
+  "createModal": {
+    "title": "Nuevo Ejercicio",
+    "nameLabel": "Nombre *",
+    "difficultyLabel": "Dificultad",
+    "metricsLabel": "Métricas",
+    "equipmentLabel": "Equipamiento",
+    "primaryMusclesLabel": "Músculos primarios",
+    "secondaryMusclesLabel": "Músculos secundarios",
+    "bodyPartsLabel": "Partes del cuerpo",
+    "overviewLabel": "Descripción",
+    "instructionsLabel": "Instrucciones",
+    "instructionsPlaceholder": "Describe un paso...",
+    "addInstruction": "Añadir paso",
+    "tipsLabel": "Consejos",
+    "tipsPlaceholder": "Añade un consejo...",
+    "addTip": "Añadir consejo",
+    "variationsLabel": "Variaciones",
+    "variationsPlaceholder": "Añade una variación...",
+    "addVariation": "Añadir variación",
+    "keywordsLabel": "Palabras clave",
+    "keywordsPlaceholder": "Escribe y pulsa Enter...",
+    "relatedLabel": "Ejercicios relacionados",
+    "relatedPlaceholder": "Buscar ejercicios...",
+    "relatedEmpty": "No se encontraron ejercicios"
+  },
+  "editModal": {
+    "title": "Editar ejercicio",
+    "masterNotice": "Este es un ejercicio Master. Los cambios afectarán a todas las compañías que lo usen.",
+    "addMetric": "Añadir métrica...",
+    "addEquipment": "Añadir equipamiento...",
+    "addMuscle": "Añadir músculo...",
+    "addBodyPart": "Añadir parte del cuerpo...",
+    "overviewPlaceholder": "Descripción del ejercicio..."
+  },
+  "filters": {
+    "metric": "Métrica",
+    "difficulty": "Dificultad",
+    "bodyPart": "Zona",
+    "muscle": "Músculo",
+    "equipment": "Equipamiento",
+    "clear": "Limpiar filtros",
+    "title": "Filtros",
+    "searchPlaceholder": "Buscar...",
+    "noResults": "Sin resultados",
+    "any": "Cualquiera",
+    "scope": "Origen",
+    "showResults": "Ver resultados",
+    "showResultsCount_one": "Ver {{count}} resultado",
+    "showResultsCount_other": "Ver {{count}} resultados"
+  },
+  "detail": {
+    "tabs": {
+      "stats": "Estadísticas",
+      "info": "Indicaciones"
+    },
+    "noHowTo": "Este ejercicio no tiene indicaciones, consejos ni variaciones.",
+    "master": "Master",
+    "company": "Compañía",
+    "instructions": "Instrucciones",
+    "tips": "Consejos",
+    "variations": "Variaciones",
+    "relatedExercises": "Ejercicios relacionados",
+    "generalInfo": "Información General",
+    "muscles": "Músculos",
+    "primary": "Primarios",
+    "secondary": "Secundarios",
+    "keywords": "Palabras clave",
+    "copyToCompany": "Copiar a mi empresa",
+    "copyToCompanyHint": "Crea una copia editable en el catálogo de tu empresa",
+    "copied": "Copia creada: {{name}}",
+    "origin": "Origen",
+    "level": "Nivel",
+    "actions": "Más acciones",
+    "whereUsed": "Ver dónde se usa",
+    "copyToOwn": "Copiar a mis ejercicios"
+  },
+  "nameStatus": {
+    "checking": "Comprobando disponibilidad...",
+    "taken": "Ya existe un ejercicio con este nombre.",
+    "available": "Nombre disponible."
+  },
+  "delete": {
+    "title": "Eliminar ejercicio",
+    "description": "¿Seguro que quieres eliminar «{{name}}»? Esta acción no se puede deshacer."
+  },
+  "usages": {
+    "title": "Dónde se usa",
+    "none": "No se usa en ninguna plantilla ni rutina de cliente. Puedes eliminarlo sin afectar a nada.",
+    "templates_one": "{{count}} plantilla",
+    "templates_other": "{{count}} plantillas",
+    "clients_one": "{{count}} entrenamiento de cliente",
+    "clients_other": "{{count}} entrenamientos de clientes",
+    "inRoutines": "En: {{names}}",
+    "templatesTab": "Plantillas",
+    "clientsTab": "Clientes",
+    "noneTemplates": "Ninguna plantilla de la compañía usa este ejercicio.",
+    "noneClients": "Ningún entrenamiento de cliente usa este ejercicio."
+  },
+  "inUse": {
+    "title": "Este ejercicio está en uso",
+    "description": "Se usa en {{where}}. Quítalo de ahí antes de eliminarlo: en la lista que se abre tienes el acceso a cada uno.",
+    "and": " y "
+  },
+  "scope": {
+    "own": "Mío"
+  },
+  "origin": {
+    "app": "App",
+    "company": "Compañía",
+    "own": "Mis ejercicios"
+  }
+}

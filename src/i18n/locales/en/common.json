@@ -1,0 +1,77 @@
+{
+  "errors": {
+    "generic": "An error occurred",
+    "requestFailed": "Request failed ({{status}})",
+    "network": "Could not reach the server. Check your connection.",
+    "noStatus": "no response"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "search": "Search"
+  },
+  "states": {
+    "loading": "Loading...",
+    "empty": "No results"
+  },
+  "roles": {
+    "SUPER_ADMIN": "Super admin",
+    "ADMIN": "Admin",
+    "PROFESSIONAL": "Professional"
+  },
+  "language": {
+    "es": "Spanish",
+    "en": "English"
+  },
+  "view": "View",
+  "options": "Options",
+  "edit": "Edit",
+  "delete": "Delete",
+  "duplicate": "Duplicate",
+  "exportExcel": "Export to Excel",
+  "exportAll": "Export all",
+  "exporting": "Exporting…",
+  "save": "Save",
+  "cancel": "Cancel",
+  "select": "Select...",
+  "create": "Create",
+  "search": "Search",
+  "add": "Add",
+  "close": "Close",
+  "confirm": "Confirm",
+  "back": "Back",
+  "next": "Next",
+  "noResults": "No results",
+  "previous": "Previous",
+  "remove": "Remove",
+  "yes": "Yes",
+  "no": "No",
+  "done": "Done",
+  "reorder": {
+    "dragHandle": "Drag to reorder",
+    "save": "Save order",
+    "saveError": "Error saving order"
+  },
+  "contentStatus": {
+    "all": "All",
+    "draft": "Draft",
+    "final": "Final",
+    "draftPlural": "Drafts",
+    "finalPlural": "Final"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "This address does not exist or has changed. The link may be old, or something may be missing from it.",
+    "home": "Back to home",
+    "login": "Go to sign in",
+    "help": "See help"
+  },
+  "colorPicker": {
+    "label": "Colour",
+    "none": "No colour",
+    "custom": "Custom colour",
+    "hex": "Colour code",
+    "pick": "Pick with the system picker"
+  }
+}

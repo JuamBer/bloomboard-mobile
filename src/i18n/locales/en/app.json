@@ -1,0 +1,51 @@
+{
+  "session": {
+    "expired": "Your session has expired. Please sign in again."
+  },
+  "auth": {
+    "staffTitle": "This app is for members",
+    "staffDescription": "Yours is a staff account. Sign in at app.bloomboard.pro in a browser.",
+    "tooManyAttempts": "Too many attempts. Wait a few minutes and try again."
+  },
+  "actions": {
+    "retry": "Retry",
+    "clear": "Clear",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "moveUp": "Move up",
+    "moveDown": "Move down"
+  },
+  "login": {
+    "subtitle": "Your training, with you at the gym",
+    "noAccount": "Don't have an account yet?",
+    "emailPlaceholder": "you@email.com"
+  },
+  "theme": {
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "profile": {
+    "logoutTitle": "Sign out?",
+    "logoutDescription": "You'll need your email and password to sign back in."
+  },
+  "editor": {
+    "nextField": "Next",
+    "sortSequence": "Reorder the sequence"
+  },
+  "metrics": {
+    "selected": "Selected"
+  },
+  "routines": {
+    "readOnly": "Prepared by your center · read-only",
+    "readOnlyBy": "Prepared by {{company}} · read-only",
+    "name": "Routine name",
+    "workoutName": "Workout name",
+    "descriptionPlaceholder": "Description (optional)",
+    "sortWorkouts": "Reorder workouts",
+    "deleteTitle": "Delete the routine?",
+    "deleteDescription": "\"{{name}}\" and its workouts will be deleted. What you have already trained stays in your history.",
+    "removeWorkoutTitle": "Remove the workout?",
+    "removeWorkoutDescription": "\"{{name}}\" will be removed from this routine. What you have already trained stays in your history."
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "header": {
+    "title": "Clientes",
+    "subtitle": "Gestiona tus clientes"
+  },
+  "list": {
+    "newClient": "Nuevo cliente",
+    "search": "Buscar por nombre, apodo, email o teléfono...",
+    "count_one": "{{count}} usuario",
+    "count_other": "{{count}} usuarios",
+    "noResults": "Sin resultados",
+    "noResultsHint": "Prueba con otro término de búsqueda",
+    "noResultsFilterHint": "Prueba a quitar algún filtro",
+    "pageOf": "Página {{page}} de {{total}}",
+    "addExisting": "Añadir cuenta existente"
+  },
+  "empty": "Sin clientes",
+  "createModal": {
+    "title": "Nuevo cliente",
+    "created": "Cliente {{name}} creado",
+    "emailInUse": "Este email ya es de un cliente de otro negocio que aún no ha activado su cuenta de Bloom Board. Cuando la active podrás añadirle a tu centro.",
+    "linkable": "{{name}} ({{email}}) ya tiene cuenta en Bloom Board. Puedes añadirle a este centro sin crear otra.",
+    "linkableIndependent": "Gestiona su propia cuenta: verás sus datos, pero solo esa persona puede cambiarlos.",
+    "linkAction": "Añadir a este centro"
+  },
+  "editModal": {
+    "title": "Editar cliente",
+    "timpNotice": "Este cliente está sincronizado con TIMP. El nombre, el email, el teléfono y el resto de datos personales se editan desde TIMP. Aquí puedes modificar el apodo y, si TIMP no la tiene, la dirección.",
+    "firstNameLabel": "Nombre",
+    "lastNameLabel": "Apellidos",
+    "aliasLabel": "Apodo",
+    "aliasPlaceholder": "Se muestra en la TV en lugar del nombre",
+    "emailLabel": "Email",
+    "phoneLabel": "Teléfono",
+    "genderLabel": "Género",
+    "genderPlaceholder": "Seleccionar género...",
+    "genderMale": "Masculino",
+    "genderFemale": "Femenino",
+    "genderUnspecified": "No especificado",
+    "birthdayLabel": "Fecha de nacimiento",
+    "birthdayPlaceholder": "Seleccionar fecha...",
+    "addressLabel": "Dirección",
+    "postalCodeLabel": "Código postal",
+    "postalCodeHint": "Sitúa al cliente en el mapa del panel.",
+    "independentNotice": "Este cliente gestiona su propia cuenta de Bloom Board. Sus datos personales solo los puede cambiar esa persona; tú sigues gestionando sus etiquetas, notas, rutinas y sesiones."
+  },
+  "nameForm": {
+    "nameLabel": "Nombre",
+    "namePlaceholder": "Nombre",
+    "descriptionLabel": "Descripción (opcional)"
+  },
+  "attachServices": {
+    "title": "Adjuntar servicios",
+    "subtitle": "Selecciona los servicios vinculados a esta rutina.",
+    "noServices": "No hay servicios disponibles. Solo se pueden vincular a una rutina los servicios con \"Usa rutinas en la TV\" activado.",
+    "skip": "Omitir",
+    "attach": "Adjuntar"
+  },
+  "routinesSection": {
+    "blankRoutine": "Rutina en blanco",
+    "assignRoutine": "Asignar rutina",
+    "selectService": "Selecciona servicio",
+    "blankTemplate": "Plantilla en blanco",
+    "assignTemplate": "Asignar plantilla",
+    "removeTemplate": "Quitar plantilla",
+    "removeTemplateTitle": "Quitar plantilla de entrenamiento",
+    "removeTemplateConfirm": "¿Quitar \"{{name}}\" de esta rutina?",
+    "sortTemplates": "Ordenar plantillas de entrenamiento",
+    "newBlankRoutine": "Nueva rutina en blanco",
+    "routineNamePlaceholder": "Nombre de la rutina",
+    "assignExistingRoutine": "Asignar rutina existente",
+    "newBlankTemplate": "Nueva plantilla en blanco",
+    "templateNamePlaceholder": "Nombre de la plantilla",
+    "assignExistingTemplate": "Asignar plantilla existente",
+    "deleteRoutineTitle": "Eliminar rutina del cliente",
+    "deleteRoutineDescription": "Se eliminará la rutina y sus plantillas asociadas.",
+    "backToRoutines": "Rutinas",
+    "source": {
+      "company": "Empresa",
+      "users": "Usuarios"
+    },
+    "pickUser": "Selecciona un usuario",
+    "pickUserRoutine": "Rutinas de {{name}}",
+    "pickUserTemplate": "Selecciona una plantilla",
+    "searchUsers": "Buscar por nombre, apodo, email o teléfono...",
+    "noUsersWithRoutines": "Ningún usuario tiene rutinas todavía",
+    "noRoutinesForUser": "Este usuario no tiene rutinas",
+    "noTemplatesInRoutine": "Esta rutina no tiene plantillas",
+    "clientOwn": "Creadas por el cliente",
+    "addTemplate": "Añadir plantilla",
+    "selectWorkout": "Elige un entrenamiento de la lista"
+  },
+  "detail": {
+    "internal": "Interno",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "yearsOld": "{{age}} años",
+    "information": "Información",
+    "personalInfo": "Información personal",
+    "birthdayWithAge": "{{date}} ({{age}} años)",
+    "clientProfile": "Perfil del cliente",
+    "independent": "Cuenta propia",
+    "independentHint": "Gestiona su propia cuenta: solo esa persona puede cambiar sus datos personales.",
+    "invite": "Invitar",
+    "inviteHint": "Le enviamos un email para que cree su contraseña y vea sus sesiones y rutinas.",
+    "inviteSent": "Invitación enviada",
+    "inviteError": "No se ha podido enviar la invitación"
+  },
+  "filters": {
+    "title": "Filtros",
+    "filtered": "filtrado",
+    "clear": "Limpiar filtros",
+    "gender": "Género",
+    "genders": {
+      "M": "Hombre",
+      "F": "Mujer",
+      "OTHER": "Otro",
+      "UNKNOWN": "Sin especificar"
+    },
+    "age": "Edad",
+    "ageMin": "Desde",
+    "ageMax": "Hasta",
+    "ageTo": "a",
+    "ageHint": "Solo incluye clientes con fecha de nacimiento.",
+    "tags": "Etiquetas",
+    "untagged": "Sin etiquetas",
+    "noTags": "Este centro todavía no tiene etiquetas.",
+    "tagMatch": {
+      "any": "Cualquiera",
+      "all": "Todas"
+    },
+    "services": "Servicios",
+    "servicesHint": "Clientes con una rutina vinculada a ese servicio.",
+    "noServices": "Este centro todavía no tiene servicios.",
+    "routine": "Rutina",
+    "roadmap": "Roadmap",
+    "roadmapStatus": "Estado del roadmap",
+    "phone": "Teléfono",
+    "email": "Email",
+    "address": "Dirección",
+    "tri": {
+      "all": "Todos",
+      "yes": "Con",
+      "no": "Sin"
+    }
+  },
+  "sort": {
+    "firstName": "Nombre",
+    "lastName": "Apellidos",
+    "email": "Email",
+    "birthday": "Edad",
+    "createdAt": "Fecha de alta",
+    "activity": "Actividad",
+    "ascending": "Orden ascendente",
+    "descending": "Orden descendente",
+    "searchOverrides": "Mientras buscas, los resultados se ordenan por relevancia."
+  },
+  "linkModal": {
+    "title": "Añadir una cuenta existente",
+    "hint": "Si la persona ya tiene cuenta en Bloom Board (se registró por su cuenta o entrena en otro sitio), añádela a este centro en vez de crear un cliente nuevo. Búscala por su email exacto.",
+    "emailPlaceholder": "email@ejemplo.com",
+    "search": "Buscar",
+    "notFound": "No hay ninguna cuenta con ese email. Puedes crearla con «Nuevo cliente».",
+    "notLinkable": {
+      "STAFF_ACCOUNT": "Ese email es de un miembro de un equipo, no de un cliente.",
+      "MANAGED_ELSEWHERE": "Es un cliente de otro negocio que aún no ha activado su cuenta. Cuando la active podrás añadirle.",
+      "INACTIVE": "Esa cuenta está desactivada.",
+      "default": "Esa cuenta no se puede añadir."
+    },
+    "independent": "Gestiona su propia cuenta",
+    "alreadyInCenter": "Ya está en este centro.",
+    "add": "Añadir a este centro",
+    "added": "{{name}} añadido a este centro"
+  }
+}

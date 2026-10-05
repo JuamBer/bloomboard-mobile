@@ -1,0 +1,77 @@
+{
+  "errors": {
+    "generic": "Ha ocurrido un error",
+    "requestFailed": "Error en la petición ({{status}})",
+    "network": "No se ha podido conectar con el servidor. Comprueba tu conexión.",
+    "noStatus": "sin respuesta"
+  },
+  "actions": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "search": "Buscar"
+  },
+  "states": {
+    "loading": "Cargando...",
+    "empty": "Sin resultados"
+  },
+  "roles": {
+    "SUPER_ADMIN": "Super admin",
+    "ADMIN": "Admin",
+    "PROFESSIONAL": "Profesional"
+  },
+  "language": {
+    "es": "Español",
+    "en": "Inglés"
+  },
+  "view": "Ver",
+  "options": "Opciones",
+  "edit": "Editar",
+  "delete": "Eliminar",
+  "duplicate": "Duplicar",
+  "exportExcel": "Exportar a Excel",
+  "exportAll": "Exportar todo",
+  "exporting": "Exportando…",
+  "save": "Guardar",
+  "cancel": "Cancelar",
+  "select": "Seleccionar...",
+  "create": "Crear",
+  "search": "Buscar",
+  "add": "Añadir",
+  "close": "Cerrar",
+  "confirm": "Confirmar",
+  "back": "Volver",
+  "next": "Siguiente",
+  "noResults": "Sin resultados",
+  "previous": "Anterior",
+  "remove": "Quitar",
+  "yes": "Sí",
+  "no": "No",
+  "done": "Listo",
+  "reorder": {
+    "dragHandle": "Arrastrar para ordenar",
+    "save": "Guardar orden",
+    "saveError": "Error al guardar el orden"
+  },
+  "contentStatus": {
+    "all": "Todos",
+    "draft": "Borrador",
+    "final": "Definitiva",
+    "draftPlural": "Borradores",
+    "finalPlural": "Definitivas"
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "body": "Esta dirección no existe o ha cambiado. Puede que el enlace sea antiguo o que falte algo al escribirlo.",
+    "home": "Volver al inicio",
+    "login": "Ir a iniciar sesión",
+    "help": "Ver la ayuda"
+  },
+  "colorPicker": {
+    "label": "Color",
+    "none": "Sin color",
+    "custom": "Color personalizado",
+    "hex": "Código de color",
+    "pick": "Elegir en la paleta del sistema"
+  }
+}

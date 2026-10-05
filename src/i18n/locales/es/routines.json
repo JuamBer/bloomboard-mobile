@@ -1,0 +1,65 @@
+{
+  "header": {
+    "title": "Rutinas",
+    "subtitle": "Gestiona tus rutinas de entrenamiento"
+  },
+  "list": {
+    "newRoutine": "Nueva rutina",
+    "search": "Buscar rutina...",
+    "empty": "Sin rutinas",
+    "emptyHint": "Crea tu primera rutina",
+    "count_one": "{{count}} rutina",
+    "count_other": "{{count}} rutinas",
+    "workouts": "{{count}} plantillas"
+  },
+  "delete": {
+    "title": "Eliminar rutina",
+    "description": "¿Seguro que quieres eliminar la rutina \"{{name}}\"? Esta acción no se puede deshacer."
+  },
+  "createModal": {
+    "title": "Nueva Rutina",
+    "nameLabel": "Nombre *",
+    "namePlaceholder": "Ej: Plan de Iniciación 4 Semanas",
+    "descriptionLabel": "Descripción",
+    "descriptionPlaceholder": "Descripción de la rutina...",
+    "create": "Crear Rutina"
+  },
+  "editModal": {
+    "title": "Editar Rutina"
+  },
+  "nameStatus": {
+    "checking": "Comprobando disponibilidad...",
+    "taken": "Ya existe una rutina con este nombre.",
+    "available": "Nombre disponible."
+  },
+  "addWorkout": {
+    "title": "Añadir Plantilla"
+  },
+  "workoutCard": {
+    "openInNewTab": "Abrir plantilla en una pestaña nueva",
+    "saveChanges": "Guardar cambios",
+    "removeTitle": "Eliminar plantilla de la rutina",
+    "removeConfirm": "¿Quitar \"{{name}}\" de esta rutina?",
+    "actions": "Más acciones",
+    "sortWorkouts": "Ordenar plantillas de entrenamiento"
+  },
+  "detail": {
+    "addTemplate": "Añadir plantilla",
+    "noTemplatesYet": "Sin plantillas todavía",
+    "addFirst": "Añade la primera"
+  },
+  "status": {
+    "finalize": "Marcar como definitiva",
+    "reopen": "Reabrir",
+    "lockedNotice": "Esta rutina es definitiva. Reábrela para editarla.",
+    "finalizeTitle": "¿Marcar la rutina como definitiva?",
+    "finalizeDescription": "«{{name}}» quedará bloqueada: no podrá editarse ni eliminarse hasta que la reabras.",
+    "reopenTitle": "¿Reabrir la rutina?",
+    "reopenDescription": "«{{name}}» volverá a ser editable.",
+    "cascadeLabel": "Marcar también sus {{count}} entrenamientos como definitivos",
+    "cascadeReopenLabel": "Reabrir también sus {{count}} entrenamientos",
+    "cascadeSharedWarning": "{{count}} de estos entrenamientos también se usan en otras rutinas y quedarán bloqueados en ellas.",
+    "finalized": "Rutina marcada como definitiva",
+    "reopened": "Rutina reabierta"
+  }
+}

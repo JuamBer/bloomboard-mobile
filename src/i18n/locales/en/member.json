@@ -1,0 +1,175 @@
+{
+  "nav": {
+    "calendar": "Calendar",
+    "routines": "Routines",
+    "profile": "Profile",
+    "logout": "Sign out",
+    "workouts": "Workouts",
+    "exercises": "Exercises",
+    "portal": "Your training"
+  },
+  "calendar": {
+    "title": "My sessions",
+    "subtitle": "Your classes and workouts at the centres where you train.",
+    "today": "Today",
+    "previous": "Previous month",
+    "next": "Next month",
+    "empty": "You have no sessions this month.",
+    "noSessionsDay": "Nothing this day.",
+    "with": "with {{names}}",
+    "finished": "Finished",
+    "status": {
+      "PRESENT": "Booked",
+      "ABSENT": "Missed",
+      "INJURED": "Injured",
+      "CANCELLED": "Cancelled"
+    }
+  },
+  "session": {
+    "when": "When",
+    "where": "Where",
+    "professionals": "Trainers",
+    "workout": "Workout",
+    "noWorkout": "Your trainer hasn't assigned a workout to this session yet.",
+    "online": "Online / no premises",
+    "close": "Close",
+    "trained": "What you trained",
+    "openWorkout": "Open the workout"
+  },
+  "routines": {
+    "title": "Routines",
+    "subtitle": "Your routines and the ones your centres prepare for you.",
+    "own": "My routines",
+    "ownEmpty": "You don't have routines of your own yet. Create one to train on your own.",
+    "byCompany": "From {{company}}",
+    "new": "New routine",
+    "edit": "Edit routine",
+    "newWorkout": "New workout"
+  },
+  "workout": {
+    "back": "Back"
+  },
+  "exercise": {
+    "back": "Back",
+    "overview": "Overview",
+    "instructions": "How to do it",
+    "tips": "Tips",
+    "muscles": "Primary muscles",
+    "secondary": "Secondary muscles",
+    "equipment": "Equipment",
+    "difficulty": "Level",
+    "copy": "Copy to my exercises",
+    "copied": "“{{name}}” is now in your exercises",
+    "centerHint": "This exercise belongs to {{company}}. To use it in your own routines, copy it to your exercises — it stays yours even if you leave the centre.",
+    "usages": "Where you use it",
+    "noUsages": "It isn't in any of your workouts.",
+    "deleteTitle": "Delete exercise",
+    "deleteConfirm": "Delete “{{name}}”? This cannot be undone."
+  },
+  "profile": {
+    "title": "My profile",
+    "subtitle": "Your details and the centres where you train.",
+    "alias": {
+      "title": "Nickname",
+      "help": "The name your centres' screens will show for you.",
+      "placeholder": "No nickname"
+    },
+    "details": "Your details",
+    "detailsNote": "The centres where you train see these.",
+    "email": "Email",
+    "phone": "Phone",
+    "birthday": "Date of birth",
+    "birthdayPlaceholder": "Pick a date",
+    "gender": "Gender",
+    "genderPlaceholder": "Choose one",
+    "save": "Save",
+    "saved": "Details saved",
+    "error": "Couldn't save your details.",
+    "companies": "Where you train",
+    "noCompanies": "You don't train at any Bloom Board centre yet.",
+    "online": "Online / no premises",
+    "appearance": "Appearance",
+    "language": "Language"
+  },
+  "errors": {
+    "load": "Couldn't load this. Please try again.",
+    "notFound": "We couldn't find what you're looking for."
+  },
+  "activate": {
+    "title": "Activate your account",
+    "greeting": "Hi {{name}}. Choose a password to sign in to Bloom Board.",
+    "password": "Password",
+    "confirm": "Repeat the password",
+    "submit": "Activate account",
+    "submitting": "Activating…",
+    "tooShort": "The password must be at least 8 characters.",
+    "mismatch": "The passwords don't match.",
+    "invalid": "This link is invalid or has expired. Ask your centre to send you a new one.",
+    "toLogin": "Go to sign in",
+    "ownership": "Once activated, the account is yours: only you will be able to change your name, email and phone."
+  },
+  "exercises": {
+    "title": "Exercises",
+    "subtitle": "The catalogue, your own and your centres’.",
+    "new": "New exercise",
+    "ownEmpty": "You don't have exercises of your own yet.",
+    "sources": {
+      "all": "All",
+      "catalog": "Catalogue",
+      "own": "Mine",
+      "centers": "From my centres"
+    }
+  },
+  "plan": {
+    "title": "Your plan",
+    "subtitle": "What you can create on your own. What your centres prepare for you doesn't count.",
+    "usage": "{{used}} of {{max}}",
+    "unlimited": "{{used}} · unlimited",
+    "perMonth": "{{price}}/month",
+    "upgrade": "Upgrade to {{plan}}",
+    "comingSoon": "Coming soon",
+    "see": "See my plan"
+  },
+  "limits": {
+    "reachedTitle": "You've reached your plan's limit",
+    "reached": "Your plan allows up to {{max}} {{noun}}. Upgrade to Pro to create without limits.",
+    "label": {
+      "routines": "Your routines",
+      "workouts": "Your workouts",
+      "exercises": "Your exercises"
+    },
+    "noun": {
+      "routines_one": "routine of your own",
+      "routines_other": "routines of your own",
+      "workouts_one": "workout of your own",
+      "workouts_other": "workouts of your own",
+      "exercises_one": "exercise of your own",
+      "exercises_other": "exercises of your own"
+    },
+    "unlimited": {
+      "routines": "Unlimited routines",
+      "workouts": "Unlimited workouts",
+      "exercises": "Unlimited exercises of your own"
+    },
+    "upTo": {
+      "routines_one": "Up to {{count}} routine",
+      "routines_other": "Up to {{count}} routines",
+      "workouts_one": "Up to {{count}} workout",
+      "workouts_other": "Up to {{count}} workouts",
+      "exercises_one": "Up to {{count}} exercise of your own",
+      "exercises_other": "Up to {{count}} exercises of your own"
+    }
+  },
+  "sessionControl": {
+    "pill": "Session in progress",
+    "open": "Open the session control",
+    "live": "In progress",
+    "session": "Session",
+    "allDone": "Done",
+    "tv": "TV",
+    "noTv": "None",
+    "none": "You don't have a session in progress",
+    "noneHint": "When one of your sessions starts, you can follow your workout from here.",
+    "toCalendar": "See my calendar"
+  }
+}

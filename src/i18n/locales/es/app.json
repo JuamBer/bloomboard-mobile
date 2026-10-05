@@ -1,0 +1,51 @@
+{
+  "session": {
+    "expired": "Tu sesión ha caducado. Vuelve a iniciar sesión."
+  },
+  "auth": {
+    "staffTitle": "Esta app es para quienes entrenan",
+    "staffDescription": "Tu cuenta es de un equipo. Entra en app.bloomboard.pro desde el navegador.",
+    "tooManyAttempts": "Demasiados intentos. Espera unos minutos y vuelve a probar."
+  },
+  "actions": {
+    "retry": "Reintentar",
+    "clear": "Quitar",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "moveUp": "Subir",
+    "moveDown": "Bajar"
+  },
+  "login": {
+    "subtitle": "Tu entrenamiento, contigo en el gimnasio",
+    "noAccount": "¿Aún no tienes cuenta?",
+    "emailPlaceholder": "tu@email.com"
+  },
+  "theme": {
+    "system": "Sistema",
+    "light": "Claro",
+    "dark": "Oscuro"
+  },
+  "profile": {
+    "logoutTitle": "¿Cerrar sesión?",
+    "logoutDescription": "Tendrás que volver a entrar con tu email y tu contraseña."
+  },
+  "editor": {
+    "nextField": "Siguiente",
+    "sortSequence": "Ordenar la secuencia"
+  },
+  "metrics": {
+    "selected": "Seleccionadas"
+  },
+  "routines": {
+    "readOnly": "Preparada por tu centro · solo lectura",
+    "readOnlyBy": "Preparada por {{company}} · solo lectura",
+    "name": "Nombre de la rutina",
+    "workoutName": "Nombre del entrenamiento",
+    "descriptionPlaceholder": "Descripción (opcional)",
+    "sortWorkouts": "Ordenar entrenamientos",
+    "deleteTitle": "¿Eliminar la rutina?",
+    "deleteDescription": "Se eliminará «{{name}}» con sus entrenamientos. Lo que ya has entrenado se queda en tu historial.",
+    "removeWorkoutTitle": "¿Quitar el entrenamiento?",
+    "removeWorkoutDescription": "Se quitará «{{name}}» de esta rutina. Lo que ya has entrenado se queda en tu historial."
+  }
+}

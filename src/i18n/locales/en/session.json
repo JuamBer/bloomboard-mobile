@@ -1,0 +1,79 @@
+{
+  "header": {
+    "title": "Session",
+    "subtitle": "Session details"
+  },
+  "calendar": {
+    "allServices": "All services",
+    "allProfessionals": "All professionals",
+    "allUsers": "All clients",
+    "filters": "Filters",
+    "searchPlaceholder": "Search...",
+    "noResults": "No results",
+    "missingRoutine": "A client has no routine attached",
+    "turningAge": "{{name}} turns {{age}}",
+    "day": "Day",
+    "threeDay": "3 days",
+    "week": "Weekly",
+    "agenda": "Agenda",
+    "month": "Monthly",
+    "today": "Today",
+    "now": "Now",
+    "noSessions": "No upcoming sessions",
+    "moreCount": "+{{count}} more",
+    "newSession": "New Session",
+    "viewLabel": "View"
+  },
+  "clientActions": {
+    "menu": "Client actions",
+    "removeFromSession": "Remove from session"
+  },
+  "userCard": {
+    "noTemplate": "No template",
+    "openProfileInNewTab": "Open client profile in a new tab",
+    "noRoutine": "no routine"
+  },
+  "professionalsPicker": {
+    "assign": "Assign",
+    "add": "Add"
+  },
+  "clientsDialog": {
+    "addClient": "Add client",
+    "searchClient": "Search by name, nickname, email or phone...",
+    "autoAssignHint": "The template is automatically assigned based on the client's routine for the session's service.",
+    "noClientsFound": "No clients found",
+    "clientCount_one": "{{count}} client",
+    "clientCount_other": "{{count}} clients",
+    "client": "Client",
+    "deleteSession": "Delete session",
+    "deleteSessionConfirm": "Are you sure you want to delete this session? This action cannot be undone.",
+    "professionals": "Professionals",
+    "noProfessionals": "No professionals assigned",
+    "removeProfessional": "Remove professional",
+    "clientsTab": "Clients ({{count}})",
+    "cancelledTab": "Cancelled ({{count}})",
+    "cancelled": "Cancelled"
+  },
+  "createSession": {
+    "errorCreating": "Error creating session",
+    "noService": "No service",
+    "when": "When",
+    "start": "Start",
+    "end": "End",
+    "endBeforeStart": "End time must be after the start time"
+  },
+  "control": {
+    "title": "Session",
+    "clientsCount_one": "{{count}} client",
+    "clientsCount_other": "{{count}} clients",
+    "live": "Live",
+    "offline": "Offline",
+    "error": "Could not load the session",
+    "empty": "No clients in this session",
+    "noTemplate": "No template assigned",
+    "current": "In progress",
+    "allDone": "Routine completed",
+    "absent": "Absent",
+    "complete": "Complete"
+  }
+}
