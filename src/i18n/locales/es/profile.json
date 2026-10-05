@@ -1,0 +1,45 @@
+{
+  "header": {
+    "title": "Perfil",
+    "subtitle": "Gestiona tu cuenta y las preferencias de la aplicación."
+  },
+  "appearance": {
+    "title": "Apariencia",
+    "description": "Elige el tema de la interfaz. Por defecto se usa el del dispositivo."
+  },
+  "language": {
+    "title": "Idioma",
+    "description": "Selecciona tu idioma preferido."
+  },
+  "personalInfo": {
+    "title": "Información personal",
+    "email": "Email",
+    "phone": "Teléfono",
+    "gender": "Género",
+    "birthday": "Fecha de nacimiento",
+    "role": "Rol",
+    "company": "Compañía",
+    "centers": "Centros",
+    "edit": "Editar",
+    "firstName": "Nombre",
+    "lastName": "Apellidos",
+    "genderPlaceholder": "Sin especificar",
+    "birthdayPlaceholder": "Selecciona una fecha",
+    "emailHint": "El email es tu acceso a Bloom Board y no se cambia desde aquí.",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saved": "Datos actualizados.",
+    "readonly": "Solo lectura"
+  },
+  "genders": {
+    "M": "Masculino",
+    "F": "Femenino",
+    "N": "Sin especificar"
+  },
+  "roles": {
+    "SUPER_ADMIN": "Administrador de plataforma",
+    "ADMIN": "Administrador",
+    "PROFESSIONAL": "Entrenador",
+    "CLIENT": "Cliente"
+  }
+}

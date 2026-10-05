@@ -1,0 +1,131 @@
+{
+  "header": {
+    "title": "Exercises",
+    "subtitle": "Exercise catalog"
+  },
+  "list": {
+    "newExercise": "New exercise",
+    "search": "Search exercise...",
+    "count_one": "{{count}} exercise",
+    "count_other": "{{count}} exercises",
+    "noResultsHint": "Try a different search term or filter",
+    "pageOf": "Page {{page}} of {{total}}"
+  },
+  "empty": "No exercises",
+  "aiFill": {
+    "button": "Auto-fill with AI",
+    "loading": "Generating...",
+    "error": "Could not generate suggestions. Please try again."
+  },
+  "createModal": {
+    "title": "New Exercise",
+    "nameLabel": "Name *",
+    "difficultyLabel": "Difficulty",
+    "metricsLabel": "Metrics",
+    "equipmentLabel": "Equipment",
+    "primaryMusclesLabel": "Primary muscles",
+    "secondaryMusclesLabel": "Secondary muscles",
+    "bodyPartsLabel": "Body parts",
+    "overviewLabel": "Description",
+    "instructionsLabel": "Instructions",
+    "instructionsPlaceholder": "Describe a step...",
+    "addInstruction": "Add step",
+    "tipsLabel": "Tips",
+    "tipsPlaceholder": "Add a tip...",
+    "addTip": "Add tip",
+    "variationsLabel": "Variations",
+    "variationsPlaceholder": "Add a variation...",
+    "addVariation": "Add variation",
+    "keywordsLabel": "Keywords",
+    "keywordsPlaceholder": "Type and press Enter...",
+    "relatedLabel": "Related exercises",
+    "relatedPlaceholder": "Search exercises...",
+    "relatedEmpty": "No exercises found"
+  },
+  "editModal": {
+    "title": "Edit exercise",
+    "masterNotice": "This is a Master exercise. Changes will affect all companies using it.",
+    "addMetric": "Add metric...",
+    "addEquipment": "Add equipment...",
+    "addMuscle": "Add muscle...",
+    "addBodyPart": "Add body part...",
+    "overviewPlaceholder": "Exercise description..."
+  },
+  "filters": {
+    "metric": "Metric",
+    "difficulty": "Difficulty",
+    "bodyPart": "Body part",
+    "muscle": "Muscle",
+    "equipment": "Equipment",
+    "clear": "Clear filters",
+    "title": "Filters",
+    "searchPlaceholder": "Search...",
+    "noResults": "No results",
+    "any": "Any",
+    "scope": "Source",
+    "showResults": "Show results",
+    "showResultsCount_one": "Show {{count}} result",
+    "showResultsCount_other": "Show {{count}} results"
+  },
+  "detail": {
+    "tabs": {
+      "stats": "Stats",
+      "info": "How to"
+    },
+    "noHowTo": "This exercise has no instructions, tips or variations.",
+    "master": "Master",
+    "company": "Company",
+    "instructions": "Instructions",
+    "tips": "Tips",
+    "variations": "Variations",
+    "relatedExercises": "Related exercises",
+    "generalInfo": "General Information",
+    "muscles": "Muscles",
+    "primary": "Primary",
+    "secondary": "Secondary",
+    "keywords": "Keywords",
+    "copyToCompany": "Copy to my company",
+    "copyToCompanyHint": "Creates an editable copy in your company's catalog",
+    "copied": "Copy created: {{name}}",
+    "origin": "Origin",
+    "level": "Level",
+    "actions": "More actions",
+    "whereUsed": "See where it is used",
+    "copyToOwn": "Copy to my exercises"
+  },
+  "nameStatus": {
+    "checking": "Checking availability...",
+    "taken": "An exercise with this name already exists.",
+    "available": "Name available."
+  },
+  "delete": {
+    "title": "Delete exercise",
+    "description": "Are you sure you want to delete “{{name}}”? This cannot be undone."
+  },
+  "usages": {
+    "title": "Where it is used",
+    "none": "Not used in any template or client routine. You can delete it without affecting anything.",
+    "templates_one": "{{count}} template",
+    "templates_other": "{{count}} templates",
+    "clients_one": "{{count}} client workout",
+    "clients_other": "{{count}} client workouts",
+    "inRoutines": "In: {{names}}",
+    "templatesTab": "Templates",
+    "clientsTab": "Clients",
+    "noneTemplates": "No company template uses this exercise.",
+    "noneClients": "No client workout uses this exercise."
+  },
+  "inUse": {
+    "title": "This exercise is in use",
+    "description": "It is used in {{where}}. Remove it from them before deleting it: the list that opens links to each one.",
+    "and": " and "
+  },
+  "scope": {
+    "own": "Mine"
+  },
+  "origin": {
+    "app": "App",
+    "company": "Company",
+    "own": "My exercises"
+  }
+}

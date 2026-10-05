@@ -1,0 +1,79 @@
+{
+  "header": {
+    "title": "Sesión",
+    "subtitle": "Detalles de la sesión"
+  },
+  "calendar": {
+    "allServices": "Todos los servicios",
+    "allProfessionals": "Todos los profesionales",
+    "allUsers": "Todos los clientes",
+    "filters": "Filtros",
+    "searchPlaceholder": "Buscar...",
+    "noResults": "Sin resultados",
+    "missingRoutine": "Rutinas por asignar",
+    "turningAge": "{{name}} cumple {{age}}",
+    "day": "Día",
+    "threeDay": "3 días",
+    "week": "Semanal",
+    "agenda": "Agenda",
+    "month": "Mensual",
+    "today": "Hoy",
+    "now": "Ahora",
+    "noSessions": "No hay sesiones próximas",
+    "moreCount": "+{{count}} más",
+    "newSession": "Nueva Sesión",
+    "viewLabel": "Vista"
+  },
+  "clientActions": {
+    "menu": "Acciones del cliente",
+    "removeFromSession": "Eliminar de la sesión"
+  },
+  "userCard": {
+    "noTemplate": "Sin plantilla",
+    "openProfileInNewTab": "Abrir perfil del cliente en una pestaña nueva",
+    "noRoutine": "sin rutina"
+  },
+  "professionalsPicker": {
+    "assign": "Asignar",
+    "add": "Añadir"
+  },
+  "clientsDialog": {
+    "addClient": "Añadir cliente",
+    "searchClient": "Buscar por nombre, apodo, email o teléfono...",
+    "autoAssignHint": "La plantilla se asigna automáticamente según la rutina del cliente para el servicio de la sesión.",
+    "noClientsFound": "No se encontraron clientes",
+    "clientCount_one": "{{count}} cliente",
+    "clientCount_other": "{{count}} clientes",
+    "client": "Cliente",
+    "deleteSession": "Eliminar sesión",
+    "deleteSessionConfirm": "¿Seguro que quieres eliminar esta sesión? Esta acción no se puede deshacer.",
+    "professionals": "Profesionales",
+    "noProfessionals": "Sin profesionales asignados",
+    "removeProfessional": "Quitar profesional",
+    "clientsTab": "Clientes ({{count}})",
+    "cancelledTab": "Cancelados ({{count}})",
+    "cancelled": "Cancelado"
+  },
+  "createSession": {
+    "errorCreating": "Error al crear la sesión",
+    "noService": "Sin servicio",
+    "when": "Cuándo",
+    "start": "Inicio",
+    "end": "Fin",
+    "endBeforeStart": "La hora de fin debe ser posterior a la de inicio"
+  },
+  "control": {
+    "title": "Sesión",
+    "clientsCount_one": "{{count}} cliente",
+    "clientsCount_other": "{{count}} clientes",
+    "live": "En vivo",
+    "offline": "Sin conexión",
+    "error": "No se pudo cargar la sesión",
+    "empty": "No hay clientes en esta sesión",
+    "noTemplate": "Sin plantilla asignada",
+    "current": "En curso",
+    "allDone": "Rutina completada",
+    "absent": "Ausente",
+    "complete": "Completar"
+  }
+}

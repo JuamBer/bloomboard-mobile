@@ -1,0 +1,175 @@
+{
+  "header": {
+    "title": "Clients",
+    "subtitle": "Manage your clients"
+  },
+  "list": {
+    "newClient": "New client",
+    "search": "Search by name, nickname, email or phone...",
+    "count_one": "{{count}} user",
+    "count_other": "{{count}} users",
+    "noResults": "No results",
+    "noResultsHint": "Try a different search term",
+    "noResultsFilterHint": "Try removing a filter",
+    "pageOf": "Page {{page}} of {{total}}",
+    "addExisting": "Add existing account"
+  },
+  "empty": "No clients",
+  "createModal": {
+    "title": "New client",
+    "created": "Client {{name}} created",
+    "emailInUse": "This email belongs to another business's client who hasn't activated a Bloom Board account yet. Once they do, you can add them to your centre.",
+    "linkable": "{{name}} ({{email}}) already has a Bloom Board account. Add them to this centre instead of creating another.",
+    "linkableIndependent": "They manage their own account: you will see their details, but only they can change them.",
+    "linkAction": "Add to this centre"
+  },
+  "editModal": {
+    "title": "Edit client",
+    "timpNotice": "This client is synced with TIMP. Name, email, phone and the other personal details are edited in TIMP. Here you can change the nickname and, when TIMP doesn't have it, the address.",
+    "firstNameLabel": "First name",
+    "lastNameLabel": "Last name",
+    "aliasLabel": "Nickname",
+    "aliasPlaceholder": "Shown on the TV instead of the name",
+    "emailLabel": "Email",
+    "phoneLabel": "Phone",
+    "genderLabel": "Gender",
+    "genderPlaceholder": "Select gender...",
+    "genderMale": "Male",
+    "genderFemale": "Female",
+    "genderUnspecified": "Unspecified",
+    "birthdayLabel": "Date of birth",
+    "birthdayPlaceholder": "Select date...",
+    "addressLabel": "Address",
+    "postalCodeLabel": "Postal code",
+    "postalCodeHint": "Places the client on the dashboard map.",
+    "independentNotice": "This client manages their own Bloom Board account. Only they can change their personal details; you still manage their tags, notes, routines and sessions."
+  },
+  "nameForm": {
+    "nameLabel": "Name",
+    "namePlaceholder": "Name",
+    "descriptionLabel": "Description (optional)"
+  },
+  "attachServices": {
+    "title": "Attach services",
+    "subtitle": "Select the services linked to this routine.",
+    "noServices": "No services available. Only services with \"Uses routines on the TV\" enabled can be linked to a routine.",
+    "skip": "Skip",
+    "attach": "Attach"
+  },
+  "routinesSection": {
+    "blankRoutine": "Blank routine",
+    "assignRoutine": "Assign routine",
+    "selectService": "Select service",
+    "blankTemplate": "Blank template",
+    "assignTemplate": "Assign template",
+    "removeTemplate": "Remove template",
+    "removeTemplateTitle": "Remove workout template",
+    "removeTemplateConfirm": "Remove \"{{name}}\" from this routine?",
+    "sortTemplates": "Sort workout templates",
+    "newBlankRoutine": "New blank routine",
+    "routineNamePlaceholder": "Routine name",
+    "assignExistingRoutine": "Assign existing routine",
+    "newBlankTemplate": "New blank template",
+    "templateNamePlaceholder": "Template name",
+    "assignExistingTemplate": "Assign existing template",
+    "deleteRoutineTitle": "Delete client's routine",
+    "deleteRoutineDescription": "The routine and its associated templates will be deleted.",
+    "backToRoutines": "Routines",
+    "source": {
+      "company": "Company",
+      "users": "Users"
+    },
+    "pickUser": "Select a user",
+    "pickUserRoutine": "{{name}}'s routines",
+    "pickUserTemplate": "Select a workout template",
+    "searchUsers": "Search by name, nickname, email or phone...",
+    "noUsersWithRoutines": "No user has routines yet",
+    "noRoutinesForUser": "This user has no routines",
+    "noTemplatesInRoutine": "This routine has no workout templates",
+    "clientOwn": "Created by the client",
+    "addTemplate": "Add template",
+    "selectWorkout": "Pick a workout from the list"
+  },
+  "detail": {
+    "internal": "Internal",
+    "active": "Active",
+    "inactive": "Inactive",
+    "yearsOld": "{{age}} years old",
+    "information": "Information",
+    "personalInfo": "Personal information",
+    "birthdayWithAge": "{{date}} ({{age}} years old)",
+    "clientProfile": "Client profile",
+    "independent": "Own account",
+    "independentHint": "They manage their own account: only they can change their personal details.",
+    "invite": "Invite",
+    "inviteHint": "We'll email them a link to set a password and see their sessions and routines.",
+    "inviteSent": "Invitation sent",
+    "inviteError": "Couldn't send the invitation"
+  },
+  "filters": {
+    "title": "Filters",
+    "filtered": "filtered",
+    "clear": "Clear filters",
+    "gender": "Gender",
+    "genders": {
+      "M": "Male",
+      "F": "Female",
+      "OTHER": "Other",
+      "UNKNOWN": "Unspecified"
+    },
+    "age": "Age",
+    "ageMin": "From",
+    "ageMax": "To",
+    "ageTo": "to",
+    "ageHint": "Only includes clients with a date of birth.",
+    "tags": "Tags",
+    "untagged": "Untagged",
+    "noTags": "This center has no tags yet.",
+    "tagMatch": {
+      "any": "Any",
+      "all": "All"
+    },
+    "services": "Services",
+    "servicesHint": "Clients with a routine linked to that service.",
+    "noServices": "This center has no services yet.",
+    "routine": "Routine",
+    "roadmap": "Roadmap",
+    "roadmapStatus": "Roadmap status",
+    "phone": "Phone",
+    "email": "Email",
+    "address": "Address",
+    "tri": {
+      "all": "All",
+      "yes": "With",
+      "no": "Without"
+    }
+  },
+  "sort": {
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "birthday": "Age",
+    "createdAt": "Joined",
+    "activity": "Activity",
+    "ascending": "Ascending order",
+    "descending": "Descending order",
+    "searchOverrides": "While searching, results are ordered by relevance."
+  },
+  "linkModal": {
+    "title": "Add an existing account",
+    "hint": "If the person already has a Bloom Board account (they registered themselves or train elsewhere), add them to this centre instead of creating a new client. Find them by their exact email.",
+    "emailPlaceholder": "email@example.com",
+    "search": "Search",
+    "notFound": "No account has that email. You can create one with \"New client\".",
+    "notLinkable": {
+      "STAFF_ACCOUNT": "That email belongs to a team member, not a client.",
+      "MANAGED_ELSEWHERE": "They are another business's client who hasn't activated their account yet. Once they do, you can add them.",
+      "INACTIVE": "That account is deactivated.",
+      "default": "That account can't be added."
+    },
+    "independent": "Manages their own account",
+    "alreadyInCenter": "Already in this centre.",
+    "add": "Add to this centre",
+    "added": "{{name}} added to this centre"
+  }
+}

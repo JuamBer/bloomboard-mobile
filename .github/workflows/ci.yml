@@ -1,0 +1,62 @@
+name: CI
+
+# Everything here is a required gate and passed when it was introduced, so a
+# red run means this change broke something that was working.
+#
+# `develop` is where this repo is checked. Feature branches arrive through pull
+# requests; the push trigger covers every other way develop moves. Promotions
+# (develop -> beta -> main) are direct pushes CI does not see: they carry
+# commits already checked here. Promote from a green `develop`.
+on:
+  pull_request:
+    branches:
+      - develop
+      - beta
+      - main
+  push:
+    branches:
+      - develop
+
+jobs:
+  check:
+    name: Format, lint, test, typecheck, i18n and bundle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint:check
+
+      # Pure-module unit tests (jest-expo). Early: they need nothing generated
+      # and fail in seconds.
+      - name: Test
+        run: npm test -- --ci
+
+      # Generates the typed-routes declarations first (scripts/typed-routes.mjs)
+      # — without them every href is a plain string and a route typo passes.
+      - name: Typecheck
+        run: npm run typecheck
+
+      # es/en parity, and every key the code uses exists. tsc cannot see
+      # either.
+      - name: Check translations
+        run: npm run check:i18n
+
+      # Metro + Hermes for both platforms: the closest thing to "it builds"
+      # without an EAS build. No EXPO_PUBLIC_* vars: it only has to compile.
+      - name: Bundle (Android + iOS)
+        run: npm run bundle:check

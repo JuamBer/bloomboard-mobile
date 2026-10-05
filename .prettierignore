@@ -1,0 +1,7 @@
+dist/
+node_modules/
+.expo/
+android/
+ios/
+.agents/
+expo-env.d.ts

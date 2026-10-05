@@ -1,0 +1,246 @@
+{
+  "header": {
+    "title": "Templates",
+    "subtitle": "Training templates"
+  },
+  "list": {
+    "newTemplate": "New template",
+    "search": "Search template...",
+    "empty": "No templates",
+    "emptyHint": "Create your first training template",
+    "count_one": "{{count}} template",
+    "count_other": "{{count}} templates",
+    "exercises": "{{count}} exercises",
+    "blocks": "{{count}} blocks"
+  },
+  "createModal": {
+    "title": "New Template",
+    "nameLabel": "Name *",
+    "namePlaceholder": "E.g.: Full Body Routine",
+    "difficultyLabel": "Difficulty",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Template description...",
+    "create": "Create Template"
+  },
+  "editModal": {
+    "title": "Edit Template"
+  },
+  "addExercise": {
+    "title": "Add Exercise",
+    "createNew": "Create exercise",
+    "copyAndAdd": "Copy & add",
+    "copyAndUse": "Copy & use",
+    "copyHint": "Your centers' exercises are copied to yours before you use them."
+  },
+  "replaceExercise": {
+    "title": "Replace Exercise"
+  },
+  "metricSelector": {
+    "title": "Exercise metrics",
+    "simpleMetrics": "Simple metrics",
+    "compositeMetrics": "Composite metrics",
+    "unit": "Unit",
+    "byDefault": "default",
+    "selected": "Selected — drag to reorder",
+    "available": "Available",
+    "resetOrder": "Reset order",
+    "lockedByMode": "This block is Work/Rest: the TV needs this metric to run its clock."
+  },
+  "exerciseNameLink": {
+    "clickToOpen": "Click to open the full exercise sheet",
+    "originalName": "Original: {{name}}"
+  },
+  "blockEditor": {
+    "editTitle": "Edit block",
+    "newTitle": "New block",
+    "presetsLabel": "Predefined blocks",
+    "nameLabel": "Name *",
+    "namePlaceholder": "E.g.: Warm-up",
+    "colorLabel": "Color",
+    "descriptionPlaceholder": "Block description...",
+    "create": "Create block",
+    "modeLabel": "Block type"
+  },
+  "setTypes": {
+    "warmup": "Warm-up",
+    "approach": "Approach",
+    "normal": "Normal",
+    "allOut": "All out",
+    "toFailure": "To failure",
+    "drop": "Drop set",
+    "restPause": "Rest-Pause",
+    "cluster": "Cluster"
+  },
+  "setsEditor": {
+    "setType": "Set type",
+    "choose": "Choose",
+    "switchToExact": "Switch to exact value",
+    "switchToRange": "Switch to range",
+    "mode": "Mode",
+    "modes": {
+      "exact": "Exact",
+      "range": "Range",
+      "lessThan": "Less than",
+      "greaterThan": "Greater than"
+    },
+    "modesShort": {
+      "exact": "Exact",
+      "range": "Range",
+      "lessThan": "Less",
+      "greaterThan": "More"
+    },
+    "modeEditing": {
+      "title": "Comparison mode",
+      "hint": "Pick how each value is compared. Use a column header to apply one mode to every set.",
+      "notApplicable": "This metric always takes an exact value",
+      "applyToColumn": "Apply a mode to the whole column"
+    },
+    "addSet": "Add set",
+    "rangePlaceholder": "min/max",
+    "rangeSameEnds": "Same value on both ends — this is an exact value, not a range",
+    "addSetAfter": "New set",
+    "addSetInside": "Set inside the {{type}}"
+  },
+  "blockCard": {
+    "expand": "Expand block",
+    "collapse": "Collapse block",
+    "exerciseCount_one": "{{count}} exercise",
+    "exerciseCount_other": "{{count}} exercises",
+    "editBlock": "Edit block",
+    "deleteBlock": "Delete block",
+    "noExercises": "No exercises in this block",
+    "addExercise": "Add exercise",
+    "addFirstExercise": "Add the first exercise to this block",
+    "deleteBlockConfirm": "Delete block \"{{name}}\" and all its exercises?",
+    "sortBlocks": "Sort blocks",
+    "sortExercises": "Sort exercises",
+    "loose": "Exercises without a block"
+  },
+  "exerciseEntryCard": {
+    "setCount_one": "{{count}} set",
+    "setCount_other": "{{count}} sets",
+    "manageMetrics": "Manage metrics",
+    "metrics": "Metrics",
+    "changeModes": "Change modes",
+    "exitChangeModes": "Finish changing modes",
+    "removeFromSuperset": "Remove from superset",
+    "notes": "Notes",
+    "notesPlaceholder": "Notes for the client or trainer...",
+    "addMetrics": "Add metrics",
+    "addMetricsHint": "Choose the metrics to configure the sets",
+    "removeTitle": "Remove exercise from template",
+    "removeConfirm": "Remove \"{{name}}\" from this template?",
+    "actions": "More actions",
+    "replaceExercise": "Replace exercise",
+    "rename": "Rename",
+    "resetName": "Reset name",
+    "renameDialogTitle": "Rename exercise",
+    "renameDialogDescription": "Custom name for this exercise in this template only. The original exercise is not changed.",
+    "customNameLabel": "Custom name"
+  },
+  "superSet": {
+    "title": "Superset",
+    "slotCount_one": "{{count}} set in sequence",
+    "slotCount_other": "{{count}} sets in sequence",
+    "addSlot": "Add set",
+    "addExercise": "Add exercise to superset",
+    "moveToExercise": "Change which exercise does this set",
+    "removeMember": "Remove from superset",
+    "dissolve": "Break up superset",
+    "dissolveConfirm": "Break up this superset? The exercises and their sets stay in the block, just no longer linked.",
+    "notApplicable": "Not tracked for this exercise",
+    "lastSlotHint": "An exercise needs at least one set — remove it from the superset instead",
+    "create": "Create superset",
+    "createTitle": "Create superset",
+    "createHint": "Pick the exercises performed together with this one. You'll set the order they're performed in afterwards.",
+    "createCount": "Create superset ({{count}})",
+    "origin": "Starting exercise",
+    "alreadyGrouped": "Already in another superset",
+    "noCandidates": "No other exercises in this block"
+  },
+  "nameStatus": {
+    "checking": "Checking availability...",
+    "taken": "A template with this name already exists.",
+    "available": "Name available."
+  },
+  "rpeLegend": {
+    "title": "RPE Legend",
+    "feeling": "Feeling",
+    "rir": "Approx. RIR",
+    "rpe1": "Minimal effort, almost no fatigue.",
+    "rpe2": "Very easy, you could continue for a long time.",
+    "rpe3": "Easy, slightly accelerated breathing.",
+    "rpe4": "Moderately easy.",
+    "rpe5": "Moderate work, you clearly notice the effort.",
+    "rpe6": "Quite hard, but controlled.",
+    "rpe7": "Hard; you could do a few more reps.",
+    "rpe8": "Very hard; few reps left in you.",
+    "rpe9": "Almost at the limit; only 1 more rep possible.",
+    "rpe10": "Maximal effort; no additional reps possible with good form.",
+    "rir1": "Many more than 10",
+    "rir2": "More than 10",
+    "rir3": "8-10",
+    "rir4": "6-8",
+    "rir5": "5-6",
+    "rir6": "4-5",
+    "rir7": "3",
+    "rir8": "2",
+    "rir9": "1",
+    "rir10": "0"
+  },
+  "delete": {
+    "title": "Delete template",
+    "description": "Are you sure you want to delete the template \"{{name}}\"? This action cannot be undone."
+  },
+  "detail": {
+    "blocks": "Blocks",
+    "blockCount_one": "{{count}} block",
+    "blockCount_other": "{{count}} blocks",
+    "showSets": "Show sets",
+    "hideSets": "Hide sets",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "noBlocksYet": "No exercises yet",
+    "addBlock": "Add block",
+    "addFirstBlock": "Organise it in parts: warm-up, strength…",
+    "addExercise": "Add exercise",
+    "addFirstExercise": "Loose exercises, no blocks",
+    "addLooseExercise": "Exercise without a block"
+  },
+  "status": {
+    "finalize": "Mark as final",
+    "reopen": "Reopen",
+    "lockedNotice": "This template is final. Reopen it to edit.",
+    "finalizeTitle": "Mark this template as final?",
+    "finalizeDescription": "“{{name}}” will be locked: it cannot be edited or deleted until you reopen it.",
+    "reopenTitle": "Reopen this template?",
+    "reopenDescription": "“{{name}}” will be editable again.",
+    "finalized": "Template marked as final",
+    "reopened": "Template reopened"
+  },
+  "blockMode": {
+    "NORMAL": "Normal",
+    "NORMALHint": "Classic table. The trainer marks progress.",
+    "WORK_REST": "Work/Rest",
+    "WORK_RESTHint": "Timed circuit. The TV advances on its own.",
+    "seedNotice": "Time (30s) and Rest (15s) will be filled in on sets that lack them. Values you already typed are left alone.",
+    "incomplete": "No times",
+    "incompleteHint": "A set has no Time or Rest. The TV cannot run a clock on it until you fill them in."
+  },
+  "session": {
+    "current": "Up now",
+    "complete": "Complete",
+    "unmark": "Unmark"
+  },
+  "setComment": {
+    "start": "Comment on sets",
+    "stop": "Done commenting",
+    "placeholder": "Comment for this set…",
+    "label": "Set comment"
+  },
+  "rpePicker": {
+    "clear": "Clear RPE",
+    "rir": "Approx. RIR {{rir}}",
+    "hint": "Perceived effort, from 0 (rest) to 10 (maximal)."
+  }
+}
