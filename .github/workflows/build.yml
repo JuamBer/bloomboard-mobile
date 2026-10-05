@@ -1,0 +1,72 @@
+name: Build Mobile (EAS)
+
+# Store and tester binaries, on demand. Native changes ship this way (an EAS
+# Update cannot carry them): run `preview` to put a build on testers' phones
+# against the beta API, `production` for the stores — with `submit` to upload
+# it to App Store Connect / Google Play once it is built.
+# The build itself runs on EAS's machines; this job only queues it.
+# See docs/RELEASING.md.
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: EAS build profile
+        type: choice
+        options:
+          - preview
+          - production
+        default: preview
+      platform:
+        description: Platform
+        type: choice
+        options:
+          - all
+          - android
+          - ios
+        default: all
+      submit:
+        description: Submit to the stores when built (production only)
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    name: EAS Build (${{ inputs.profile }}, ${{ inputs.platform }})
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Require EAS credentials
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "::error::EXPO_TOKEN is not set. See docs/ENVIRONMENTS.md (one-off setup)."
+            exit 1
+          fi
+
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Queue build
+        run: |
+          SUBMIT=""
+          if [ "${{ inputs.submit }}" = "true" ] && [ "${{ inputs.profile }}" = "production" ]; then
+            SUBMIT="--auto-submit"
+          fi
+          eas build --profile "${{ inputs.profile }}" --platform "${{ inputs.platform }}" \
+            --non-interactive --no-wait $SUBMIT
