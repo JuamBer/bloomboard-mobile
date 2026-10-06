@@ -8,31 +8,34 @@ import { version } from './package.json';
  *
  * APP_ENV picks the variant, set per EAS build profile in eas.json:
  *   development → "Bloom Board (dev)", a dev client talking to a local API
- *   preview     → "Bloom Board (beta)", internal builds against beta
+ *   preview     → "Bloom Board (beta)", sideloaded builds against beta, with
+ *                 their own id so they install beside the store app
+ *   beta        → "Bloom Board (beta)", the store app's id against the beta
+ *                 API: what the Play internal testing track gets
  *   production  → "Bloom Board", the store app against production
- * Each variant has its own bundle id, so the three install side by side.
  */
-type AppEnv = 'development' | 'preview' | 'production';
+type AppEnv = 'development' | 'preview' | 'beta' | 'production';
 
 const APP_ENV = (process.env.APP_ENV ?? 'development') as AppEnv;
 
-// The store identifier of the production app. If the member app already
-// published on Google Play is to be replaced by this one (same listing), set
-// ANDROID_PACKAGE to that listing's package name before the first production
-// build — a package name can never change once published. See
-// docs/ENVIRONMENTS.md.
+// The store identifier: Google Play listing `pro.bloomboard.app` (a new app,
+// not the earlier member app published outside this repo). A package name can
+// never change once published. See docs/ENVIRONMENTS.md.
 const BASE_ID = process.env.APP_BUNDLE_ID ?? 'pro.bloomboard.app';
 const ANDROID_BASE = process.env.ANDROID_PACKAGE ?? BASE_ID;
 
 const SUFFIX: Record<AppEnv, string> = {
   development: '.dev',
   preview: '.beta',
+  // A Play testing track belongs to the store listing: same id.
+  beta: '',
   production: '',
 };
 
 const NAME: Record<AppEnv, string> = {
   development: 'Bloom Board (dev)',
   preview: 'Bloom Board (beta)',
+  beta: 'Bloom Board (beta)',
   production: 'Bloom Board',
 };
 
@@ -108,8 +111,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   // A JS-only update reaches exactly the binaries built from the same native
   // fingerprint; anything native needs a new store build (docs/RELEASING.md).
-  runtimeVersion: { policy: 'fingerprint' },
-  ...(projectId ? { updates: { url: `https://u.expo.dev/${projectId}` } } : {}),
+  // Only with EAS Updates configured: without them it is unused, and the dev
+  // server would hash the whole project on every manifest request.
+  ...(projectId
+    ? {
+        runtimeVersion: { policy: 'fingerprint' as const },
+        updates: { url: `https://u.expo.dev/${projectId}` },
+      }
+    : {}),
   extra: {
     appEnv: APP_ENV,
     ...(projectId ? { eas: { projectId } } : {}),
