@@ -125,8 +125,9 @@ The member and the trainer's board write the same session workout.
   native configuration. `APP_ENV` (from the EAS profile) picks name, bundle id
   and API.
 - Hermes, the New Architecture (default in SDK 57), React Compiler.
-- `runtimeVersion: fingerprint` — an over-the-air update only reaches binaries
-  with the same native fingerprint. See `docs/RELEASING.md`.
+- `runtimeVersion: appVersion` — an over-the-air update only reaches binaries
+  of the same app version. Not `fingerprint`: its hash differs between Windows
+  and EAS's Linux builders and fails the build. See `docs/RELEASING.md`.
 - The **web build** (`expo export --platform web`) is for development checks
   only — Playwright at phone size against a local API. It is not deployed;
   members on the web use `app.bloomboard.pro`.

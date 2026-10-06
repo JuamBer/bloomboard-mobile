@@ -105,14 +105,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     typedRoutes: true,
     reactCompiler: true,
   },
-  // A JS-only update reaches exactly the binaries built from the same native
-  // fingerprint; anything native needs a new store build (docs/RELEASING.md).
-  // Store builds only: a development build never takes updates, and the dev
-  // server would hash the whole project on every manifest request (the
-  // spawned process crashes on Windows, taking Metro down).
+  // An over-the-air update reaches only binaries of the same app version
+  // (package.json); bump it with any native change (docs/RELEASING.md).
+  // Not `fingerprint`: the native-code hash comes out different on a Windows
+  // machine and on EAS's Linux builders, which fails every build with
+  // "Runtime version mismatch" — and resolving it in the dev server crashed
+  // Metro on Windows. Store builds only: a development build never updates.
   ...(projectId && APP_ENV !== 'development'
     ? {
-        runtimeVersion: { policy: 'fingerprint' as const },
+        runtimeVersion: { policy: 'appVersion' as const },
         updates: { url: `https://u.expo.dev/${projectId}` },
       }
     : {}),

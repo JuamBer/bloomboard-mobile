@@ -78,9 +78,12 @@ monthly allowance — promote in batches, not on every commit.
 ## Over-the-air updates (not used yet)
 
 EAS Update can replace an installed app's JavaScript without a store release.
-The app is prepared for it (`runtimeVersion: fingerprint` once the EAS project
-is linked: an update only reaches binaries built from the same native code),
-but the workflows ship store builds only. Adding updates later means: publish
+The app is prepared for it (`runtimeVersion: appVersion`: an update only
+reaches binaries of the same `package.json` version — so **bump the version
+with every native change**), but the workflows ship store builds only.
+(`fingerprint`, which would track native changes by itself, is unusable from
+Windows: the hash differs between a Windows machine and EAS's Linux builders
+and every build fails with "Runtime version mismatch".) Adding updates later means: publish
 `eas update --channel <beta|production>` for JavaScript-only changes and keep
 store builds for native ones.
 
