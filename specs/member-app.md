@@ -193,10 +193,10 @@ More in `docs/ARCHITECTURE.md`.
 - **Members are default-denied** on the backend. A new call needs its route open
   to CLIENT, in `bloomboard-backend`, deployed first — else a 403 the axios
   interceptor toasts.
-- **An existing member app is on Google Play**, built outside this repo; it
-  calls `POST /auth/select-center` after login. Backend changes that restrict
-  members can break it. Whether this app replaces that listing is a decision to
-  make before the first production build (`docs/ENVIRONMENTS.md`).
+- **A separate member app is on Google Play**, built outside this repo; it
+  calls `POST /auth/select-center` after login. This app ships as its own new
+  listing (`pro.bloomboard.app`) and does not replace it, but backend changes
+  that restrict members can still break that one.
 - **Typed routes are generated.** `npm run typecheck` generates them; a bare
   `tsc` passes without them and checks no href.
 - **The web build is not the phone.** It is good for layout and flows in
@@ -208,9 +208,9 @@ More in `docs/ARCHITECTURE.md`.
 - **React Compiler + refs:** reading `useRef().current` during render fails
   lint (`react-hooks/refs`). An `Animated.Value` read by styles lives in
   `useState(() => new Animated.Value(0))`.
-- **An over-the-air update only reaches matching binaries** (fingerprint runtime
-  version). After a native change, a store build has to go out before the
-  JavaScript that needs it reaches anyone (`docs/RELEASING.md`).
+- **Every release is a store build** (push to `beta` → Play internal testing,
+  `main` → production). Over-the-air updates are prepared but not wired in
+  (`docs/RELEASING.md`).
 
 ## Verification
 

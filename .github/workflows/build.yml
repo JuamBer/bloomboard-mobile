@@ -14,6 +14,7 @@ on:
         type: choice
         options:
           - preview
+          - beta
           - production
         default: preview
       platform:
@@ -25,7 +26,7 @@ on:
           - ios
         default: all
       submit:
-        description: Submit to the stores when built (production only)
+        description: Submit to Google Play when built (beta or production)
         type: boolean
         default: false
 
@@ -65,8 +66,9 @@ jobs:
       - name: Queue build
         run: |
           SUBMIT=""
-          if [ "${{ inputs.submit }}" = "true" ] && [ "${{ inputs.profile }}" = "production" ]; then
-            SUBMIT="--auto-submit"
+          # beta → Play internal testing, production → Play production.
+          if [ "${{ inputs.submit }}" = "true" ] && [ "${{ inputs.profile }}" != "preview" ]; then
+            SUBMIT="--auto-submit-with-profile ${{ inputs.profile }}"
           fi
           eas build --profile "${{ inputs.profile }}" --platform "${{ inputs.platform }}" \
             --non-interactive --no-wait $SUBMIT

@@ -1,35 +1,39 @@
 name: Deploy Mobile BETA
 
-# Publishes the JavaScript on `beta` as an over-the-air update to the `beta`
-# channel — the one `preview` builds (internal testers, beta API) listen to.
-# Native changes need a new build instead (build.yml); the fingerprint runtime
-# version keeps an update from ever reaching a binary it does not fit.
-# See docs/RELEASING.md.
+# Every push to `beta` builds the Android app against the beta API and submits
+# it to Google Play's **internal testing** track — the team installs it from
+# the Play Store (opt-in link). Same listing as production
+# (`pro.bloomboard.app`), shown as "Bloom Board (beta)".
+#
+# The build runs on EAS's machines; this job queues it and returns. EAS submits
+# when the build finishes, with the Play service account key stored in EAS
+# (docs/ENVIRONMENTS.md). Track releases are created as drafts until the app's
+# first release is published — see `releaseStatus` in eas.json.
 on:
   push:
     branches:
       - beta
 
 concurrency:
-  group: eas-update-beta
+  group: eas-build-beta
   cancel-in-progress: false
 
 jobs:
-  update:
-    name: EAS Update (beta)
+  build:
+    name: Build and submit (internal testing)
     runs-on: ubuntu-latest
 
     steps:
       # Until the EAS project is linked and EXPO_TOKEN exists (docs/
-      # ENVIRONMENTS.md, one-off setup) there is nothing to publish to: skip
-      # with a notice rather than fail every promotion.
+      # ENVIRONMENTS.md) there is nothing to build with: skip with a notice
+      # rather than fail every promotion.
       - name: Check EAS credentials
         id: eas
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           if [ -z "$EXPO_TOKEN" ]; then
-            echo "::notice::EXPO_TOKEN is not set — skipping the EAS update. See docs/ENVIRONMENTS.md."
+            echo "::notice::EXPO_TOKEN is not set — skipping the build. See docs/ENVIRONMENTS.md."
             echo "ready=false" >> "$GITHUB_OUTPUT"
           else
             echo "ready=true" >> "$GITHUB_OUTPUT"
@@ -57,14 +61,9 @@ jobs:
         if: steps.eas.outputs.ready == 'true'
         run: npm ci
 
-      # The same values as the `preview` build profile in eas.json: an update
-      # is compiled here, not on EAS, so it does not read the profile's env.
-      - name: Publish update
+      - name: Build and submit
         if: steps.eas.outputs.ready == 'true'
-        env:
-          APP_ENV: preview
-          EXPO_PUBLIC_API_URL: https://beta.service.bloomboard.pro/api
-          EXPO_PUBLIC_WS_URL: https://beta.service.bloomboard.pro
         run: |
-          eas update --channel beta --platform all --non-interactive \
+          eas build --profile beta --platform android --non-interactive --no-wait \
+            --auto-submit-with-profile beta \
             --message "$(git log -1 --pretty=%s) ($(git rev-parse --short HEAD))"

@@ -171,14 +171,14 @@ N` with the rejected options and why, `## File map`, `## Gotchas`,
 
 ```
 feature branch ──PR──► develop ──merge──► beta ──merge──► main
-                       (CI)               (EAS update     (EAS update
-                                           → beta)         → production)
+                       (CI)               (EAS build →     (EAS build →
+                                           Play internal)   Play production)
 ```
 
-`develop` is checked by CI. `beta` and `main` publish over-the-air JavaScript
-updates to the matching EAS channel; store binaries are built on demand. What
-can ship over the air and what needs a store build, how to cut one, and how the
-version and tag are managed: `docs/RELEASING.md`. Environments and the one-off
-EAS setup: `docs/ENVIRONMENTS.md`.
+`develop` is checked by CI. A push to `beta` builds the app and submits it to
+Google Play's internal testing track; a push to `main` builds and submits to
+production. How it works, versions and rollbacks: `docs/RELEASING.md`.
+Environments: `docs/ENVIRONMENTS.md`. Setting up the Play listing:
+`store/google-play/README.md`.
 
-Do not push `beta` or `main` unless asked — a push there reaches phones.
+Do not push `beta` or `main` unless asked — a push there ships to phones.

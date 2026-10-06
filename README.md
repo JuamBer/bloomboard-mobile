@@ -13,7 +13,7 @@ One of four Bloom Board repos:
 | bloomboard-backend | REST + WebSocket API | `service.bloomboard.pro`, `beta.service.bloomboard.pro` |
 | bloomboard-frontend | Staff portal, TVs, member web portal | `app.bloomboard.pro`, `beta.app.bloomboard.pro` |
 | bloomboard-landing | Marketing site | `bloomboard.pro`, `beta.bloomboard.pro` |
-| **bloomboard-mobile** (this) | Member app | App Store, Google Play (EAS channels `beta` / `production`) |
+| **bloomboard-mobile** (this) | Member app | Google Play `pro.bloomboard.app` (internal testing ← `beta`, production ← `main`) |
 
 ## Stack
 
@@ -64,5 +64,6 @@ until a native dependency changes.
 - [AGENTS.md](AGENTS.md) — commands, the checks to run, conventions
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — structure, navigation, state, auth, real time
 - [docs/ENVIRONMENTS.md](docs/ENVIRONMENTS.md) — EAS project, profiles, identifiers, secrets
-- [docs/RELEASING.md](docs/RELEASING.md) — over-the-air updates vs store builds, versions
+- [docs/RELEASING.md](docs/RELEASING.md) — store builds on push, versions, rollbacks
+- [store/google-play/README.md](store/google-play/README.md) — publishing on Google Play, step by step
 - [specs/member-app.md](specs/member-app.md) — who it is for and the design decisions
