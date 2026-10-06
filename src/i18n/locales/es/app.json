@@ -27,17 +27,7 @@
   },
   "profile": {
     "logoutTitle": "¿Cerrar sesión?",
-    "logoutDescription": "Tendrás que volver a entrar con tu email y tu contraseña.",
-    "deleteAccount": "Eliminar cuenta",
-    "deleteTitle": "Eliminar tu cuenta",
-    "deleteIntro": "Se borrarán para siempre tu cuenta y todos tus datos de Bloom Board:",
-    "deleteItems": "Tus datos personales y tu acceso\nTus rutinas, entrenamientos y ejercicios propios\nTodo lo que has entrenado: series, récords y progreso\nTus reservas y notas de sesión",
-    "deleteCenters": "Si entrenas en un centro que usa Bloom Board, el centro podría volver a darte de alta. No se puede deshacer.",
-    "deletePassword": "Escribe tu contraseña para confirmarlo",
-    "deleteConfirm": "Eliminar mi cuenta",
-    "deleteWrongPassword": "La contraseña no es correcta.",
-    "deleteError": "No se ha podido eliminar la cuenta. Inténtalo de nuevo.",
-    "deleted": "Tu cuenta y tus datos se han eliminado."
+    "logoutDescription": "Tendrás que volver a entrar con tu email y tu contraseña."
   },
   "editor": {
     "nextField": "Siguiente",
