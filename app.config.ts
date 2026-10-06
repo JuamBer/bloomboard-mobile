@@ -40,8 +40,8 @@ const NAME: Record<AppEnv, string> = {
 // docs/ENVIRONMENTS.md); until then EAS builds and updates are not configured
 // and everything local works as is. The env vars only override them for a
 // one-off build under another account.
-const EAS_PROJECT_ID = '';
-const EAS_OWNER = '';
+const EAS_PROJECT_ID = '4ee08910-fb31-4fda-b84a-c0d5de67c175';
+const EAS_OWNER = 'juamber';
 const projectId = process.env.EAS_PROJECT_ID || EAS_PROJECT_ID || undefined;
 const owner = process.env.EAS_OWNER || EAS_OWNER || undefined;
 
@@ -107,9 +107,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   // A JS-only update reaches exactly the binaries built from the same native
   // fingerprint; anything native needs a new store build (docs/RELEASING.md).
-  // Only with EAS Updates configured: without them it is unused, and the dev
-  // server would hash the whole project on every manifest request.
-  ...(projectId
+  // Store builds only: a development build never takes updates, and the dev
+  // server would hash the whole project on every manifest request (the
+  // spawned process crashes on Windows, taking Metro down).
+  ...(projectId && APP_ENV !== 'development'
     ? {
         runtimeVersion: { policy: 'fingerprint' as const },
         updates: { url: `https://u.expo.dev/${projectId}` },
