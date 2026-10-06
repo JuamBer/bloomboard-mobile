@@ -48,6 +48,12 @@ export const meService = {
     return data;
   },
 
+  /** Deletes the account and all its data, for good. 403 WRONG_PASSWORD when
+   *  the password is not the account's; the caller shows it inline. */
+  deleteAccount: async (password: string): Promise<void> => {
+    await apiClient.delete('/me', { data: { password }, silentErrors: true });
+  },
+
   /** Omitted = unchanged, null = cleared. */
   updateProfile: async (
     changes: Partial<
