@@ -130,10 +130,15 @@ member's sessions; Rutinas, Entrenos and Ejercicios work without a session.
 Does the app collect or share user data? **Yes, collects. Shares: No.**
 Encrypted in transit: **Yes** (HTTPS only).
 
-Account creation: **Username and password** only. Account deletion: in the app
-(*Perfil › Eliminar cuenta*, password-confirmed, deletes everything at once)
-and on the web at `https://bloomboard.pro/privacy/#eliminar-cuenta` (the URL
-the form asks for). Deleting some data without deleting the account: **Yes** —
+Account creation: **Username and password** only.
+
+**Account deletion URL** (the field in *Data safety*, also shown on the store
+listing): `https://bloomboard.pro/privacy/#eliminar-cuenta` — privacy policy
+§10, which names Bloom Board, gives the steps and says what is deleted and what
+is kept. Members delete their account themselves, instantly and
+password-confirmed, in the app (*Perfil › Eliminar cuenta*) and on the web
+(app.bloomboard.pro › *Perfil* › *Eliminar cuenta*); by email or through their
+center otherwise. Deleting some data without deleting the account: **Yes** —
 members delete their own workouts, routines, plans and exercises in the app.
 
 | Data type | Collected | Shared | Optional | Purpose |
