@@ -9,6 +9,7 @@ import {
   Monitor,
   Moon,
   Sun,
+  Trash2,
 } from 'lucide-react-native';
 import { useState } from 'react';
 import { View } from 'react-native';
@@ -26,6 +27,7 @@ import {
   type Language,
 } from '@/i18n/language.store';
 import { configurationsService } from '@shared/api/services/configurations.service';
+import { errorBody } from '@shared/api/errors';
 import { meService } from '@shared/api/services/me.service';
 import { fromDateOnly, toDateOnly } from '@shared/lib/format';
 import { makeStyles, useTheme } from '@shared/theme/ThemeProvider';
@@ -37,6 +39,7 @@ import { Card, Divider, Section, Segmented } from '@shared/ui/controls';
 import { PageHeader, Screen } from '@shared/ui/layout';
 import { Avatar } from '@shared/ui/misc';
 import { DateField, SelectField } from '@shared/ui/pickers';
+import { Sheet } from '@shared/ui/Sheet';
 import { QueryState } from '@shared/ui/states';
 import { Text } from '@shared/ui/Text';
 import { TextField } from '@shared/ui/TextField';
@@ -48,7 +51,7 @@ const GENDERS = ['M', 'F', 'N'] as const;
 /**
  * The member's own profile: their plan and what they have used of it, then
  * who they are and where they train, their appearance and language, and —
- * the app has no other place for it — signing out.
+ * the app has no other place for it — signing out and deleting the account.
  *
  * The account is theirs, so they keep the details a business holds about them
  * — nickname (what their centers' TVs show), phone, birthday, gender.
@@ -63,6 +66,7 @@ export function ProfileScreen() {
   const queryClient = useQueryClient();
   const logout = useMemberLogout();
   const [confirmLogout, setConfirmLogout] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const hasCompanies = (profile?.affiliations.length ?? 0) > 0;
 
   return (
@@ -172,6 +176,13 @@ export function ProfileScreen() {
             fullWidth
             onPress={() => setConfirmLogout(true)}
           />
+          <Button
+            label={t('app:profile.deleteAccount')}
+            icon={Trash2}
+            variant="ghost"
+            fullWidth
+            onPress={() => setDeleting(true)}
+          />
           <Text variant="caption" muted={0.3} center>
             Bloom Board {Constants.expoConfig?.version ?? ''}
           </Text>
@@ -188,7 +199,117 @@ export function ProfileScreen() {
           void logout();
         }}
       />
+      <DeleteAccountSheet open={deleting} onClose={() => setDeleting(false)} />
     </Screen>
+  );
+}
+
+/**
+ * Deleting the account: what goes, then the password — the one step that
+ * makes an irreversible action deliberate (and that a borrowed, unlocked phone
+ * cannot pass). Google Play requires it in the app; the privacy policy
+ * describes it as "Perfil › Eliminar cuenta". DELETE /me removes everything at
+ * once, then the member is signed out.
+ */
+function DeleteAccountSheet({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation(['app', 'common']);
+  const styles = useStyles();
+  const theme = useTheme();
+  const logout = useMemberLogout();
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  const remove = useMutation({
+    mutationFn: () => meService.deleteAccount(password),
+    onSuccess: async () => {
+      await logout();
+      toast.success(t('app:profile.deleted'));
+    },
+    onError: (e) =>
+      setError(
+        errorBody(e)?.code === 'WRONG_PASSWORD'
+          ? t('app:profile.deleteWrongPassword')
+          : t('app:profile.deleteError'),
+      ),
+  });
+
+  const close = () => {
+    if (remove.isPending) return;
+    setPassword('');
+    setError(null);
+    onClose();
+  };
+
+  return (
+    <Sheet
+      open={open}
+      onClose={close}
+      title={t('app:profile.deleteTitle')}
+      dismissable={!remove.isPending}
+      footer={
+        <>
+          <Button
+            label={t('common:cancel')}
+            variant="secondary"
+            flex
+            disabled={remove.isPending}
+            onPress={close}
+          />
+          <Button
+            label={t('app:profile.deleteConfirm')}
+            variant="danger"
+            flex
+            disabled={!password}
+            loading={remove.isPending}
+            onPress={() => {
+              setError(null);
+              remove.mutate();
+            }}
+          />
+        </>
+      }
+    >
+      <Text variant="bodySmall">{t('app:profile.deleteIntro')}</Text>
+      <View style={styles.deleteList}>
+        {t('app:profile.deleteItems')
+          .split('\n')
+          .map((item) => (
+            <View key={item} style={styles.deleteItem}>
+              <Trash2 size={14} color={theme.colors.dangerInk} />
+              <Text variant="bodySmall" muted={0.7} style={styles.flex}>
+                {item}
+              </Text>
+            </View>
+          ))}
+      </View>
+      <Text variant="caption" muted={0.55}>
+        {t('app:profile.deleteCenters')}
+      </Text>
+      <TextField
+        label={t('app:profile.deletePassword')}
+        value={password}
+        onChangeText={(next) => {
+          setPassword(next);
+          setError(null);
+        }}
+        secret
+        autoComplete="current-password"
+        textContentType="password"
+        autoCapitalize="none"
+        editable={!remove.isPending}
+      />
+      {error ? (
+        <Text variant="bodySmall" color={theme.colors.dangerInk}>
+          {error}
+        </Text>
+      ) : null}
+    </Sheet>
   );
 }
 
@@ -338,6 +459,8 @@ const useStyles = makeStyles(() => ({
   identity: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   flex: { flex: 1, minWidth: 0 },
   rule: { marginVertical: 10 },
+  deleteList: { gap: 8 },
+  deleteItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   company: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   centers: {
     flexDirection: 'row',
