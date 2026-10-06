@@ -22,6 +22,7 @@ expo-env.d.ts
 *.mobileprovision
 *.pem
 google-services.json
+google-play-service-account.json
 GoogleService-Info.plist
 
 # Metro
