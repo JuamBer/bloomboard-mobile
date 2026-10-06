@@ -8,13 +8,11 @@ import { version } from './package.json';
  *
  * APP_ENV picks the variant, set per EAS build profile in eas.json:
  *   development → "Bloom Board (dev)", a dev client talking to a local API
- *   preview     → "Bloom Board (beta)", sideloaded builds against beta, with
- *                 their own id so they install beside the store app
  *   beta        → "Bloom Board (beta)", the store app's id against the beta
  *                 API: what the Play internal testing track gets
  *   production  → "Bloom Board", the store app against production
  */
-type AppEnv = 'development' | 'preview' | 'beta' | 'production';
+type AppEnv = 'development' | 'beta' | 'production';
 
 const APP_ENV = (process.env.APP_ENV ?? 'development') as AppEnv;
 
@@ -26,7 +24,6 @@ const ANDROID_BASE = process.env.ANDROID_PACKAGE ?? BASE_ID;
 
 const SUFFIX: Record<AppEnv, string> = {
   development: '.dev',
-  preview: '.beta',
   // A Play testing track belongs to the store listing: same id.
   beta: '',
   production: '',
@@ -34,7 +31,6 @@ const SUFFIX: Record<AppEnv, string> = {
 
 const NAME: Record<AppEnv, string> = {
   development: 'Bloom Board (dev)',
-  preview: 'Bloom Board (beta)',
   beta: 'Bloom Board (beta)',
   production: 'Bloom Board',
 };

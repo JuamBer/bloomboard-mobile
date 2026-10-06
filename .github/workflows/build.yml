@@ -1,10 +1,9 @@
 name: Build Mobile (EAS)
 
-# Store and tester binaries, on demand. Native changes ship this way (an EAS
-# Update cannot carry them): run `preview` to put a build on testers' phones
-# against the beta API, `production` for the stores — with `submit` to upload
-# it to App Store Connect / Google Play once it is built.
-# The build itself runs on EAS's machines; this job only queues it.
+# A store build on demand, outside the push-triggered deploys: `beta` (beta
+# API, Play internal testing) or `production` — with `submit` to upload it to
+# Google Play once it is built. The build itself runs on EAS's machines; this
+# job only queues it.
 # See docs/RELEASING.md.
 on:
   workflow_dispatch:
@@ -13,18 +12,17 @@ on:
         description: EAS build profile
         type: choice
         options:
-          - preview
           - beta
           - production
-        default: preview
+        default: beta
       platform:
         description: Platform
         type: choice
         options:
-          - all
           - android
           - ios
-        default: all
+          - all
+        default: android
       submit:
         description: Submit to Google Play when built (beta or production)
         type: boolean
@@ -67,7 +65,7 @@ jobs:
         run: |
           SUBMIT=""
           # beta → Play internal testing, production → Play production.
-          if [ "${{ inputs.submit }}" = "true" ] && [ "${{ inputs.profile }}" != "preview" ]; then
+          if [ "${{ inputs.submit }}" = "true" ]; then
             SUBMIT="--auto-submit-with-profile ${{ inputs.profile }}"
           fi
           eas build --profile "${{ inputs.profile }}" --platform "${{ inputs.platform }}" \

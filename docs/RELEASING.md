@@ -46,8 +46,7 @@ press *Roll out* in Play Console. Once the app is live, set both to
 ## Manual builds
 
 The **Build Mobile (EAS)** workflow (`build.yml`, *Run workflow*) builds any
-profile on demand — `preview` for a sideloadable APK against beta, `beta` or
-`production` with optional submission. Locally:
+profile on demand — `beta` or `production`, with optional submission. Locally:
 
 ```bash
 npx eas-cli build --profile beta --platform android

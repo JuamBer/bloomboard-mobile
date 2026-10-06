@@ -23,7 +23,7 @@ export const API_URL: string =
 export const WS_URL: string =
   process.env.EXPO_PUBLIC_WS_URL ?? API_URL.replace(/\/api\/?$/, '');
 
-export type AppEnv = 'development' | 'preview' | 'beta' | 'production';
+export type AppEnv = 'development' | 'beta' | 'production';
 
 export const APP_ENV: AppEnv =
   (Constants.expoConfig?.extra?.appEnv as AppEnv | undefined) ?? 'development';

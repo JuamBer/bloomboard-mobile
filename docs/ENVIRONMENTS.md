@@ -11,10 +11,6 @@
 | Beta | `beta` | `beta.service.bloomboard.pro` | `beta` | Google Play **internal testing** (automatic) | "Bloom Board (beta)" / `pro.bloomboard.app` |
 | Production | `main` | `service.bloomboard.pro` | `production` | Google Play **production** (automatic, after review) | "Bloom Board" / `pro.bloomboard.app` |
 
-A fourth profile, `preview`, builds a sideloadable APK against beta with its own
-package (`pro.bloomboard.app.beta`), for a tester who should not join the Play
-track — run it from the manual *Build* workflow.
-
 `APP_ENV` (set per profile in `eas.json`) drives `app.config.ts`: name, package,
 and which API the JavaScript is compiled against (`EXPO_PUBLIC_API_URL` /
 `EXPO_PUBLIC_WS_URL`, also per profile). Those are public — they end up in the
@@ -27,7 +23,6 @@ bundle — so they live in `eas.json`, not in secrets.
 | | Android package | iOS bundle id |
 |---|---|---|
 | Store (beta track and production) | `pro.bloomboard.app` | `pro.bloomboard.app` |
-| Sideloaded beta (`preview`) | `pro.bloomboard.app.beta` | `pro.bloomboard.app.beta` |
 | Development | `pro.bloomboard.app.dev` | `pro.bloomboard.app.dev` |
 
 `pro.bloomboard.app` is a **new** Google Play listing, "Bloom Board". An earlier
