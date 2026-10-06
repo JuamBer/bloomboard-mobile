@@ -25,7 +25,7 @@ Android and iOS:
 | **Rutinas** | their own routines and plans (create, rename, reorder, delete, edit in the editor, start); each company's routines, read-only |
 | **Entrenos** | every workout — at a center or on their own — start one (empty or from a plan), log it live, finish it, edit it after |
 | **Ejercicios** | catalog, their own and their companies' exercises; filters; create / edit / copy their own; detail with their stats and progress; where an exercise is used |
-| **Perfil** | identity, plan and usage (Free limits, Pro "Próximamente"), where they train, personal details, theme, language, sign out, **delete account** (password-confirmed; `DELETE /me` removes the account and all its data — `bloomboard-backend/specs/member-portal.md` decision 9; required by Google Play) |
+| **Perfil** | identity, plan and usage (Free limits, Pro "Próximamente"), where they train, personal details, theme, language, sign out, **delete account** (password-confirmed; `DELETE /me` removes the account and all its data — `bloomboard-backend/specs/member-portal.md` decision 9; required by Google Play; the web portal has the same since 2.1.0, with the same `member:profile.delete*` strings) |
 
 Plus, on every screen while a session is on: the live pill leading to the
 session control. Sign-up, sign-in and activation (a member a center created

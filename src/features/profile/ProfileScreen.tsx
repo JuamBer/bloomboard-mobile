@@ -177,7 +177,7 @@ export function ProfileScreen() {
             onPress={() => setConfirmLogout(true)}
           />
           <Button
-            label={t('app:profile.deleteAccount')}
+            label={t('member:profile.deleteAccount')}
             icon={Trash2}
             variant="ghost"
             fullWidth
@@ -218,7 +218,7 @@ function DeleteAccountSheet({
   open: boolean;
   onClose: () => void;
 }) {
-  const { t } = useTranslation(['app', 'common']);
+  const { t } = useTranslation(['member', 'common']);
   const styles = useStyles();
   const theme = useTheme();
   const logout = useMemberLogout();
@@ -229,13 +229,13 @@ function DeleteAccountSheet({
     mutationFn: () => meService.deleteAccount(password),
     onSuccess: async () => {
       await logout();
-      toast.success(t('app:profile.deleted'));
+      toast.success(t('member:profile.deleted'));
     },
     onError: (e) =>
       setError(
         errorBody(e)?.code === 'WRONG_PASSWORD'
-          ? t('app:profile.deleteWrongPassword')
-          : t('app:profile.deleteError'),
+          ? t('member:profile.deleteWrongPassword')
+          : t('member:profile.deleteError'),
       ),
   });
 
@@ -250,7 +250,7 @@ function DeleteAccountSheet({
     <Sheet
       open={open}
       onClose={close}
-      title={t('app:profile.deleteTitle')}
+      title={t('member:profile.deleteTitle')}
       dismissable={!remove.isPending}
       footer={
         <>
@@ -262,7 +262,7 @@ function DeleteAccountSheet({
             onPress={close}
           />
           <Button
-            label={t('app:profile.deleteConfirm')}
+            label={t('member:profile.deleteConfirm')}
             variant="danger"
             flex
             disabled={!password}
@@ -275,9 +275,9 @@ function DeleteAccountSheet({
         </>
       }
     >
-      <Text variant="bodySmall">{t('app:profile.deleteIntro')}</Text>
+      <Text variant="bodySmall">{t('member:profile.deleteIntro')}</Text>
       <View style={styles.deleteList}>
-        {t('app:profile.deleteItems')
+        {t('member:profile.deleteItems')
           .split('\n')
           .map((item) => (
             <View key={item} style={styles.deleteItem}>
@@ -289,10 +289,10 @@ function DeleteAccountSheet({
           ))}
       </View>
       <Text variant="caption" muted={0.55}>
-        {t('app:profile.deleteCenters')}
+        {t('member:profile.deleteCenters')}
       </Text>
       <TextField
-        label={t('app:profile.deletePassword')}
+        label={t('member:profile.deletePassword')}
         value={password}
         onChangeText={(next) => {
           setPassword(next);
