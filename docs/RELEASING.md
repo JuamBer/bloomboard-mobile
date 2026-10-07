@@ -46,15 +46,19 @@ press *Roll out* in Play Console. Once the app is live, set both to
 `"completed"` and pushes go out on their own.
 
 **Current state (2026-10-07):** 2.1.0 (5) is in Google's first review, sent by
-hand; the Play service account is not yet in EAS, so a push to `beta`/`main`
-would build but fail to upload — hold the mobile promotions until it is.
+hand. The Play service account is not yet in EAS, so a push to `beta`/`main`
+builds but uploads nothing — as happened with builds 3 and 4 (pushed on
+2026-10-06). Hold the mobile promotions until the key is in EAS; each one costs
+a build.
 
 ## The first store builds — what went wrong
 
 - **"Runtime version mismatch"** at *Configure expo-updates*: the `fingerprint`
   runtime policy hashed the native project differently on Windows and on EAS's
-  Linux builders (`node_modules` autolinking). `runtimeVersion: appVersion`
-  fixed it — see *Over-the-air updates* below.
+  Linux builders (`node_modules` autolinking). Builds started from GitHub
+  Actions (Linux, like EAS) passed; one started from a Windows PC failed.
+  `runtimeVersion: appVersion` works from anywhere — see *Over-the-air updates*
+  below.
 - **`eas build` uploads the local project**, not what is on GitHub: a fix needs
   a commit (uncommitted files are left out), not a push.
 - **Version codes are spent by every build**, failed or cancelled ones

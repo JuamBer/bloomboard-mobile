@@ -23,8 +23,11 @@ Texts, forms and graphics to paste: [`listing.md`](listing.md),
 | 5. Service account for EAS Submit | ⏳ Not done — until then pushes to `beta`/`main` build but cannot upload |
 | 6. Production | ⏳ **2.1.0 (5) submitted for review on 2026-10-07**, countries Spain + United States, managed publishing **off** (goes live as soon as Google approves). After approval: `releaseStatus` → `"completed"` in `eas.json` |
 
-Also pending: push `bloomboard-mobile` to GitHub (it has only lived locally so
-far); iOS / App Store (not started).
+`beta` and `main` were pushed on 2026-10-06 (at the screenshots commit): their
+workflows queued EAS builds 3 (beta) and 4 (production), which built fine but
+uploaded nothing — no service account yet (EAS lists no submissions). No
+`v2.1.0` tag reached GitHub from that run; check the *Deploy Mobile PRODUCTION*
+run's *Tag release* job in the Actions tab. iOS / App Store: not started.
 
 ---
 
@@ -136,11 +139,13 @@ first one made in the console.
    (*Play App Signing*, accepted by default on the first upload).
 2. **Expect a 2–3 hour wait** on EAS's free tier before the build starts (it
    takes ~15 min once running). Priority builds need a paid plan.
-3. The first attempt failed with **"Runtime version mismatch"** — the
-   `fingerprint` runtime policy hashes native code differently on Windows and on
-   EAS's Linux machines. Fixed by `runtimeVersion: { policy: 'appVersion' }`
-   (`docs/RELEASING.md`). `eas build` uploads the **local, committed** project,
-   not GitHub — a fix only needs a commit, not a push.
+3. The first attempt (build 2, started from this Windows PC) failed with
+   **"Runtime version mismatch"** — the `fingerprint` runtime policy hashes
+   native code differently on Windows and on EAS's Linux machines. Builds queued
+   from GitHub Actions (Linux) passed with the same setting. Fixed for both by
+   `runtimeVersion: { policy: 'appVersion' }` (`docs/RELEASING.md`). `eas build`
+   uploads the **local, committed** project, not GitHub — a fix only needs a
+   commit, not a push.
 4. Download the `.aab` from the build page (expo.dev → project → Builds).
 5. Play Console → *Prueba y lanza → Pruebas internas → Crear nueva versión* →
    upload → release name `2.1.0 (5)` → notes in `<es-ES>…</es-ES>` and
