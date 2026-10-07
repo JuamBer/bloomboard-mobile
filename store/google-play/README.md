@@ -29,6 +29,14 @@ uploaded nothing — no service account yet (EAS lists no submissions). No
 `v2.1.0` tag reached GitHub from that run; check the *Deploy Mobile PRODUCTION*
 run's *Tag release* job in the Actions tab. iOS / App Store: not started.
 
+**Next release, waiting on `develop`** (merged 2026-10-07, not released): the
+Work/Rest player with sound, exercise media on white, equal-ended ranges.
+Held until 2.1.0 (5) is approved. It adds `expo-audio` (native), so it ships as
+**2.2.0 with a new store build** — bump the version first (`docs/RELEASING.md`).
+`expo-audio` merges only `MODIFY_AUDIO_SETTINGS` into the manifest (its config
+plugin is deliberately not used), so the Play data-safety and permission
+answers do not change.
+
 ---
 
 ## 1. Google Play developer account (once) — done

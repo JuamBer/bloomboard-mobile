@@ -67,6 +67,10 @@ Studio; `ANDROID_HOME` is not set globally).
 
 ## A new development build (native changes only)
 
+> **Needed since 2026-10-07:** `develop` added `expo-audio` (the Work/Rest
+> player's sounds). A development build from before that crashes in Metro with
+> *Cannot find native module 'ExpoAudio'* — rebuild it as below.
+
 `npx expo run:android` from the repo **does not work on this PC**: the path
 `C:\Users\…\Bloom Fitness\bloomboard\bloomboard-mobile` is long enough that
 reanimated's native build exceeds Windows' 260-character path limit, and the old
