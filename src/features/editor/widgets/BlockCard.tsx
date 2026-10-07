@@ -5,6 +5,7 @@ import {
   ListOrdered,
   MoreVertical,
   Pencil,
+  Play,
   Timer,
   Trash2,
 } from 'lucide-react-native';
@@ -15,11 +16,16 @@ import { radius } from '@shared/theme/theme';
 import { makeStyles, useTheme } from '@shared/theme/ThemeProvider';
 import type { EditorBlock } from '@shared/types/api.types';
 import { ActionSheet } from '@shared/ui/ActionSheet';
-import { IconButton } from '@shared/ui/Button';
+import { Button, IconButton } from '@shared/ui/Button';
 import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
 import { ReorderSheet } from '@shared/ui/ReorderSheet';
 import { Text } from '@shared/ui/Text';
-import { useEditorSource, type EditorDoc } from '../lib/editor-source';
+import { WorkRestPlayer } from '@features/workouts/widgets/WorkRestPlayer';
+import {
+  useEditorSource,
+  useIsWorkout,
+  type EditorDoc,
+} from '../lib/editor-source';
 import { hasIncompleteWorkRest } from '../lib/workout-time';
 import { AddZone } from './EditorParts';
 import { ExerciseEntryCard } from './ExerciseEntryCard';
@@ -58,7 +64,7 @@ export function BlockCard({
   autoMetricsEntryId?: string | null;
   onAutoMetricsConsumed?: () => void;
 }) {
-  const { t } = useTranslation(['templates', 'common']);
+  const { t } = useTranslation(['templates', 'common', 'workouts']);
   const styles = useStyles();
   const theme = useTheme();
   const queryClient = useQueryClient();
@@ -74,6 +80,16 @@ export function BlockCard({
   const isWorkRest = block.mode === 'WORK_REST';
   const incomplete = isWorkRest && hasIncompleteWorkRest(block);
   const groups = block.superSetGroups ?? [];
+  // A member training a timed block runs the TV's clock on their phone. Only
+  // in a workout they can still log (a plan is not trained, a finished workout
+  // is history) and only when every set has a duration. As on the web.
+  const canRun =
+    useIsWorkout() &&
+    isWorkRest &&
+    !incomplete &&
+    !isReadOnly &&
+    exercises.length > 0;
+  const [running, setRunning] = useState(false);
 
   const writeDoc = (updated: EditorDoc) =>
     queryClient.setQueryData(editor.queryKey, updated);
@@ -162,6 +178,15 @@ export function BlockCard({
               </Text>
             ) : null}
           </View>
+          {canRun && (
+            <Button
+              label={t('workouts:workRest.start')}
+              icon={Play}
+              size="sm"
+              accessibilityLabel={t('workouts:workRest.startHint')}
+              onPress={() => setRunning(true)}
+            />
+          )}
           {!isReadOnly && (
             <IconButton
               icon={MoreVertical}
@@ -325,6 +350,10 @@ export function BlockCard({
           reorder.mutate(ids.flatMap((id) => members.get(id) ?? []));
         }}
       />
+
+      {running && (
+        <WorkRestPlayer block={block} onClose={() => setRunning(false)} />
+      )}
     </View>
   );
 }
