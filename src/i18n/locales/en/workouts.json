@@ -172,5 +172,17 @@
     "records_one": "{{count}} personal record",
     "records_other": "{{count}} personal records",
     "continue": "Continue"
+  },
+  "workRest": {
+    "title": "Work / rest",
+    "start": "Start",
+    "startHint": "Opens the work and rest clock full screen, with sound",
+    "pause": "Pause",
+    "resume": "Resume",
+    "paused": "Paused",
+    "go": "GO!",
+    "rest": "Rest",
+    "next": "Next",
+    "finished": "Block complete!"
   }
 }

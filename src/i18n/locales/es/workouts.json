@@ -172,5 +172,17 @@
     "records_one": "{{count}} récord personal",
     "records_other": "{{count}} récords personales",
     "continue": "Continuar"
+  },
+  "workRest": {
+    "title": "Trabajo / descanso",
+    "start": "Empezar",
+    "startHint": "Abre el reloj de trabajo y descanso a pantalla completa, con sonido",
+    "pause": "Pausar",
+    "resume": "Seguir",
+    "paused": "En pausa",
+    "go": "¡VAMOS!",
+    "rest": "Descanso",
+    "next": "Siguiente",
+    "finished": "¡Bloque completado!"
   }
 }

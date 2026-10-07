@@ -1,6 +1,6 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import { StyleSheet, useColorScheme } from 'react-native';
-import { DEFAULT_PALETTE } from './palettes';
+import { DEFAULT_PALETTE, type SchemeName } from './palettes';
 import { getTheme, type Theme } from './theme';
 import { useThemeStore } from './theme.store';
 
@@ -30,6 +30,24 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 }
 
 export const useTheme = (): Theme => useContext(ThemeContext);
+
+/**
+ * A subtree drawn in one scheme whatever the member chose: the Work/Rest
+ * player is always dark, like the TV it mirrors (the web wraps it in `.dark`).
+ */
+export function SchemeOverride({
+  scheme,
+  children,
+}: {
+  scheme: SchemeName;
+  children: ReactNode;
+}) {
+  return (
+    <ThemeContext.Provider value={getTheme(DEFAULT_PALETTE, scheme)}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
 
 // StyleSheet.create's own constraint, so a factory is checked like a literal.
 type AnyStyles = StyleSheet.NamedStyles<any>;

@@ -22,6 +22,13 @@ const SIZE_INDEX: Record<ExerciseMediaSize, number> = {
   full: 4,
 };
 
+// The ground behind an exercise's media. The demos are drawn on plain white, so
+// whatever frames one is white too — while it loads, around a letterboxed gif —
+// and the media itself is never dimmed: a theme tint, or a white picture at half
+// opacity over the screen, came out light blue or light orange depending on the
+// palette. Same rule as the web's exerciseMediaBg.
+export const EXERCISE_MEDIA_BG = '#ffffff';
+
 // Picks the URL closest to the requested size, falling back to the largest
 // available variant (then nothing) so an exercise with missing resolutions
 // still renders something.

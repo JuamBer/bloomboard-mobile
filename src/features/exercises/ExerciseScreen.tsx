@@ -21,7 +21,7 @@ import { useLimitGuard, useMemberProfile } from '@features/member/hooks';
 import { UpgradeSheet } from '@features/member/widgets/MemberPlan';
 import { ExerciseProgress } from '@features/workouts/widgets/ExerciseProgress';
 import { meService } from '@shared/api/services/me.service';
-import { exerciseMedia } from '@shared/lib/exercise-media';
+import { EXERCISE_MEDIA_BG, exerciseMedia } from '@shared/lib/exercise-media';
 import { isMemberOwned } from '@shared/lib/ownership';
 import { radius } from '@shared/theme/theme';
 import { makeStyles, useTheme } from '@shared/theme/ThemeProvider';
@@ -432,7 +432,14 @@ function HowTo({
                 accessibilityRole="button"
                 style={styles.relatedCard}
               >
-                <View style={styles.relatedMedia}>
+                <View
+                  style={[
+                    styles.relatedMedia,
+                    exerciseMedia(r.imageUrls, 'small')
+                      ? { backgroundColor: EXERCISE_MEDIA_BG }
+                      : null,
+                  ]}
+                >
                   {exerciseMedia(r.imageUrls, 'small') ? (
                     <Image
                       source={{ uri: exerciseMedia(r.imageUrls, 'small') }}
@@ -462,7 +469,7 @@ const useStyles = makeStyles((t) => ({
     borderRadius: radius['2xl'],
     // White behind the demos: they are drawn on plain white, so the sides read
     // as part of the picture (the web's hover preview does the same).
-    backgroundColor: '#ffffff',
+    backgroundColor: EXERCISE_MEDIA_BG,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',

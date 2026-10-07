@@ -246,24 +246,14 @@ function DraftInput({
 // ─── Range ───────────────────────────────────────────────────────────────────
 
 /** A plan's range: two numbers in one box with the "/" between them. Both
- *  ends equal is an exact value written the long way — flagged amber. */
+ *  ends equal ("10/10") is allowed and not flagged, as on the web. */
 function RangeCell({ col, value, onChange, position }: MetricCellProps) {
   const styles = useStyles();
   const theme = useTheme();
-  const degenerate =
-    present(value?.min) &&
-    present(value?.max) &&
-    Number(value?.min) === Number(value?.max);
   const set = (part: 'min' | 'max', next: number | string | null) =>
     onChange({ ...(value ?? {}), mode: 'RANGE', [part]: next } as MetricValue);
   return (
-    <View
-      style={[
-        styles.box,
-        styles.boxRow,
-        degenerate && { borderColor: 'rgba(245,158,11,0.6)' },
-      ]}
-    >
+    <View style={[styles.box, styles.boxRow]}>
       <DraftInput
         value={value?.min}
         numeric
@@ -274,10 +264,7 @@ function RangeCell({ col, value, onChange, position }: MetricCellProps) {
         accessibilityLabel={`${col.label} min`}
         align="right"
       />
-      <Text
-        variant="caption"
-        color={degenerate ? theme.colors.warningInk : theme.text(0.4)}
-      >
+      <Text variant="caption" color={theme.text(0.4)}>
         /
       </Text>
       <DraftInput

@@ -46,8 +46,8 @@ path with JDK 22, Metro dying on the fingerprint runtime: all in
 text` — "rr" is the reload shortcut.
 
 **The API this app needs is backend 2.0.0** (workouts); account deletion needs
-**2.1.0** (`DELETE /me`). Beta and production run 2.1.0 since 2026-10-07. A
-change that needs a new backend route ships the backend first.
+**2.1.0** (`DELETE /me`). Beta and production run backend 2.1.1 since
+2026-10-07. A change that needs a new backend route ships the backend first.
 
 ## After every change — run these
 
@@ -192,5 +192,12 @@ Play service account is not in EAS yet, so a push to `beta`/`main` would build
 but not upload; after the approval, `releaseStatus` in `eas.json` goes from
 `"draft"` to `"completed"`. An EAS build on the free plan waits 2–3 hours in a
 queue.
+
+**`develop` is ahead of the store, on purpose** (2026-10-07): the Work/Rest
+player (with `expo-audio`, a **native** module), white exercise media and the
+range fix are merged but not released — held until 2.1.0 (5) is approved. No
+version bump yet: releasing it is `chore(release): 2.2.0` and a new store build
+(an over-the-air update cannot add a native module). A development build made
+before this needs rebuilding (`docs/DEVELOPMENT.md`).
 
 Do not push `beta` or `main` unless asked — a push there ships to phones.

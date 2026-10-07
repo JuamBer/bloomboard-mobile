@@ -8,7 +8,7 @@ import {
   UserRound,
 } from 'lucide-react-native';
 import { ActivityIndicator, Pressable, View } from 'react-native';
-import { exerciseMedia } from '@shared/lib/exercise-media';
+import { EXERCISE_MEDIA_BG, exerciseMedia } from '@shared/lib/exercise-media';
 import { isMasterOwned, isMemberOwned } from '@shared/lib/ownership';
 import { radius } from '@shared/theme/theme';
 import { makeStyles, useTheme } from '@shared/theme/ThemeProvider';
@@ -55,7 +55,9 @@ export function ExerciseCard({
         disabled && !busy && { opacity: 0.6 },
       ]}
     >
-      <View style={styles.media}>
+      <View
+        style={[styles.media, uri && { backgroundColor: EXERCISE_MEDIA_BG }]}
+      >
         {uri ? (
           <Image
             source={{ uri }}
