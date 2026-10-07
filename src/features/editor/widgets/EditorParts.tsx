@@ -10,7 +10,7 @@ import {
 } from 'lucide-react-native';
 import { Platform, Pressable, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { exerciseMedia } from '@shared/lib/exercise-media';
+import { EXERCISE_MEDIA_BG, exerciseMedia } from '@shared/lib/exercise-media';
 import { fonts, radius } from '@shared/theme/theme';
 import { makeStyles, useTheme } from '@shared/theme/ThemeProvider';
 import type { EditorExercise } from '@shared/types/api.types';
@@ -136,11 +136,16 @@ export function ExerciseThumb({
   const styles = useStyles();
   const theme = useTheme();
   const uri = exerciseMedia(exercise.imageUrls, 'thumb');
+  // A picture is never dimmed (see EXERCISE_MEDIA_BG); only the icon of an
+  // exercise without one fades with a resolved row.
   return (
     <View
       style={[
         styles.thumb,
-        { width: size, height: size, opacity: dimmed ? 0.5 : 1 },
+        { width: size, height: size },
+        uri
+          ? { backgroundColor: EXERCISE_MEDIA_BG }
+          : { opacity: dimmed ? 0.5 : 1 },
       ]}
     >
       {uri ? (

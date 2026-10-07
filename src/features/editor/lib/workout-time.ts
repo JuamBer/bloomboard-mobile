@@ -4,6 +4,7 @@ import type {
   EditorBlock,
   EditorExercise,
 } from '@shared/types/api.types';
+import { effectiveMetrics } from '@shared/lib/workout-display';
 
 // How long a block actually takes, derived from the TIME (work) and REST values
 // already stored in each set's metrics JSON. Nothing in the schema records a
@@ -72,14 +73,19 @@ export function blockSeconds(block: EditorBlock): number {
 }
 
 /** True when a timed block still has a set with no work time — the editor flags
- *  these rather than blocking the save (autosave must never fail mid-edit). */
+ *  these rather than blocking the save (autosave must never fail mid-edit).
+ *  A workout's set is read as the clock reads it (effectiveMetrics): its sets
+ *  start empty with the plan as the target, and an untouched one is not
+ *  missing its times — every timed block of a fresh workout used to be
+ *  flagged "no times". */
 export function hasIncompleteWorkRest(block: EditorBlock): boolean {
   return (block.exercises ?? []).some((entry) =>
-    (entry.sets ?? []).some(
-      (set) =>
-        metricSeconds(set.metrics?.TIME) <= 0 ||
-        metricSeconds(set.metrics?.REST) <= 0,
-    ),
+    (entry.sets ?? []).some((set) => {
+      const metrics = effectiveMetrics(set);
+      return (
+        metricSeconds(metrics.TIME) <= 0 || metricSeconds(metrics.REST) <= 0
+      );
+    }),
   );
 }
 

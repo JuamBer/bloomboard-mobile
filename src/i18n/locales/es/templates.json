@@ -97,7 +97,6 @@
     },
     "addSet": "Añadir serie",
     "rangePlaceholder": "mín/máx",
-    "rangeSameEnds": "Mismo valor en ambos extremos: esto es un valor exacto, no un rango",
     "addSetAfter": "Serie nueva",
     "addSetInside": "Serie dentro del {{type}}"
   },

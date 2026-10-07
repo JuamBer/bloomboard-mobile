@@ -97,7 +97,6 @@
     },
     "addSet": "Add set",
     "rangePlaceholder": "min/max",
-    "rangeSameEnds": "Same value on both ends — this is an exact value, not a range",
     "addSetAfter": "New set",
     "addSetInside": "Set inside the {{type}}"
   },
