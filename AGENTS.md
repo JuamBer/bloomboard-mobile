@@ -20,7 +20,7 @@ coach programs, the one whose center runs on Bloom Board — is in
 | Task | Command |
 | --- | --- |
 | Dev server (Metro) | `npm start` — opened in a development build (not Expo Go: `react-native-keyboard-controller`) |
-| Development build | `npx expo run:android` / `npx expo run:ios`, or `eas build --profile development` |
+| Development build | on Windows, from the short-path worktree `C:bm` with JDK 22 — `docs/DEVELOPMENT.md` (`npx expo run:android` from the repo path fails there) |
 | Typecheck | `npm run typecheck` |
 | Lint | `npm run lint:check` / `lint:fix` |
 | Format | `npm run format:check` / `format:fix` |
@@ -35,13 +35,19 @@ does it on its build machines). A native setting goes in `app.config.ts` or a
 config plugin. See `docs/ARCHITECTURE.md`.
 
 A local run talks to `http://<the Metro host's LAN address>:3000/api` unless
-`EXPO_PUBLIC_API_URL` says otherwise (`.env.example`), so a phone on the same
-Wi-Fi reaches the backend on your machine with no setup. The Android emulator
-gets `10.0.2.2`.
+`EXPO_PUBLIC_API_URL` says otherwise (`.env.example`). Start Metro with
+`REACT_NATIVE_PACKAGER_HOSTNAME` set to the PC's connected adapter's address so
+the phone gets the right one. The Android emulator gets `10.0.2.2`.
 
-**The API this app needs is backend 2.0.0** (workouts — `feature/workouts` in
-`bloomboard-backend` until it is promoted). Against 1.x the Entrenos tab, the
-session's workout and the finish flow answer 404. Deploy the backend first.
+**Running on a real phone from Windows** has a few traps — the firewall rule,
+the LAN address, wireless adb pairing, building the native shell from a short
+path with JDK 22, Metro dying on the fingerprint runtime: all in
+**`docs/DEVELOPMENT.md`**. Never type into a dev build with `adb shell input
+text` — "rr" is the reload shortcut.
+
+**The API this app needs is backend 2.0.0** (workouts); account deletion needs
+**2.1.0** (`DELETE /me`). Beta and production run 2.1.0 since 2026-10-07. A
+change that needs a new backend route ships the backend first.
 
 ## After every change — run these
 
@@ -178,7 +184,13 @@ feature branch ──PR──► develop ──merge──► beta ──merge�
 `develop` is checked by CI. A push to `beta` builds the app and submits it to
 Google Play's internal testing track; a push to `main` builds and submits to
 production. How it works, versions and rollbacks: `docs/RELEASING.md`.
-Environments: `docs/ENVIRONMENTS.md`. Setting up the Play listing:
-`store/google-play/README.md`.
+Environments and accounts: `docs/ENVIRONMENTS.md`. The Play listing, its
+history and what is pending: `store/google-play/README.md`.
+
+**State (2026-10-07):** 2.1.0 (5) is in Google's first production review. The
+Play service account is not in EAS yet, so a push to `beta`/`main` would build
+but not upload; after the approval, `releaseStatus` in `eas.json` goes from
+`"draft"` to `"completed"`. An EAS build on the free plan waits 2–3 hours in a
+queue.
 
 Do not push `beta` or `main` unless asked — a push there ships to phones.

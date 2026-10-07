@@ -27,10 +27,12 @@ Promotions are plain merges pushed directly, as in the other repos; promote
 from a green `develop`. **Don't push `beta` or `main` unless that is the
 intent** — it builds and ships.
 
-The workflow only queues the build and returns in about a minute. The build
-itself runs on EAS (10–20 minutes, longer in the free tier's queue), and EAS
-submits it when it finishes. Follow it on expo.dev → the project → *Builds*;
-a failed build or submission is emailed to the account.
+The workflow only queues the build and returns in about a minute. On EAS's free
+plan the build then **waits 2–3 hours in a queue**, runs ~15 minutes, and EAS
+submits it when it finishes. Follow it on expo.dev → the project → *Builds*; a
+failed build or submission is emailed to the account. A build's logs are on its
+page (the CLI's `build:view --json` gives a log URL, served brotli-compressed —
+`curl --compressed` reads it).
 
 - **Internal testing**: testers on the Play opt-in list get the update from the
   Play Store within minutes of the upload.
@@ -43,6 +45,22 @@ accepts **draft** releases through the API, so both submit profiles in
 press *Roll out* in Play Console. Once the app is live, set both to
 `"completed"` and pushes go out on their own.
 
+**Current state (2026-10-07):** 2.1.0 (5) is in Google's first review, sent by
+hand; the Play service account is not yet in EAS, so a push to `beta`/`main`
+would build but fail to upload — hold the mobile promotions until it is.
+
+## The first store builds — what went wrong
+
+- **"Runtime version mismatch"** at *Configure expo-updates*: the `fingerprint`
+  runtime policy hashed the native project differently on Windows and on EAS's
+  Linux builders (`node_modules` autolinking). `runtimeVersion: appVersion`
+  fixed it — see *Over-the-air updates* below.
+- **`eas build` uploads the local project**, not what is on GitHub: a fix needs
+  a commit (uncommitted files are left out), not a push.
+- **Version codes are spent by every build**, failed or cancelled ones
+  included: the first upload is version code 5, not 1. Harmless — Play only
+  needs each upload's code to be higher than the last.
+
 ## Manual builds
 
 The **Build Mobile (EAS)** workflow (`build.yml`, *Run workflow*) builds any
@@ -52,6 +70,12 @@ profile on demand — `beta` or `production`, with optional submission. Locally:
 npx eas-cli build --profile beta --platform android
 npx eas-cli submit --profile beta --platform android --latest
 ```
+
+When the free queue is too slow for an urgent build, the release `.aab` can be
+built on a PC as the development build is (`docs/DEVELOPMENT.md`:
+`C:/bbm`, JDK 22) with `./gradlew bundleRelease`, signed with the upload key
+downloaded from EAS (`eas credentials` → *Download credentials*). Play accepts
+it because it carries the same upload key. Not needed so far.
 
 ## Versions
 

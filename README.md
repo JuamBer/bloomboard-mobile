@@ -42,10 +42,14 @@ With no `.env`, the app calls port 3000 on the machine running Metro, by its LAN
 address — a phone on the same Wi-Fi reaches your local backend as is.
 
 The app runs in a **development build**, not Expo Go: it uses
-`react-native-keyboard-controller`, which Expo Go does not ship. Build one with
-`npx expo run:android` / `npx expo run:ios` locally, or
-`eas build --profile development` — once; after that `npm start` is enough
-until a native dependency changes.
+`react-native-keyboard-controller`, which Expo Go does not ship. Build one once
+(`eas build --profile development`, or locally — on Windows from a short path,
+see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)); after that `npm start` is
+enough until a native dependency changes.
+
+**Status (2026-10-07):** on Google Play as `pro.bloomboard.app` — 2.1.0 (5) on
+internal testing and in its first production review. Details and what is
+pending: [store/google-play/README.md](store/google-play/README.md).
 
 ## Scripts
 
@@ -63,6 +67,7 @@ until a native dependency changes.
 
 - [AGENTS.md](AGENTS.md) — commands, the checks to run, conventions
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — structure, navigation, state, auth, real time
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — running it on a phone (Windows: firewall, LAN address, wireless adb, native builds)
 - [docs/ENVIRONMENTS.md](docs/ENVIRONMENTS.md) — EAS project, profiles, identifiers, secrets
 - [docs/RELEASING.md](docs/RELEASING.md) — store builds on push, versions, rollbacks
 - [store/google-play/README.md](store/google-play/README.md) — publishing on Google Play, step by step

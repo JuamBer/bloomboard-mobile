@@ -169,6 +169,26 @@ frame is right. Light mode repaints the muted foreground steps darker, as the
 web's `html:not(.dark)` overrides do — the alpha helpers on the theme carry
 that, so components never pick a colour themselves.
 
+## Design decision 11: one Play listing, two tracks, store builds only
+
+How the app reaches phones (set up 2026-10-06/07; the step-by-step is
+`store/google-play/README.md`).
+
+| Question | Chosen | Rejected, and why |
+|---|---|---|
+| Which listing | A **new** Play app, `pro.bloomboard.app` | Taking over the member app already on Play (built outside this repo): it meant importing its upload key and package name and inheriting its reviews and reviewer account for an app this code does not come from. The business chose to leave it alone. |
+| Beta testers | The **internal testing track of the same app**; the `beta` profile builds the store package against the beta API, named "Bloom Board (beta)" | A separate `pro.bloomboard.app.beta` listing: a second app to set up, review and keep in sync. A sideloaded APK (`preview` profile, removed): no updates through the store, and two variants for one branch. |
+| What ships | A **store build** on every push to `beta` / `main` (EAS Build + Submit) | Over-the-air updates (EAS Update) on push: faster, but a JavaScript update that needs a newer native module would reach binaries that cannot run it. Prepared (`runtimeVersion`), not wired in. |
+| Runtime version | `appVersion` | `fingerprint`: tracks native changes by itself, but hashes the project differently on Windows and on EAS's Linux builders — every build failed with "Runtime version mismatch", and resolving it in the dev server crashed Metro on Windows. The cost: bump `package.json`'s version with any native change. |
+| Signing | Upload key generated and held by **EAS**; **Play App Signing** for what users download | A keystore file kept by someone: one more secret to lose, and a lost upload key without Play App Signing means a new listing. |
+| Developer account | **Organization** | Personal: a closed test with 12 testers for 14 days before any production release. |
+
+Google requires two things of an app with sign-up that the product did not have:
+**account deletion inside the app** (*Perfil › Eliminar cuenta*, backed by
+`DELETE /me` — backend decision 9 in `specs/member-portal.md`) and a public
+**deletion URL** (`bloomboard.pro/privacy/#eliminar-cuenta`). Both shipped in
+2.1.0 on the app, the web portal and the landing before the first review.
+
 ## File map
 
 | Area | Where |
@@ -210,7 +230,21 @@ More in `docs/ARCHITECTURE.md`.
   `useState(() => new Animated.Value(0))`.
 - **Every release is a store build** (push to `beta` → Play internal testing,
   `main` → production). Over-the-air updates are prepared but not wired in
-  (`docs/RELEASING.md`).
+  (`docs/RELEASING.md`). On EAS's free plan a build waits **2–3 hours** in a
+  queue, and `eas build` uploads the local committed project, not GitHub.
+- **Bump the version with any native change** (`runtimeVersion: appVersion`) —
+  otherwise a future over-the-air update could reach a binary it does not fit.
+- **On a real phone from Windows:** firewall rule, the connected adapter's LAN
+  address, wireless adb pairing, native builds from a short path with JDK 22 —
+  `docs/DEVELOPMENT.md`. `adb shell input text` into a dev build reloads it on
+  any "rr".
+
+## Known issues
+
+- **Finish summary, a record without its unit:** "Peso máximo — 30" for the
+  seated military press, while the bench press shows "52.5 kg". Seen on
+  2026-10-06 with a demo member; to fix in the next release (and check the web's
+  copy of the same summary).
 
 ## Verification
 
@@ -241,4 +275,7 @@ session now and one tomorrow with a plan:
 8. Dark and light, Spanish and English; Android and iOS.
 
 Steps 2–5 were also driven in a browser build with Playwright at 390 × 844,
-light and dark, with no console or HTTP errors.
+light and dark, with no console or HTTP errors. On 2026-10-06 the same flows
+ran on a Pixel 7 (development build against the local backend) with a demo
+member, and the store build 2.1.0 (5) was installed from Play's internal
+testing track against production.
