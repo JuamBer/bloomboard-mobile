@@ -970,6 +970,8 @@ export interface MemberPlan {
     /** False until members can pay: the portal shows it as "coming soon". */
     available: boolean;
   };
+  /** On a plan Bloom Board gave them (Pro for a friend), not one they pay. */
+  comped?: boolean;
 }
 
 /** GET /me/sessions/active — the session the member is training in now. */

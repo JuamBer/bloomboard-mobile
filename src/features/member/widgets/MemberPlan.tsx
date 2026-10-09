@@ -41,7 +41,8 @@ export function MemberPlanCard() {
           />
         ))}
       </View>
-      <ProOffer plan={data} />
+      {/* Already on Pro (given by Bloom Board): nothing to offer. */}
+      {data.plan.key !== data.upgrade.key && <ProOffer plan={data} />}
     </Section>
   );
 }
