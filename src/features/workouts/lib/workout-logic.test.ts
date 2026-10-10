@@ -1,5 +1,9 @@
 import { describe, expect, it } from '@jest/globals';
-import type { EditorBlock, EditorExercise } from '@shared/types/api.types';
+import type {
+  EditorBlock,
+  EditorExercise,
+  PreviousSet,
+} from '@shared/types/api.types';
 import {
   currentExerciseIndex,
   flattenExercises,
@@ -12,6 +16,8 @@ import {
   targetToLogged,
 } from '@features/editor/lib/logged-values';
 import { toWorkoutSetPayload } from '@features/editor/types/workout-set.types';
+import { withPlaceholderValues } from '@features/editor/lib/workout-cells';
+import { showsSetComment } from '@features/editor/lib/set-comment';
 
 const entry = (
   id: string,
@@ -153,6 +159,7 @@ describe('a workout set as it is saved', () => {
         targetMetrics: { REPS: { mode: 'RANGE', min: 8, max: 12 } },
         completed: true,
         notes: '  ',
+        planNotes: 'Bajada lenta',
       }),
     ).toEqual({
       setType: 'NORMAL',
@@ -162,8 +169,112 @@ describe('a workout set as it is saved', () => {
       },
       targetMetrics: { REPS: { mode: 'RANGE', min: 8, max: 12 } },
       notes: null,
+      planNotes: 'Bajada lenta',
       completed: true,
       subSets: undefined,
     });
+  });
+});
+
+describe('a set ticked as done', () => {
+  const unitOf = (key: string) => (key === 'WEIGHT' ? 'KILOGRAMS' : undefined);
+  const keys = ['WEIGHT', 'REPS', 'RPE'];
+
+  it("logs the plan's values its empty fields showed", () => {
+    const filled = withPlaceholderValues(
+      {
+        setType: 'NORMAL',
+        metrics: {},
+        targetMetrics: {
+          WEIGHT: { mode: 'EXACT', value: 60, unit: 'kg' },
+          REPS: { mode: 'RANGE', min: 8, max: 12 },
+          RPE: { mode: 'EXACT', value: '8' },
+        },
+      },
+      keys,
+      { index: 0, unitOf },
+    );
+    expect(filled.metrics).toEqual({
+      WEIGHT: { value: 60, unit: 'KILOGRAMS' },
+      REPS: { value: 8 },
+      RPE: { value: '8' },
+    });
+  });
+
+  it('keeps what was typed, and leaves a field with no hint empty', () => {
+    const filled = withPlaceholderValues(
+      {
+        setType: 'NORMAL',
+        metrics: { WEIGHT: { value: 62.5, unit: 'KILOGRAMS' } },
+        targetMetrics: {
+          WEIGHT: { mode: 'EXACT', value: 60, unit: 'KILOGRAMS' },
+          REPS: { mode: 'EXACT', value: 10 },
+        },
+      },
+      keys,
+      { index: 0, unitOf },
+    );
+    expect(filled.metrics).toEqual({
+      WEIGHT: { value: 62.5, unit: 'KILOGRAMS' },
+      REPS: { value: 10 },
+    });
+  });
+
+  it('takes the last time where the plan says nothing — row by row', () => {
+    const previousSets: PreviousSet[] = [
+      { setType: 'NORMAL', metrics: { REPS: { value: 12 } } },
+      {
+        setType: 'NORMAL',
+        metrics: {
+          WEIGHT: { value: 50, unit: 'KILOGRAMS' },
+          REPS: { value: 9 },
+        },
+      },
+    ];
+    const set = {
+      setType: 'NORMAL' as const,
+      metrics: {},
+      targetMetrics: { REPS: { mode: 'EXACT' as const, value: 10 } },
+    };
+    // The third row has no last-time row of its own: it reads the last one.
+    expect(
+      withPlaceholderValues(set, keys, { index: 2, previousSets, unitOf })
+        .metrics,
+    ).toEqual({
+      WEIGHT: { value: 50, unit: 'KILOGRAMS' },
+      REPS: { value: 10 },
+    });
+  });
+
+  it("fills a compound set's sub-sets from their own plan", () => {
+    const filled = withPlaceholderValues(
+      {
+        setType: 'DROP',
+        metrics: {},
+        targetMetrics: { REPS: { mode: 'EXACT', value: 8 } },
+        subSets: [
+          {
+            setType: 'NORMAL',
+            metrics: {},
+            targetMetrics: { REPS: { mode: 'EXACT', value: 6 } },
+          },
+        ],
+      },
+      keys,
+      { index: 0, unitOf },
+    );
+    expect(filled.metrics).toEqual({ REPS: { value: 8 } });
+    expect(filled.subSets?.[0].metrics).toEqual({ REPS: { value: 6 } });
+  });
+});
+
+describe("a set's comment row", () => {
+  it("shows for the trainee's comment or the plan's", () => {
+    expect(showsSetComment({ notes: 'Me costó' }, false, false)).toBe(true);
+    expect(showsSetComment({ planNotes: 'Lento' }, false, true)).toBe(true);
+    expect(showsSetComment({ notes: ' ', planNotes: null }, false, false)).toBe(
+      false,
+    );
+    expect(showsSetComment({}, true, false)).toBe(true);
   });
 });

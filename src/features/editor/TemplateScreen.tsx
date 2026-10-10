@@ -23,8 +23,6 @@ import { EditorBody } from './widgets/EditorBody';
 import { NameSheet } from './widgets/EditorSheets';
 import { EditorScroll, type EditorScrollHandle } from './widgets/EditorScroll';
 
-const NO_COLLAPSED = new Set<string>();
-
 /**
  * A plan — a workout template — in the shared editor. Editable only when the
  * member built it (and it isn't final); a center's plan reads, and can be
@@ -142,7 +140,6 @@ export function TemplateScreen({
             <EditorBody
               doc={template}
               isReadOnly={isReadOnly}
-              collapsedExercises={NO_COLLAPSED}
               emptyReadOnly={t('templates:detail.noBlocksYet')}
             />
           </EditorSourceProvider>

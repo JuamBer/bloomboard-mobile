@@ -1,7 +1,11 @@
-/** Whether a set's comment row is drawn: always when it has a comment,
- *  otherwise only while its exercise is in "Comentar series" mode. */
+/** Whether a set's comment row is drawn: always when it has a comment — or,
+ *  in a workout, when the plan has one, shown as its placeholder — otherwise
+ *  only while its exercise is in "Comentar series" mode. */
 export const showsSetComment = (
-  notes: string | undefined,
+  set: { notes?: string; planNotes?: string | null },
   commentsEditing: boolean,
   isReadOnly: boolean,
-) => !!notes?.trim() || (commentsEditing && !isReadOnly);
+) =>
+  !!set.notes?.trim() ||
+  !!set.planNotes?.trim() ||
+  (commentsEditing && !isReadOnly);

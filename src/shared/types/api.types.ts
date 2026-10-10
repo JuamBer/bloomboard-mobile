@@ -415,6 +415,8 @@ export interface EditorSet {
   metrics: SetMetrics;
   /** A coach's comment on this one set (a plan), or the member's (a workout). */
   notes?: string | null;
+  /** A workout's: the plan's comment on it — the comment field's placeholder. */
+  planNotes?: string | null;
   parentSetId?: string | null;
   subSets?: EditorSet[];
   /** A workout's: what the plan asked for — the field's placeholder. */
@@ -455,7 +457,10 @@ export interface EditorExercise {
   id: string;
   exerciseId: string;
   order: number;
+  /** A plan's instructions, or — in a workout — the trainee's own note. */
   notes: string | null;
+  /** A workout's: the plan's note, the notes field's placeholder. */
+  planNotes?: string | null;
   /** Per-entry display name override. null = fall back to exercise.name. */
   customName: string | null;
   superSetGroupId: string | null;
@@ -674,12 +679,16 @@ export interface WorkoutPerformance {
   workoutId: string;
   workoutName: string;
   performedAt: string;
+  /** What the person wrote about the exercise that time. */
+  notes: string | null;
   sets: ReferenceSet[];
 }
 
 /** GET /workouts/:id/exercises/:entryId/references */
 export interface WorkoutReferences {
   plan: ReferenceSet[] | null;
+  /** The plan's note on the exercise. */
+  planNotes: string | null;
   last: WorkoutPerformance | null;
   lastInTemplate: WorkoutPerformance | null;
 }

@@ -25,7 +25,10 @@ import { useUnitAcronym } from '../hooks/useMetricsCatalog';
 import { fieldPosition } from '../lib/field-chain';
 import { canonicalUnit, formatTarget } from '../lib/logged-values';
 import { showsSetComment } from '../lib/set-comment';
-import { previousPlaceholder } from '../lib/workout-cells';
+import {
+  previousPlaceholder,
+  withPlaceholderValues,
+} from '../lib/workout-cells';
 import type { EditableWorkoutSet } from '../types/workout-set.types';
 import { MetricCell } from './MetricCell';
 import { SetTick, SetTypeBadge, useRowTint } from './SetControls';
@@ -138,10 +141,27 @@ export function SetsEditor({
 
   const toggleDone = (index: number) => {
     const done = !sets[index].completed;
+    // Ticked, the empty fields keep the hints they showed as real values;
+    // unticked, what is there stays.
+    const set = done
+      ? withPlaceholderValues(
+          sets[index],
+          cols.map((col) => col.key),
+          {
+            previousSets,
+            index,
+            unitOf: (key) => {
+              const col = cols.find((c) => c.key === key);
+              return col && activeUnitKey(col);
+            },
+          },
+        )
+      : sets[index];
     updateSet(index, {
+      ...set,
       completed: done,
       // A compound set is done as a whole.
-      subSets: sets[index].subSets?.map((sub) => ({ ...sub, completed: done })),
+      subSets: set.subSets?.map((sub) => ({ ...sub, completed: done })),
     });
     onTickChanged?.();
   };
@@ -344,9 +364,10 @@ export function SetsEditor({
                   </GridRow>
                 ))}
 
-              {showsSetComment(set.notes, commentsEditing, isReadOnly) && (
+              {showsSetComment(set, commentsEditing, isReadOnly) && (
                 <SetCommentRow
                   value={set.notes ?? ''}
+                  planNotes={set.planNotes}
                   onChange={(notes) => updateSet(index, { notes })}
                   isReadOnly={isReadOnly}
                 />

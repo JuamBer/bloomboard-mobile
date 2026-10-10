@@ -3,7 +3,6 @@ import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import {
   Check,
-  ChevronDown,
   Dumbbell,
   SkipForward,
   type LucideIcon,
@@ -18,20 +17,29 @@ import { Text } from '@shared/ui/Text';
 import { useIsWorkout } from '../lib/editor-source';
 import { statusOfAll, useTemplateSession } from '../lib/template-session';
 
-// ─── Live-session controls ───────────────────────────────────────────────────
-// Both render nothing outside a live workout, so the cards can place them
-// unconditionally and stay plain editors everywhere else. They act on
-// `entryIds`: one exercise, or every member of a super-set (completed as one).
+// ─── Live-session control ────────────────────────────────────────────────────
 
 /**
- * The tick at the head of an exercise or super-set — the one way to mark it.
- * A done one goes back to pending, which is how a mis-tap is undone.
+ * The tick at the head of an exercise — only for one with no sets to tick (no
+ * metrics yet), which would otherwise have no way to be done. Everywhere else
+ * the sets' ticks are the only ones on a phone: the web's exercise tick is the
+ * trainer's, on the board and on a wide screen (specs/member-app.md). Renders
+ * nothing outside a live workout, so the cards place it unconditionally. It
+ * acts on `entryIds` (a super-set passes every member: completed as one). A
+ * done one goes back to pending, which is how a mis-tap is undone.
  */
-export function SessionStatusToggle({ entryIds }: { entryIds: string[] }) {
+export function SessionStatusToggle({
+  entryIds,
+  hasSets,
+}: {
+  entryIds: string[];
+  /** Whether the entries show set ticks of their own. */
+  hasSets: boolean;
+}) {
   const { t } = useTranslation(['templates']);
   const theme = useTheme();
   const session = useTemplateSession();
-  if (!session) return null;
+  if (!session || hasSets) return null;
   const status = statusOfAll(session, entryIds);
   const resolved = status !== 'PENDING';
   const isCurrent =
@@ -81,43 +89,6 @@ export function SessionStatusToggle({ entryIds }: { entryIds: string[] }) {
       ) : status === 'SKIPPED' ? (
         <SkipForward size={14} color={theme.colors.warningInk} />
       ) : null}
-    </Pressable>
-  );
-}
-
-/** Opens or folds one exercise — or a whole super-set. Only a live workout
- *  has it: there every exercise but the current one starts folded. */
-export function SessionCollapseToggle({
-  entryIds,
-  collapsed,
-}: {
-  entryIds: string[];
-  collapsed: boolean;
-}) {
-  const { t } = useTranslation(['templates']);
-  const theme = useTheme();
-  const session = useTemplateSession();
-  if (!session) return null;
-  return (
-    <Pressable
-      onPress={() => session.toggleCollapsed(entryIds)}
-      hitSlop={10}
-      accessibilityRole="button"
-      accessibilityState={{ expanded: !collapsed }}
-      accessibilityLabel={
-        collapsed
-          ? t('templates:detail.showSets')
-          : t('templates:detail.hideSets')
-      }
-      style={{
-        width: 32,
-        height: 32,
-        alignItems: 'center',
-        justifyContent: 'center',
-        transform: [{ rotate: collapsed ? '-90deg' : '0deg' }],
-      }}
-    >
-      <ChevronDown size={18} color={theme.text(0.4)} />
     </Pressable>
   );
 }
@@ -209,25 +180,31 @@ export function ExerciseNameLink({
 /**
  * An exercise's notes: one line by default, growing with the text, with no
  * label and no box — the placeholder says what it is. In a workout the note is
- * about how it went, not instructions. Locked, it is just text.
+ * about how it went, not instructions, and the plan's own note is its
+ * placeholder — never copied into it. Locked, it is just text (the plan's,
+ * dimmed, when the trainee wrote none).
  */
 export function EntryNotesField({
   value,
   onChange,
+  planNotes,
   disabled,
 }: {
   value: string;
   onChange: (value: string) => void;
+  /** A workout's: the plan's note. */
+  planNotes?: string | null;
   disabled?: boolean;
 }) {
   const styles = useStyles();
   const theme = useTheme();
   const isWorkout = useIsWorkout();
   const { t } = useTranslation(['templates', 'workouts']);
+  const plan = isWorkout ? planNotes?.trim() : undefined;
   if (disabled) {
     return (
-      <Text variant="bodySmall" muted={0.6}>
-        {value}
+      <Text variant="bodySmall" muted={value.trim() ? 0.6 : 0.4}>
+        {value.trim() ? value : plan}
       </Text>
     );
   }
@@ -238,7 +215,7 @@ export function EntryNotesField({
       multiline
       placeholder={
         isWorkout
-          ? t('workouts:exerciseNotes')
+          ? plan || t('workouts:exerciseNotes')
           : t('templates:exerciseEntryCard.notesPlaceholder')
       }
       placeholderTextColor={theme.text(0.3)}

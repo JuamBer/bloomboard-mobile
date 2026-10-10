@@ -52,7 +52,6 @@ import {
   EntryNotesField,
   ExerciseNameLink,
   ExerciseThumb,
-  SessionCollapseToggle,
   SessionStatusToggle,
 } from './EditorParts';
 import { CreateSuperSetSheet, NameSheet } from './EditorSheets';
@@ -89,7 +88,6 @@ interface ExerciseEntryCardProps {
   docId: string;
   blockId: string;
   isReadOnly?: boolean;
-  collapsed: boolean;
   superSetGroups?: EditorSuperSetGroup[];
   /** The block's entries — the pool "create super-set" offers. */
   blockExercises?: EditorExercise[];
@@ -115,7 +113,6 @@ export function ExerciseEntryCard({
   docId,
   blockId,
   isReadOnly = false,
-  collapsed,
   superSetGroups = [],
   blockExercises = [],
   isWorkRest = false,
@@ -410,7 +407,7 @@ export function ExerciseEntryCard({
   return (
     <View ref={registerView} style={[styles.row, isCurrent && styles.current]}>
       <View style={styles.header}>
-        <SessionStatusToggle entryIds={[entry.id]} />
+        <SessionStatusToggle entryIds={[entry.id]} hasSets={hasMetrics} />
         <ExerciseThumb exercise={entry.exercise} dimmed={resolved} />
         <View style={styles.identity}>
           <ExerciseNameLink
@@ -451,46 +448,44 @@ export function ExerciseEntryCard({
             onPress={() => setMenuOpen(true)}
           />
         )}
-        <SessionCollapseToggle entryIds={[entry.id]} collapsed={collapsed} />
       </View>
 
-      {!collapsed && (
-        <View style={styles.body}>
-          {(!isReadOnly || notes.trim()) && (
-            <EntryNotesField
-              value={notes}
-              onChange={setNotes}
-              disabled={isReadOnly}
+      <View style={styles.body}>
+        {(!isReadOnly || notes.trim() || entry.planNotes?.trim()) && (
+          <EntryNotesField
+            value={notes}
+            onChange={setNotes}
+            planNotes={entry.planNotes}
+            disabled={isReadOnly}
+          />
+        )}
+        {hasMetrics ? (
+          <SetsEditor
+            metrics={metrics}
+            compositeMetrics={compositeMetrics}
+            columnOrder={metricOrder}
+            sets={sets}
+            onChange={setSets}
+            isReadOnly={isReadOnly}
+            modeEditing={modeEditing}
+            onExitModeEditing={() => setModeEditing(false)}
+            commentsEditing={commentsEditing}
+            logging={isWorkout}
+            onTickChanged={() => setTickSaves((n) => n + 1)}
+            previousSets={entry.previousSets}
+          />
+        ) : (
+          !isReadOnly && (
+            <AddZone
+              icon={Gauge}
+              label={t('templates:exerciseEntryCard.addMetrics')}
+              description={t('templates:exerciseEntryCard.addMetricsHint')}
+              onPress={openMetrics}
+              large
             />
-          )}
-          {hasMetrics ? (
-            <SetsEditor
-              metrics={metrics}
-              compositeMetrics={compositeMetrics}
-              columnOrder={metricOrder}
-              sets={sets}
-              onChange={setSets}
-              isReadOnly={isReadOnly}
-              modeEditing={modeEditing}
-              onExitModeEditing={() => setModeEditing(false)}
-              commentsEditing={commentsEditing}
-              logging={isWorkout}
-              onTickChanged={() => setTickSaves((n) => n + 1)}
-              previousSets={entry.previousSets}
-            />
-          ) : (
-            !isReadOnly && (
-              <AddZone
-                icon={Gauge}
-                label={t('templates:exerciseEntryCard.addMetrics')}
-                description={t('templates:exerciseEntryCard.addMetricsHint')}
-                onPress={openMetrics}
-                large
-              />
-            )
-          )}
-        </View>
-      )}
+          )
+        )}
+      </View>
 
       <ActionSheet
         open={menuOpen}
@@ -503,8 +498,7 @@ export function ExerciseEntryCard({
             icon: Gauge,
             onPress: openMetrics,
           },
-          !collapsed &&
-            hasMetrics &&
+          hasMetrics &&
             !isWorkout && {
               key: 'modes',
               label: modeEditing
@@ -513,15 +507,14 @@ export function ExerciseEntryCard({
               icon: SlidersHorizontal,
               onPress: () => setModeEditing((v) => !v),
             },
-          !collapsed &&
-            hasMetrics && {
-              key: 'comments',
-              label: commentsEditing
-                ? t('templates:setComment.stop')
-                : t('templates:setComment.start'),
-              icon: MessageSquare,
-              onPress: () => setCommentsEditing((v) => !v),
-            },
+          hasMetrics && {
+            key: 'comments',
+            label: commentsEditing
+              ? t('templates:setComment.stop')
+              : t('templates:setComment.start'),
+            icon: MessageSquare,
+            onPress: () => setCommentsEditing((v) => !v),
+          },
           {
             key: 'replace',
             label: t('templates:exerciseEntryCard.replaceExercise'),

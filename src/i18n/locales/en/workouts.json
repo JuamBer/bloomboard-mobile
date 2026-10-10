@@ -40,6 +40,7 @@
     "empty": "This workout has no exercises",
     "deleteTitle": "Delete workout",
     "deleteDescription": "“{{name}}” and everything logged in it will be deleted. This cannot be undone.",
+    "deleteSessionDescription": "“{{name}}” and everything logged in it will be deleted, from the history your center sees too. Your attendance at the session stays. This cannot be undone.",
     "discard": "Discard workout",
     "discardShort": "Discard",
     "discardTitle": "Discard this workout?",
