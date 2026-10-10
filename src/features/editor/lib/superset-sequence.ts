@@ -85,6 +85,15 @@ export const slotLabel = (
   return `${memberLetter(entryId, members)}${occurrence}`;
 };
 
+/** Which of its member's own sets a slot is, from 0 — the row of that
+ *  member's last time its hints come from. */
+export const memberSetIndexOf = (
+  slots: SuperSetSlot[],
+  index: number,
+): number =>
+  slots.slice(0, index).filter((slot) => slot.entryId === slots[index].entryId)
+    .length;
+
 /** How many sets a member holds — the count of its slots in the sequence. */
 export const countSlotsFor = (slots: SuperSetSlot[], entryId: string): number =>
   slots.filter((slot) => slot.entryId === entryId).length;

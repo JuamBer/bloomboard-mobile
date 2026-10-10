@@ -28,6 +28,8 @@ export interface UpsertWorkoutExerciseSetPayload {
   >;
   targetMetrics?: SetMetrics | null;
   notes?: string | null;
+  /** The plan's comment, echoed back like `targetMetrics`. */
+  planNotes?: string | null;
   completed?: boolean;
   subSets?: UpsertWorkoutExerciseSetPayload[];
 }

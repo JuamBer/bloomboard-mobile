@@ -49,17 +49,17 @@ import { formatMinutes, formatTime, formatWorkoutDate } from './lib/dates';
 import { useFinishFlow } from './lib/finish-flow';
 import { EditWorkoutSheet } from './widgets/EditWorkoutSheet';
 
-const entryIdsOf = (workout: Workout) =>
-  workout.blocks.flatMap((b) => b.exercises.map((e) => e.id));
-
 const KEEP_AWAKE_TAG = 'bloom-workout';
 
 /**
  * One workout — what someone trained, or is training — in the shared editor:
  * its sets take exact values, a tick each, the plan as placeholder, and the
- * references. While it is under way it is trained live: every exercise but the
- * one that is up is folded, completing it opens the next and scrolls to it,
- * and the screen stays awake (the phone sits on the bench between sets).
+ * references. While it is under way it is trained live: every exercise stays
+ * open, the sets carry the ticks (an exercise without sets keeps one of its
+ * own), the exercise that is up is marked and finishing it scrolls to the
+ * next, and the screen stays awake (the phone sits on the bench between sets).
+ * Unlike the web on a wide screen, nothing folds and there is no exercise tick
+ * beside the sets' (specs/member-app.md).
  *
  * The member finishes it here — their own, or their session's, which also
  * takes them off the board (the trainer's Finish does the same there) — and
@@ -134,26 +134,6 @@ export function WorkoutView({
   const currentIdx = currentExerciseIndex(flat);
   const currentEntryId = currentIdx >= 0 ? flat[currentIdx].exercise.id : null;
 
-  // Only the exercise that is up stays open; each folds or opens on its own.
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
-  const [followedEntryId, setFollowedEntryId] = useState<string | null>();
-  if (live && workout && currentEntryId !== followedEntryId) {
-    setFollowedEntryId(currentEntryId);
-    setCollapsed((prev) => {
-      const next =
-        followedEntryId === undefined
-          ? new Set(entryIdsOf(workout))
-          : new Set(prev);
-      if (followedEntryId) next.add(followedEntryId);
-      if (currentEntryId) next.delete(currentEntryId);
-      return next;
-    });
-  }
-  if (!live && followedEntryId !== undefined) {
-    setFollowedEntryId(undefined);
-    setCollapsed(new Set());
-  }
-
   // Scrolls to the exercise that is up when the workout opens, and after a
   // mark made here moves it on — not when another device moves it.
   const scrollToCurrent = useRef(true);
@@ -205,17 +185,6 @@ export function WorkoutView({
     mark.mutate({ entryId, status });
   };
 
-  const toggleCollapsed = (entryIds: string[]) =>
-    setCollapsed((prev) => {
-      const open = entryIds.every((id) => prev.has(id));
-      const next = new Set(prev);
-      for (const id of entryIds) {
-        if (open) next.delete(id);
-        else next.add(id);
-      }
-      return next;
-    });
-
   const statusById = new Map(
     (workout?.blocks ?? []).flatMap((b) =>
       b.exercises.map((e) => [e.id, statusOf(e)] as const),
@@ -227,7 +196,6 @@ export function WorkoutView({
           statusOf: (id) => statusById.get(id) ?? 'PENDING',
           currentEntryId,
           mark: markEntry,
-          toggleCollapsed,
         }
       : null;
 
@@ -287,6 +255,9 @@ export function WorkoutView({
   const canFinish = !isReadOnly;
   // Only one's own: a session's workout is the session's record.
   const ownUnderWay = !isReadOnly && !fromSession && !workout.finishedAt;
+  // Any of theirs once it is over — a session's too (until then it is what
+  // the board and the TV run on).
+  const canDelete = !isReadOnly && !!workout.finishedAt;
   const pinFinish = canFinish && !workout.finishedAt && pastHeader;
   const finishButton = (
     <Button
@@ -424,7 +395,6 @@ export function WorkoutView({
           <EditorBody
             doc={workout}
             isReadOnly={isReadOnly}
-            collapsedExercises={collapsed}
             sessionView={sessionView}
             emptyReadOnly={t('workouts:detail.empty')}
           />
@@ -476,15 +446,14 @@ export function WorkoutView({
               onPress: () => finish.mutate(false),
             },
           // Under way, Discard sits beside Finish instead.
-          !fromSession &&
-            !!workout.finishedAt && {
-              key: 'delete',
-              label: t('common:delete'),
-              icon: Trash2,
-              destructive: true,
-              separated: true,
-              onPress: () => setConfirmDelete(true),
-            },
+          canDelete && {
+            key: 'delete',
+            label: t('common:delete'),
+            icon: Trash2,
+            destructive: true,
+            separated: true,
+            onPress: () => setConfirmDelete(true),
+          },
         ]}
       />
 
@@ -530,9 +499,11 @@ export function WorkoutView({
             : t('workouts:detail.discardTitle')
         }
         description={t(
-          workout.finishedAt
-            ? 'workouts:detail.deleteDescription'
-            : 'workouts:detail.discardDescription',
+          !workout.finishedAt
+            ? 'workouts:detail.discardDescription'
+            : fromSession
+              ? 'workouts:detail.deleteSessionDescription'
+              : 'workouts:detail.deleteDescription',
           { name: workout.name },
         )}
         confirmLabel={

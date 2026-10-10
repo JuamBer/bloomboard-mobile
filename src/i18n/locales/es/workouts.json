@@ -40,6 +40,7 @@
     "empty": "Este entrenamiento no tiene ejercicios",
     "deleteTitle": "Eliminar entrenamiento",
     "deleteDescription": "Se eliminará «{{name}}» con todo lo registrado. No se puede deshacer.",
+    "deleteSessionDescription": "Se eliminará «{{name}}» con todo lo registrado, también del historial que ve tu centro. Tu asistencia a la sesión no cambia. No se puede deshacer.",
     "discard": "Descartar entrenamiento",
     "discardShort": "Descartar",
     "discardTitle": "¿Descartar el entrenamiento?",

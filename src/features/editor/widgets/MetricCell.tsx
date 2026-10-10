@@ -243,6 +243,29 @@ function DraftInput({
   );
 }
 
+/**
+ * An empty cell's hint (a workout's plan, or last time) where the cell is a
+ * button rather than a field — RPE, an option metric. Drawn exactly as
+ * DraftInput draws its placeholder: same size, weight and ink, so every hint
+ * in a sets table reads alike.
+ */
+function CellHint({ children }: { children: string }) {
+  const styles = useStyles();
+  const theme = useTheme();
+  return (
+    <Text
+      variant="body"
+      weight="semibold"
+      color={theme.text(0.25)}
+      numberOfLines={1}
+      center
+      style={styles.hint}
+    >
+      {children}
+    </Text>
+  );
+}
+
 // ─── Range ───────────────────────────────────────────────────────────────────
 
 /** A plan's range: two numbers in one box with the "/" between them. Both
@@ -350,14 +373,18 @@ function OptionCell({ col, value, onChange, placeholder }: MetricCellProps) {
         {selected?.color ? (
           <View style={[styles.dot, { backgroundColor: selected.color }]} />
         ) : null}
-        <Text
-          variant="caption"
-          numberOfLines={1}
-          muted={selected ? undefined : 0.3}
-          style={styles.flex}
-        >
-          {selected?.name ?? placeholder ?? t('templates:setsEditor.choose')}
-        </Text>
+        {!selected && placeholder ? (
+          <CellHint>{placeholder}</CellHint>
+        ) : (
+          <Text
+            variant="caption"
+            numberOfLines={1}
+            muted={selected ? undefined : 0.3}
+            style={styles.flex}
+          >
+            {selected?.name ?? t('templates:setsEditor.choose')}
+          </Text>
+        )}
         <ChevronDown size={13} color={theme.text(0.3)} />
       </Pressable>
       <ActionSheet
@@ -446,14 +473,18 @@ function RpeCell({ col, value, onChange, placeholder }: MetricCellProps) {
           },
         ]}
       >
-        <Text
-          variant={current ? 'bodySmall' : 'caption'}
-          weight={current ? 'bold' : 'medium'}
-          color={tone ? tone.ink[theme.scheme] : theme.text(0.3)}
-          center
-        >
-          {current ?? placeholder ?? '–'}
-        </Text>
+        {!current && placeholder ? (
+          <CellHint>{placeholder}</CellHint>
+        ) : (
+          <Text
+            variant={current ? 'bodySmall' : 'caption'}
+            weight={current ? 'bold' : 'medium'}
+            color={tone ? tone.ink[theme.scheme] : theme.text(0.3)}
+            center
+          >
+            {current ?? '–'}
+          </Text>
+        )}
       </Pressable>
       <RpeSheet
         open={open}
@@ -743,6 +774,7 @@ const useStyles = makeStyles((t) => ({
   },
   dot: { width: 8, height: 8, borderRadius: 4 },
   flex: { flex: 1 },
+  hint: { flex: 1, fontVariant: ['tabular-nums'] },
   rpeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   rpeTile: {
     width: '22%',

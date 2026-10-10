@@ -209,10 +209,13 @@ export function ModeEditingBanner({ onDone }: { onDone: () => void }) {
  */
 export function SetCommentRow({
   value,
+  planNotes,
   onChange,
   isReadOnly,
 }: {
   value: string;
+  /** A workout's: the plan's comment — the placeholder of the trainee's. */
+  planNotes?: string | null;
   onChange: (value: string) => void;
   isReadOnly: boolean;
 }) {
@@ -221,8 +224,12 @@ export function SetCommentRow({
   const { t } = useTranslation(['templates']);
   if (isReadOnly) {
     return (
-      <Text variant="caption" muted={0.6} style={styles.comment}>
-        {value}
+      <Text
+        variant="caption"
+        muted={value.trim() ? 0.6 : 0.4}
+        style={styles.comment}
+      >
+        {value.trim() ? value : planNotes}
       </Text>
     );
   }
@@ -230,7 +237,7 @@ export function SetCommentRow({
     <TextInput
       value={value}
       onChangeText={onChange}
-      placeholder={t('templates:setComment.placeholder')}
+      placeholder={planNotes?.trim() || t('templates:setComment.placeholder')}
       placeholderTextColor={theme.text(0.3)}
       accessibilityLabel={t('templates:setComment.label')}
       maxLength={500}

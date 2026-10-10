@@ -110,10 +110,18 @@ phone:
 | Drag to reorder (blocks, exercises, a routine's plans, a super-set's sequence) | A reorder sheet: each row moves up or down, saved with "Guardar orden" | A drag inside a scrolling list fights the scroll gesture, and long lists need auto-scroll while dragging — fragile for a rare action. |
 | Decimal point | Comma accepted (`60,5`) and normalised | The Spanish number pad types a comma. |
 | Hover cards on an exercise name | Tap → the exercise's page | No hover on a phone. |
+| Live workout: every exercise but the current one folded, a tick per exercise beside the sets' (from `md` up) | Nothing folds, and the sets carry the only ticks — an exercise with no metrics keeps its own, or it could never be done. No `toggleCollapsed` / `SessionCollapseToggle` here. | The web's phone layout (its `TemplateSessionView.compact`, `bloomboard-frontend/specs/workouts.md` decision 8): the member logs sets; the exercise tick is a trainer's, on the board. |
 
 The keyboard is handled by `react-native-keyboard-controller`, which keeps the
 focused field above it. It is not in Expo Go, so the app runs in a development
 build (Gotchas).
+
+The logging rules are the web's, copied (`workout-cells.ts`, `set-comment.ts`,
+`workout-set.types.ts`): ticking a set keeps its hints as values (the plan's,
+else last time's), the plan's notes are the placeholders of the trainee's own
+(`planNotes`, backend 2.4.0 — an older backend sends none and the fields fall
+back to their usual placeholders), and the RPE and option cells draw their hint
+exactly as `DraftInput` draws a placeholder (`CellHint`).
 
 ## Design decision 6: the session control, live without a server push
 

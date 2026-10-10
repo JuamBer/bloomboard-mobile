@@ -24,8 +24,6 @@ import { QueryState } from '@shared/ui/states';
 import { Text } from '@shared/ui/Text';
 import { dateLocale, dayPattern } from './lib/calendar';
 
-const NO_COLLAPSED = new Set<string>();
-
 /**
  * A session in the member's calendar, about the member alone: when, where,
  * with which professionals (names only, never a way into anyone's profile),
@@ -171,7 +169,6 @@ export function SessionDetailScreen({ sessionId }: { sessionId: string }) {
                     <EditorBody
                       doc={workout}
                       isReadOnly
-                      collapsedExercises={NO_COLLAPSED}
                       emptyReadOnly={t('workouts:detail.empty')}
                     />
                   </EditorSourceProvider>
@@ -182,7 +179,6 @@ export function SessionDetailScreen({ sessionId }: { sessionId: string }) {
                 <EditorBody
                   doc={session.sessionUser.workoutTemplate}
                   isReadOnly
-                  collapsedExercises={NO_COLLAPSED}
                   emptyReadOnly={t('templates:detail.noBlocksYet')}
                 />
               </EditorSourceProvider>

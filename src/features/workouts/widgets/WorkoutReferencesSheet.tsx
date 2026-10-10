@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Check, ClipboardCopy } from 'lucide-react-native';
+import { Check, ClipboardCopy, MessageSquare } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { isCompoundSetType } from '@features/editor/constants/metric-field-config';
@@ -33,8 +33,9 @@ export type CopySets = (current: EditableWorkoutSet[]) => EditableWorkoutSet[];
 /**
  * What a person compares an exercise against while logging it: the plan for
  * today, the last time they did it, and the last time they did it in this same
- * plan. Each can be copied into the sets — by position, values only, nothing
- * ticked — to be adjusted from there.
+ * plan — each with its notes (the plan's, or what they wrote then) and its
+ * sets' comments. Each can be copied into the sets — by position, values only,
+ * nothing ticked — to be adjusted from there.
  */
 export function WorkoutReferencesSheet({
   open,
@@ -119,6 +120,7 @@ export function WorkoutReferencesSheet({
   const section = (
     title: string,
     subtitle: string | null,
+    notes: string | null | undefined,
     sets: ReferenceSet[] | null,
     empty: string,
     fromPlan: boolean,
@@ -143,6 +145,14 @@ export function WorkoutReferencesSheet({
           />
         )}
       </View>
+      {notes?.trim() ? (
+        <View style={styles.note}>
+          <MessageSquare size={15} color={theme.text(0.35)} />
+          <Text variant="bodySmall" muted={0.7} style={styles.flex}>
+            {notes.trim()}
+          </Text>
+        </View>
+      ) : null}
       {sets && sets.length > 0 ? (
         <View style={styles.sets}>
           {sets.map((set, i) => {
@@ -155,35 +165,44 @@ export function WorkoutReferencesSheet({
             );
             const c = colorsOf(set.setType);
             return (
-              <View key={i} style={[styles.setRow, i > 0 && styles.setRule]}>
-                <Text variant="caption" muted={0.35} style={styles.index}>
-                  {i + 1}
-                </Text>
-                <View
-                  style={[
-                    styles.badge,
-                    { backgroundColor: c.bg, borderColor: c.border },
-                  ]}
-                >
-                  <Text variant="micro" color={c.ink}>
-                    {SET_TYPE_INITIALS[set.setType]}
+              <View key={i} style={[styles.setItem, i > 0 && styles.setRule]}>
+                <View style={styles.setRow}>
+                  <Text variant="caption" muted={0.35} style={styles.index}>
+                    {i + 1}
                   </Text>
+                  <View
+                    style={[
+                      styles.badge,
+                      { backgroundColor: c.bg, borderColor: c.border },
+                    ]}
+                  >
+                    <Text variant="micro" color={c.ink}>
+                      {SET_TYPE_INITIALS[set.setType]}
+                    </Text>
+                  </View>
+                  <Text variant="bodySmall" style={styles.flex}>
+                    {text.length ? text.join(' · ') : '—'}
+                  </Text>
+                  {set.completed && (
+                    <Check
+                      size={16}
+                      color={theme.colors.success}
+                      strokeWidth={3}
+                    />
+                  )}
                 </View>
-                <Text variant="bodySmall" style={styles.flex}>
-                  {text.length ? text.join(' · ') : '—'}
-                </Text>
-                {set.completed && (
-                  <Check
-                    size={16}
-                    color={theme.colors.success}
-                    strokeWidth={3}
-                  />
-                )}
+                {/* The set's comment, under its values. */}
+                {set.notes?.trim() ? (
+                  <Text variant="caption" muted={0.55} style={styles.setNote}>
+                    {set.notes.trim()}
+                  </Text>
+                ) : null}
               </View>
             );
           })}
         </View>
-      ) : (
+      ) : // A plan that only says something in words has nothing more to add.
+      notes?.trim() ? null : (
         <Text variant="caption" muted={0.4} style={styles.empty}>
           {empty}
         </Text>
@@ -206,6 +225,7 @@ export function WorkoutReferencesSheet({
           {section(
             t('workouts:references.plan'),
             null,
+            data.planNotes,
             data.plan,
             t('workouts:references.noPlan'),
             true,
@@ -215,6 +235,7 @@ export function WorkoutReferencesSheet({
             data.last
               ? `${data.last.workoutName} · ${formatWorkoutDate(data.last.performedAt, i18n.language)}`
               : null,
+            data.last?.notes,
             data.last?.sets ?? null,
             t('workouts:references.noLast'),
             false,
@@ -227,6 +248,7 @@ export function WorkoutReferencesSheet({
                   i18n.language,
                 )
               : null,
+            data.lastInTemplate?.notes,
             data.lastInTemplate?.sets ?? null,
             t('workouts:references.noLastInTemplate'),
             false,
@@ -251,12 +273,17 @@ const useStyles = makeStyles((t) => ({
     borderWidth: 1,
     borderColor: t.line(0.08),
   },
-  setRow: {
+  setItem: { paddingHorizontal: 12, paddingVertical: 9, gap: 2 },
+  setRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  // Past the number and the badge (14 + 10 + 22 + 10).
+  setNote: { marginLeft: 56 },
+  note: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
+    gap: 8,
     paddingHorizontal: 12,
     paddingVertical: 9,
+    borderRadius: radius.xl,
+    backgroundColor: t.fill(0.03),
   },
   setRule: {
     borderTopWidth: StyleSheet.hairlineWidth,

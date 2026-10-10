@@ -15,8 +15,11 @@ export interface EditableWorkoutSet {
   setType: SetType;
   /** A plan's targets, or — in a workout — what was done (exact values). */
   metrics: SetMetrics;
-  /** A coach's comment on this one set; empty = none. */
+  /** A coach's comment on this one set (a plan), or the trainee's (a
+   *  workout); empty = none. */
   notes?: string;
+  /** A workout's: the plan's comment, shown as the comment's placeholder. */
+  planNotes?: string | null;
   subSets?: EditableWorkoutSet[];
   /** A workout's: the plan's value, shown as the placeholder. */
   targetMetrics?: SetMetrics | null;
@@ -36,6 +39,7 @@ export const toEditableSet = (set: EditorSet): EditableWorkoutSet => ({
   ...(set.targetMetrics !== undefined || set.completedAt !== undefined
     ? {
         targetMetrics: set.targetMetrics ?? null,
+        planNotes: set.planNotes ?? null,
         completed: !!set.completedAt,
         records: set.records ?? [],
         recordDetails: set.recordDetails ?? [],
@@ -71,6 +75,7 @@ export const toWorkoutSetPayload = (
   metrics: loggedValues(set.metrics),
   targetMetrics: set.targetMetrics ?? null,
   notes: set.notes?.trim() || null,
+  planNotes: set.planNotes ?? null,
   completed: !!set.completed,
   subSets: set.subSets?.map(toWorkoutSetPayload),
 });

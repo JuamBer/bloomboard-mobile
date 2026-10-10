@@ -26,14 +26,11 @@ import { ExercisePickerSheet } from './ExercisePickerSheet';
 export function EditorBody({
   doc,
   isReadOnly,
-  collapsedExercises,
   sessionView = null,
   emptyReadOnly,
 }: {
   doc: EditorDoc;
   isReadOnly: boolean;
-  /** Folded exercises — a live workout keeps all but the current one folded. */
-  collapsedExercises: Set<string>;
   /** Set while a workout is trained live. */
   sessionView?: TemplateSessionView | null;
   /** Shown when there is nothing and nothing can be added. */
@@ -148,7 +145,6 @@ export function EditorBody({
                 block={block}
                 docId={docId}
                 isReadOnly={isReadOnly}
-                collapsedExercises={collapsedExercises}
                 onEdit={() => setBlockSheet({ block })}
                 onRemove={() => removeBlock.mutate(block.id)}
                 onOpenSort={() => setSortOpen(true)}

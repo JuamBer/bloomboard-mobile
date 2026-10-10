@@ -59,6 +59,7 @@ import {
   buildSlots,
   countSlotsFor,
   memberColor,
+  memberSetIndexOf,
   slotLabel,
   toSlotPayload,
   unionColumns,
@@ -68,13 +69,15 @@ import {
   useSessionResolved,
   useTemplateSession,
 } from '../lib/template-session';
-import { previousPlaceholder } from '../lib/workout-cells';
+import {
+  previousPlaceholder,
+  withPlaceholderValues,
+} from '../lib/workout-cells';
 import type { EditableWorkoutSet } from '../types/workout-set.types';
 import {
   EntryNotesField,
   ExerciseNameLink,
   ExerciseThumb,
-  SessionCollapseToggle,
   SessionStatusToggle,
 } from './EditorParts';
 import { NameSheet } from './EditorSheets';
@@ -147,7 +150,6 @@ export function SuperSetCard({
   docId,
   blockId,
   isReadOnly = false,
-  collapsed,
   isWorkRest = false,
   onOpenSort,
 }: {
@@ -157,7 +159,6 @@ export function SuperSetCard({
   docId: string;
   blockId: string;
   isReadOnly?: boolean;
-  collapsed: boolean;
   isWorkRest?: boolean;
   onOpenSort: () => void;
 }) {
@@ -452,10 +453,22 @@ export function SuperSetCard({
   };
 
   const toggleSlotDone = (index: number) => {
-    const done = !slots[index].set.completed;
+    const slot = slots[index];
+    const done = !slot.set.completed;
+    // Ticked, the empty fields keep the hints they showed (the plan, else
+    // this member's last time) as real values; unticked, what is there stays.
+    const set = done
+      ? withPlaceholderValues(slot.set, [...keysOf(slot.entryId)], {
+          previousSets: byId.get(slot.entryId)?.previousSets,
+          index: memberSetIndexOf(slots, index),
+          unitOf: (key) =>
+            activeUnitKey(key, cols.find((c) => c.key === key)?.unit),
+        })
+      : slot.set;
     updateSlot(index, {
+      ...set,
       completed: done,
-      subSets: slots[index].set.subSets?.map((sub) => ({
+      subSets: set.subSets?.map((sub) => ({
         ...sub,
         completed: done,
       })),
@@ -621,9 +634,9 @@ export function SuperSetCard({
 
   return (
     <View ref={registerView} style={[styles.card, isCurrent && styles.current]}>
-      {/* Members: identity and notes. One tick for the whole group. */}
+      {/* Members: identity and notes. The slots carry the ticks. */}
       <View style={styles.membersRow}>
-        <SessionStatusToggle entryIds={memberIds} />
+        <SessionStatusToggle entryIds={memberIds} hasSets={slots.length > 0} />
         <View style={styles.members}>
           {members.map((entry, memberIndex) => {
             const m = meta[entry.id];
@@ -675,17 +688,12 @@ export function SuperSetCard({
                       onPress={() => setMenuFor(entry.id)}
                     />
                   )}
-                  {memberIndex === 0 && (
-                    <SessionCollapseToggle
-                      entryIds={memberIds}
-                      collapsed={collapsed}
-                    />
-                  )}
                 </View>
-                {!collapsed && (!isReadOnly || m.notes.trim()) && (
+                {(!isReadOnly || m.notes.trim() || entry.planNotes?.trim()) && (
                   <EntryNotesField
                     value={m.notes}
                     onChange={(notes) => patchMeta(entry.id, { notes })}
+                    planNotes={entry.planNotes}
                     disabled={isReadOnly}
                   />
                 )}
@@ -695,253 +703,242 @@ export function SuperSetCard({
         </View>
       </View>
 
-      {!collapsed && (
-        <View style={styles.sequence}>
-          {modeEdit && (
-            <ModeEditingBanner onDone={() => setModeEditing(false)} />
-          )}
-          <SetGrid>
-            <GridRow>
-              <FixedCell width={COL.label} />
-              <FixedCell width={COL.type} />
-              {cols.map((col) => {
-                const unit = activeUnitKey(col.key, col.unit);
-                return (
-                  <MetricHeader
-                    key={col.key}
-                    col={col}
-                    unitLabel={unit ? unitAcronym(unit) : undefined}
-                    modes={modeEdit ? columnModes(col.key) : undefined}
-                    onApplyMode={
-                      modeEdit
-                        ? (mode) => applyColumnMode(col.key, mode)
-                        : undefined
-                    }
-                  />
-                );
-              })}
-              {isWorkout && <FixedCell width={COL.tick} />}
-              {!isReadOnly && <FixedCell width={COL.action} />}
-            </GridRow>
-
-            {slots.map((slot, index) => {
-              const label = slotLabel(slots, index, members);
-              const color = memberColor(label);
-              const editable = keysOf(slot.entryId);
-              const compound = isCompoundSetType(slot.set.setType);
-              const subSets = slot.set.subSets ?? [];
-              const tint = rowTint(
-                slot.set.setType,
-                isWorkout && !!slot.set.completed,
-              );
-              const member = byId.get(slot.entryId);
-              const memberSetIndex = slots
-                .slice(0, index)
-                .filter((s) => s.entryId === slot.entryId).length;
-              const inert = (
-                <Text variant="caption" muted={0.2} center>
-                  ·
-                </Text>
-              );
+      <View style={styles.sequence}>
+        {modeEdit && <ModeEditingBanner onDone={() => setModeEditing(false)} />}
+        <SetGrid>
+          <GridRow>
+            <FixedCell width={COL.label} />
+            <FixedCell width={COL.type} />
+            {cols.map((col) => {
+              const unit = activeUnitKey(col.key, col.unit);
               return (
-                <Fragment key={slot.set.id ?? `slot-${index}`}>
-                  <GridRow tint={tint} last={!compound || subSets.length === 0}>
-                    <FixedCell width={COL.label}>
-                      <Pressable
-                        onPress={() => setSlotMenu(index)}
-                        disabled={isReadOnly}
-                        accessibilityRole="button"
-                        accessibilityLabel={`${label} · ${memberNames[slot.entryId]}`}
-                        accessibilityHint={
-                          isReadOnly
-                            ? undefined
-                            : t('templates:superSet.moveToExercise')
-                        }
-                        style={[
-                          styles.slotLabel,
-                          {
-                            backgroundColor: color.backgroundColor,
-                            borderColor: color.borderColor,
-                          },
-                        ]}
-                      >
-                        <Text variant="micro" color={color.color}>
-                          {label}
-                        </Text>
-                      </Pressable>
-                    </FixedCell>
-                    <FixedCell width={COL.type}>
-                      <SetTypeBadge
-                        setType={slot.set.setType}
-                        onChange={(v) => handleSetTypeChange(index, v)}
+                <MetricHeader
+                  key={col.key}
+                  col={col}
+                  unitLabel={unit ? unitAcronym(unit) : undefined}
+                  modes={modeEdit ? columnModes(col.key) : undefined}
+                  onApplyMode={
+                    modeEdit
+                      ? (mode) => applyColumnMode(col.key, mode)
+                      : undefined
+                  }
+                />
+              );
+            })}
+            {isWorkout && <FixedCell width={COL.tick} />}
+            {!isReadOnly && <FixedCell width={COL.action} />}
+          </GridRow>
+
+          {slots.map((slot, index) => {
+            const label = slotLabel(slots, index, members);
+            const color = memberColor(label);
+            const editable = keysOf(slot.entryId);
+            const compound = isCompoundSetType(slot.set.setType);
+            const subSets = slot.set.subSets ?? [];
+            const tint = rowTint(
+              slot.set.setType,
+              isWorkout && !!slot.set.completed,
+            );
+            const member = byId.get(slot.entryId);
+            const memberSetIndex = memberSetIndexOf(slots, index);
+            const inert = (
+              <Text variant="caption" muted={0.2} center>
+                ·
+              </Text>
+            );
+            return (
+              <Fragment key={slot.set.id ?? `slot-${index}`}>
+                <GridRow tint={tint} last={!compound || subSets.length === 0}>
+                  <FixedCell width={COL.label}>
+                    <Pressable
+                      onPress={() => setSlotMenu(index)}
+                      disabled={isReadOnly}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${label} · ${memberNames[slot.entryId]}`}
+                      accessibilityHint={
+                        isReadOnly
+                          ? undefined
+                          : t('templates:superSet.moveToExercise')
+                      }
+                      style={[
+                        styles.slotLabel,
+                        {
+                          backgroundColor: color.backgroundColor,
+                          borderColor: color.borderColor,
+                        },
+                      ]}
+                    >
+                      <Text variant="micro" color={color.color}>
+                        {label}
+                      </Text>
+                    </Pressable>
+                  </FixedCell>
+                  <FixedCell width={COL.type}>
+                    <SetTypeBadge
+                      setType={slot.set.setType}
+                      onChange={(v) => handleSetTypeChange(index, v)}
+                      isReadOnly={isReadOnly}
+                      records={isWorkout ? slot.set.recordDetails : undefined}
+                    />
+                  </FixedCell>
+                  {cols.map((col, colIndex) => (
+                    <MetricColumn key={col.key} col={col}>
+                      {editable.has(col.key) ? (
+                        <MetricCell
+                          col={col}
+                          value={slot.set.metrics[col.key]}
+                          onChange={(value) =>
+                            updateSlot(index, {
+                              metrics: {
+                                ...slot.set.metrics,
+                                [col.key]: value,
+                              },
+                            })
+                          }
+                          isReadOnly={isReadOnly}
+                          modeEditing={modeEdit}
+                          logging={isWorkout}
+                          placeholder={
+                            formatTarget(slot.set.targetMetrics?.[col.key]) ??
+                            (isWorkout
+                              ? previousPlaceholder(
+                                  member?.previousSets,
+                                  memberSetIndex,
+                                  col.key,
+                                )
+                              : undefined)
+                          }
+                          unit={
+                            slot.set.metrics[col.key]?.unit ??
+                            activeUnitKey(col.key, col.unit)
+                          }
+                          position={fieldPosition(index, colIndex)}
+                        />
+                      ) : (
+                        inert
+                      )}
+                    </MetricColumn>
+                  ))}
+                  {isWorkout && (
+                    <FixedCell width={COL.tick}>
+                      <SetTick
+                        done={!!slot.set.completed}
                         isReadOnly={isReadOnly}
-                        records={isWorkout ? slot.set.recordDetails : undefined}
+                        onToggle={() => toggleSlotDone(index)}
                       />
                     </FixedCell>
-                    {cols.map((col, colIndex) => (
-                      <MetricColumn key={col.key} col={col}>
-                        {editable.has(col.key) ? (
-                          <MetricCell
-                            col={col}
-                            value={slot.set.metrics[col.key]}
-                            onChange={(value) =>
-                              updateSlot(index, {
-                                metrics: {
-                                  ...slot.set.metrics,
-                                  [col.key]: value,
-                                },
-                              })
-                            }
-                            isReadOnly={isReadOnly}
-                            modeEditing={modeEdit}
-                            logging={isWorkout}
-                            placeholder={
-                              formatTarget(slot.set.targetMetrics?.[col.key]) ??
-                              (isWorkout
-                                ? previousPlaceholder(
-                                    member?.previousSets,
-                                    memberSetIndex,
-                                    col.key,
-                                  )
-                                : undefined)
-                            }
-                            unit={
-                              slot.set.metrics[col.key]?.unit ??
-                              activeUnitKey(col.key, col.unit)
-                            }
-                            position={fieldPosition(index, colIndex)}
-                          />
-                        ) : (
-                          inert
-                        )}
-                      </MetricColumn>
-                    ))}
-                    {isWorkout && (
-                      <FixedCell width={COL.tick}>
-                        <SetTick
-                          done={!!slot.set.completed}
-                          isReadOnly={isReadOnly}
-                          onToggle={() => toggleSlotDone(index)}
-                        />
+                  )}
+                  {!isReadOnly && (
+                    <FixedCell width={COL.action}>
+                      <IconButton
+                        icon={Trash2}
+                        size={30}
+                        accessibilityLabel={
+                          countSlotsFor(slots, slot.entryId) > 1
+                            ? t('common:delete')
+                            : t('templates:superSet.lastSlotHint')
+                        }
+                        disabled={countSlotsFor(slots, slot.entryId) <= 1}
+                        onPress={() =>
+                          setSlots((prev) => prev.filter((_, i) => i !== index))
+                        }
+                        color={theme.text(0.35)}
+                      />
+                    </FixedCell>
+                  )}
+                </GridRow>
+                {compound &&
+                  subSets.map((sub, subIndex) => (
+                    <GridRow
+                      key={sub.id ?? `sub-${subIndex}`}
+                      tint={tint}
+                      first={false}
+                      last={subIndex === subSets.length - 1}
+                    >
+                      <FixedCell width={COL.label} />
+                      <FixedCell width={COL.type}>
+                        <CornerDownRight size={14} color={theme.text(0.3)} />
                       </FixedCell>
-                    )}
-                    {!isReadOnly && (
-                      <FixedCell width={COL.action}>
-                        <IconButton
-                          icon={Trash2}
-                          size={30}
-                          accessibilityLabel={
-                            countSlotsFor(slots, slot.entryId) > 1
-                              ? t('common:delete')
-                              : t('templates:superSet.lastSlotHint')
-                          }
-                          disabled={countSlotsFor(slots, slot.entryId) <= 1}
-                          onPress={() =>
-                            setSlots((prev) =>
-                              prev.filter((_, i) => i !== index),
-                            )
-                          }
-                          color={theme.text(0.35)}
-                        />
-                      </FixedCell>
-                    )}
-                  </GridRow>
-                  {compound &&
-                    subSets.map((sub, subIndex) => (
-                      <GridRow
-                        key={sub.id ?? `sub-${subIndex}`}
-                        tint={tint}
-                        first={false}
-                        last={subIndex === subSets.length - 1}
-                      >
-                        <FixedCell width={COL.label} />
-                        <FixedCell width={COL.type}>
-                          <CornerDownRight size={14} color={theme.text(0.3)} />
-                        </FixedCell>
-                        {cols.map((col, colIndex) => (
-                          <MetricColumn key={col.key} col={col}>
-                            {editable.has(col.key) ? (
-                              <MetricCell
-                                col={col}
-                                value={sub.metrics[col.key]}
-                                onChange={(value) =>
-                                  updateSlot(index, {
-                                    subSets: subSets.map((s, j) =>
-                                      j === subIndex
-                                        ? {
-                                            ...s,
-                                            metrics: {
-                                              ...s.metrics,
-                                              [col.key]: value,
-                                            },
-                                          }
-                                        : s,
-                                    ),
-                                  })
-                                }
-                                isReadOnly={isReadOnly}
-                                modeEditing={modeEdit}
-                                logging={isWorkout}
-                                placeholder={formatTarget(
-                                  sub.targetMetrics?.[col.key],
-                                )}
-                                unit={activeUnitKey(col.key, col.unit)}
-                                position={fieldPosition(
-                                  index,
-                                  colIndex,
-                                  subIndex,
-                                )}
-                              />
-                            ) : (
-                              inert
-                            )}
-                          </MetricColumn>
-                        ))}
-                        {isWorkout && <FixedCell width={COL.tick} />}
-                        {!isReadOnly && (
-                          <FixedCell width={COL.action}>
-                            <IconButton
-                              icon={X}
-                              size={30}
-                              accessibilityLabel={t('common:remove')}
-                              disabled={subSets.length <= 1}
-                              onPress={() =>
+                      {cols.map((col, colIndex) => (
+                        <MetricColumn key={col.key} col={col}>
+                          {editable.has(col.key) ? (
+                            <MetricCell
+                              col={col}
+                              value={sub.metrics[col.key]}
+                              onChange={(value) =>
                                 updateSlot(index, {
-                                  subSets: subSets.filter(
-                                    (_, j) => j !== subIndex,
+                                  subSets: subSets.map((s, j) =>
+                                    j === subIndex
+                                      ? {
+                                          ...s,
+                                          metrics: {
+                                            ...s.metrics,
+                                            [col.key]: value,
+                                          },
+                                        }
+                                      : s,
                                   ),
                                 })
                               }
-                              color={theme.text(0.35)}
+                              isReadOnly={isReadOnly}
+                              modeEditing={modeEdit}
+                              logging={isWorkout}
+                              placeholder={formatTarget(
+                                sub.targetMetrics?.[col.key],
+                              )}
+                              unit={activeUnitKey(col.key, col.unit)}
+                              position={fieldPosition(
+                                index,
+                                colIndex,
+                                subIndex,
+                              )}
                             />
-                          </FixedCell>
-                        )}
-                      </GridRow>
-                    ))}
-                  {showsSetComment(
-                    slot.set.notes,
-                    commentsEditing,
-                    isReadOnly,
-                  ) && (
-                    <SetCommentRow
-                      value={slot.set.notes ?? ''}
-                      onChange={(notes) => updateSlot(index, { notes })}
-                      isReadOnly={isReadOnly}
-                    />
-                  )}
-                </Fragment>
-              );
-            })}
-          </SetGrid>
+                          ) : (
+                            inert
+                          )}
+                        </MetricColumn>
+                      ))}
+                      {isWorkout && <FixedCell width={COL.tick} />}
+                      {!isReadOnly && (
+                        <FixedCell width={COL.action}>
+                          <IconButton
+                            icon={X}
+                            size={30}
+                            accessibilityLabel={t('common:remove')}
+                            disabled={subSets.length <= 1}
+                            onPress={() =>
+                              updateSlot(index, {
+                                subSets: subSets.filter(
+                                  (_, j) => j !== subIndex,
+                                ),
+                              })
+                            }
+                            color={theme.text(0.35)}
+                          />
+                        </FixedCell>
+                      )}
+                    </GridRow>
+                  ))}
+                {showsSetComment(slot.set, commentsEditing, isReadOnly) && (
+                  <SetCommentRow
+                    value={slot.set.notes ?? ''}
+                    planNotes={slot.set.planNotes}
+                    onChange={(notes) => updateSlot(index, { notes })}
+                    isReadOnly={isReadOnly}
+                  />
+                )}
+              </Fragment>
+            );
+          })}
+        </SetGrid>
 
-          {!isReadOnly && (
-            <AddRowButton
-              label={t('templates:superSet.addSlot')}
-              onPress={() => setAddOpen(true)}
-            />
-          )}
-        </View>
-      )}
+        {!isReadOnly && (
+          <AddRowButton
+            label={t('templates:superSet.addSlot')}
+            onPress={() => setAddOpen(true)}
+          />
+        )}
+      </View>
 
       {/* ⋯ of one member: its own actions, then the group's. */}
       <ActionSheet

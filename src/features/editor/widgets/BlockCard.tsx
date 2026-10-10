@@ -42,7 +42,6 @@ export function BlockCard({
   block,
   docId,
   isReadOnly = false,
-  collapsedExercises,
   onEdit,
   onRemove,
   onOpenSort,
@@ -53,7 +52,6 @@ export function BlockCard({
   block: EditorBlock;
   docId: string;
   isReadOnly?: boolean;
-  collapsedExercises: Set<string>;
   onEdit: () => void;
   onRemove: () => void;
   onOpenSort: () => void;
@@ -235,7 +233,6 @@ export function BlockCard({
                   docId={docId}
                   blockId={block.id}
                   isReadOnly={isReadOnly}
-                  collapsed={members.every((m) => collapsedExercises.has(m.id))}
                   isWorkRest={isWorkRest}
                   onOpenSort={() => setSortOpen(true)}
                 />
@@ -248,7 +245,6 @@ export function BlockCard({
                 docId={docId}
                 blockId={block.id}
                 isReadOnly={isReadOnly}
-                collapsed={collapsedExercises.has(entry.id)}
                 superSetGroups={groups}
                 blockExercises={exercises}
                 isWorkRest={isWorkRest}
