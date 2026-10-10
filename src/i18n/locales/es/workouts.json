@@ -38,6 +38,7 @@
     "resume": "Reanudar",
     "sessionFinishes": "Este entrenamiento termina con la sesión: al salir de sala se cierra solo.",
     "empty": "Este entrenamiento no tiene ejercicios",
+    "noteBy": "Nota de {{name}}",
     "deleteTitle": "Eliminar entrenamiento",
     "deleteDescription": "Se eliminará «{{name}}» con todo lo registrado. No se puede deshacer.",
     "deleteSessionDescription": "Se eliminará «{{name}}» con todo lo registrado, también del historial que ve tu centro. Tu asistencia a la sesión no cambia. No se puede deshacer.",

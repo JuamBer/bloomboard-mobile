@@ -355,6 +355,17 @@ export function WorkoutView({
               {workout.notes}
             </Text>
           ) : null}
+          {/* Shared with the trainer's board dialog: whose it is, when it is
+              not the member's own. */}
+          {workout.notes &&
+          workout.notesUpdatedBy &&
+          workout.notesUpdatedBy.id !== workout.userId ? (
+            <Text variant="caption" muted={0.4}>
+              {t('workouts:detail.noteBy', {
+                name: `${workout.notesUpdatedBy.firstName} ${workout.notesUpdatedBy.lastName}`.trim(),
+              })}
+            </Text>
+          ) : null}
 
           {canFinish && !workout.finishedAt && (
             <View style={styles.actions}>

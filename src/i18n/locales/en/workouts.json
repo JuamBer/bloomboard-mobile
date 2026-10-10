@@ -38,6 +38,7 @@
     "resume": "Resume",
     "sessionFinishes": "This workout finishes with the session: it closes when you leave the floor.",
     "empty": "This workout has no exercises",
+    "noteBy": "Note by {{name}}",
     "deleteTitle": "Delete workout",
     "deleteDescription": "“{{name}}” and everything logged in it will be deleted. This cannot be undone.",
     "deleteSessionDescription": "“{{name}}” and everything logged in it will be deleted, from the history your center sees too. Your attendance at the session stays. This cannot be undone.",
