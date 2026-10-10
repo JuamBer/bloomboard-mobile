@@ -276,6 +276,15 @@ More in `docs/ARCHITECTURE.md`.
 
 ## Known issues
 
+- **Store build 2.1.0 against backend 2.4.0:** it keeps working (nothing it
+  calls was removed), but until the next store build its members do not see the
+  plan's exercise notes and set comments in a workout — 2.1.0 draws only the
+  trainee's own notes, and since backend 2.4.0 the plan's are a separate field
+  (`planNotes`) shown as the placeholder. The trainer's note shows in the
+  workout header without "Nota de X", and a client with no plan whose trainer
+  took a note sees an empty workout holding it. Details:
+  `bloomboard-backend/specs/workouts.md` → Compatibility.
+
 - **Finish summary, a record without its unit:** "Peso máximo — 30" for the
   seated military press, while the bench press shows "52.5 kg". Seen on
   2026-10-06 with a demo member; to fix in the next release (and check the web's

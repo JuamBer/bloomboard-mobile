@@ -34,7 +34,9 @@ Work/Rest player with sound, exercise media on white, equal-ended ranges; and
 (merged 2026-10-10) the workout logging round — set ticks only and nothing
 folded, a ticked set keeps its hints, the plan's notes as placeholders,
 deleting a finished session's workout, the trainer's note on the workout signed
-"Nota de …" (needs backend 2.4.0 live first).
+"Nota de …" (needs backend 2.4.0 live first). Once backend 2.4.0 is live, 2.1.0
+users stop seeing the plan's notes in a workout until this build reaches them
+(`specs/member-app.md` → Known issues) — a reason to ship it soon after.
 Held until 2.1.0 (5) is approved. It adds `expo-audio` (native), so it ships as
 **2.2.0 with a new store build** — bump the version first (`docs/RELEASING.md`).
 `expo-audio` merges only `MODIFY_AUDIO_SETTINGS` into the manifest (its config

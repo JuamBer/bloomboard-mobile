@@ -49,8 +49,9 @@ text` — "rr" is the reload shortcut.
 **2.1.0** (`DELETE /me`); deleting a center session's workout and the plan's
 notes as placeholders need **2.4.0** (on an older one the delete is refused and
 the notes fields keep their usual placeholders). Beta and production run
-backend 2.1.1 since 2026-10-07. A change that needs a new backend route ships
-the backend first.
+backend 2.2.0 (by 2026-10-10); 2.4.0 is merged on its `develop`. A change that
+needs a new backend route ships the backend first. How the store build 2.1.0
+behaves against backend 2.4.0: `specs/member-app.md` → Known issues.
 
 ## After every change — run these
 
