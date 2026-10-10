@@ -46,8 +46,11 @@ path with JDK 22, Metro dying on the fingerprint runtime: all in
 text` — "rr" is the reload shortcut.
 
 **The API this app needs is backend 2.0.0** (workouts); account deletion needs
-**2.1.0** (`DELETE /me`). Beta and production run backend 2.1.1 since
-2026-10-07. A change that needs a new backend route ships the backend first.
+**2.1.0** (`DELETE /me`); deleting a center session's workout and the plan's
+notes as placeholders need **2.4.0** (on an older one the delete is refused and
+the notes fields keep their usual placeholders). Beta and production run
+backend 2.1.1 since 2026-10-07. A change that needs a new backend route ships
+the backend first.
 
 ## After every change — run these
 
@@ -195,9 +198,13 @@ queue.
 
 **`develop` is ahead of the store, on purpose** (2026-10-07): the Work/Rest
 player (with `expo-audio`, a **native** module), white exercise media and the
-range fix are merged but not released — held until 2.1.0 (5) is approved. No
-version bump yet: releasing it is `chore(release): 2.2.0` and a new store build
-(an over-the-air update cannot add a native module). A development build made
-before this needs rebuilding (`docs/DEVELOPMENT.md`).
+range fix are merged but not released — held until 2.1.0 (5) is approved. So
+is the workout logging round (2026-10-10, JS only): sets carry the only ticks
+and nothing folds, a ticked set keeps its hints as values, the plan's notes
+are placeholders, a finished session's workout can be deleted, and the RPE
+hint looks like the others (`specs/member-app.md` decision 5). No version bump
+yet: releasing it is `chore(release): 2.2.0` and a new store build (an
+over-the-air update cannot add a native module), after backend 2.4.0 is live.
+A development build made before this needs rebuilding (`docs/DEVELOPMENT.md`).
 
 Do not push `beta` or `main` unless asked — a push there ships to phones.

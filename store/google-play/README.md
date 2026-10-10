@@ -30,7 +30,10 @@ uploaded nothing — no service account yet (EAS lists no submissions). No
 run's *Tag release* job in the Actions tab. iOS / App Store: not started.
 
 **Next release, waiting on `develop`** (merged 2026-10-07, not released): the
-Work/Rest player with sound, exercise media on white, equal-ended ranges.
+Work/Rest player with sound, exercise media on white, equal-ended ranges; and
+(merged 2026-10-10) the workout logging round — set ticks only and nothing
+folded, a ticked set keeps its hints, the plan's notes as placeholders,
+deleting a finished session's workout (needs backend 2.4.0 live first).
 Held until 2.1.0 (5) is approved. It adds `expo-audio` (native), so it ships as
 **2.2.0 with a new store build** — bump the version first (`docs/RELEASING.md`).
 `expo-audio` merges only `MODIFY_AUDIO_SETTINGS` into the manifest (its config
