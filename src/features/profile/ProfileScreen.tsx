@@ -1,13 +1,16 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Constants from 'expo-constants';
+import { useRouter } from 'expo-router';
 import {
   Building2,
+  Download,
   Laptop,
   LogOut,
   Mail,
   MapPin,
   Monitor,
   Moon,
+  Ruler,
   Sun,
   Trash2,
 } from 'lucide-react-native';
@@ -37,7 +40,7 @@ import { Button } from '@shared/ui/Button';
 import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
 import { Card, Divider, Section, Segmented } from '@shared/ui/controls';
 import { PageHeader, Screen } from '@shared/ui/layout';
-import { Avatar } from '@shared/ui/misc';
+import { Avatar, ListRow } from '@shared/ui/misc';
 import { DateField, SelectField } from '@shared/ui/pickers';
 import { Sheet } from '@shared/ui/Sheet';
 import { QueryState } from '@shared/ui/states';
@@ -104,6 +107,8 @@ export function ProfileScreen() {
           </Card>
 
           <MemberPlanCard />
+
+          <YourDataSection />
 
           <Section title={t('member:profile.companies')}>
             {profile.affiliations.length === 0 ? (
@@ -411,6 +416,31 @@ function PersonalDetailsForm({ profile }: { profile: MemberProfile }) {
 }
 
 /** Light, dark or the device's — stored on the server, shared with the web. */
+/** The member's measurements and bringing their history over from Hevy —
+ *  the web profile's "Tus datos". */
+function YourDataSection() {
+  const { t } = useTranslation(['imports']);
+  const router = useRouter();
+  return (
+    <Section title={t('imports:profileCard.title')}>
+      <ListRow
+        icon={Ruler}
+        title={t('imports:profileCard.measurements')}
+        subtitle={t('imports:profileCard.measurementsHint')}
+        numberOfLines={2}
+        onPress={() => router.push('/measurements')}
+      />
+      <ListRow
+        icon={Download}
+        title={t('imports:profileCard.import')}
+        subtitle={t('imports:profileCard.importHint')}
+        numberOfLines={2}
+        onPress={() => router.push('/import')}
+      />
+    </Section>
+  );
+}
+
 function AppearanceSection() {
   const { t } = useTranslation(['member', 'app']);
   const mode = useThemeStore((s) => s.mode);

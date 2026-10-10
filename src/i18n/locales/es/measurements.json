@@ -1,0 +1,62 @@
+{
+  "title": "Medidas",
+  "subtitle": "Tu peso y tus medidas corporales, día a día.",
+  "tab": "Medidas",
+  "add": "Registrar medidas",
+  "edit": "Editar",
+  "delete": "Eliminar",
+  "empty": "Aún no has registrado medidas. Empieza por tu peso.",
+  "emptyClient": "Este cliente aún no tiene medidas. Las que registréis tú o él aparecerán aquí.",
+  "latest": "Últimas medidas",
+  "since": "{{change}} desde el {{date}}",
+  "evolution": "Evolución",
+  "history": "Historial",
+  "recordedBy": "Anotado por {{name}}",
+  "recordedByYou": "Anotado por ti",
+  "imported": "Importado de Hevy",
+  "importHint": "¿Vienes de Hevy? Importa tus medidas y entrenamientos.",
+  "importAction": "Importar desde Hevy",
+  "groups": {
+    "body": "Composición",
+    "upper": "Tren superior",
+    "core": "Tronco",
+    "lower": "Tren inferior"
+  },
+  "fields": {
+    "weightKg": "Peso",
+    "bodyFatPercent": "Grasa corporal",
+    "neckCm": "Cuello",
+    "shouldersCm": "Hombros",
+    "chestCm": "Pecho",
+    "leftBicepCm": "Bíceps izq.",
+    "rightBicepCm": "Bíceps der.",
+    "leftForearmCm": "Antebrazo izq.",
+    "rightForearmCm": "Antebrazo der.",
+    "abdomenCm": "Abdomen",
+    "waistCm": "Cintura",
+    "hipsCm": "Cadera",
+    "leftThighCm": "Muslo izq.",
+    "rightThighCm": "Muslo der.",
+    "leftCalfCm": "Gemelo izq.",
+    "rightCalfCm": "Gemelo der."
+  },
+  "dialog": {
+    "titleNew": "Registrar medidas",
+    "titleEdit": "Editar medidas",
+    "date": "Fecha",
+    "hint": "Rellena solo lo que hayas medido.",
+    "notes": "Notas",
+    "notesPlaceholder": "En ayunas, tras vacaciones…",
+    "fillOne": "Rellena al menos una medida.",
+    "save": "Guardar"
+  },
+  "confirmDelete": {
+    "title": "¿Eliminar estas medidas?",
+    "text": "Se borran las medidas del {{date}}. No se puede deshacer."
+  },
+  "saved": "Medidas guardadas",
+  "deleted": "Medidas eliminadas",
+  "error": "No se han podido guardar las medidas",
+  "loadError": "No se han podido cargar las medidas.",
+  "menu": "Opciones"
+}

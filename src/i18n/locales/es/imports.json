@@ -1,0 +1,108 @@
+{
+  "title": "Importar desde Hevy",
+  "subtitle": "Trae tus entrenamientos y tus medidas para seguir donde lo dejaste.",
+  "howTo": {
+    "title": "Exporta tus datos en Hevy",
+    "step1": "En la app de Hevy, ve a Perfil → ⚙️ Ajustes.",
+    "step2": "Entra en «Exportar e importar datos».",
+    "step3": "Pulsa «Exportar entrenamientos» y, si quieres, «Exportar medidas». Te dará dos archivos .csv.",
+    "step4": "Elígelos aquí. Nada se guarda hasta que lo confirmes."
+  },
+  "drop": "Elige los archivos que exportaste de Hevy",
+  "dropHint": "workout_data.csv y/o measurement_data.csv",
+  "choose": "Elegir archivos",
+  "remove": "Quitar",
+  "analyze": "Revisar",
+  "analyzing": "Leyendo tus datos…",
+  "importing": "Importando… puede tardar un poco",
+  "errors": {
+    "IMPORT_UNKNOWN_FILE": "{{file}} no es una exportación de entrenamientos ni de medidas de Hevy.",
+    "IMPORT_NO_FILES": "Elige al menos un archivo.",
+    "generic": "No se han podido leer los archivos. Comprueba que son los que exporta Hevy."
+  },
+  "summary": {
+    "range": "Del {{first}} al {{last}}",
+    "imperial": "Tus datos estaban en libras y millas: los pasamos a kg y km.",
+    "workouts_one": "1 entrenamiento",
+    "workouts_other": "{{count}} entrenamientos",
+    "workoutsNew_one": "1 nuevo",
+    "workoutsNew_other": "{{count}} nuevos",
+    "sets_one": "1 serie",
+    "sets_other": "{{count}} series",
+    "measurements_one": "1 día de medidas",
+    "measurements_other": "{{count}} días de medidas",
+    "already_one": "1 ya importado",
+    "already_other": "{{count}} ya importados",
+    "skippedRows_one": "1 fila no se ha podido leer y se omitirá.",
+    "skippedRows_other": "{{count}} filas no se han podido leer y se omitirán."
+  },
+  "exercises": {
+    "title": "Tus ejercicios",
+    "intro": "Cada ejercicio de Hevy tiene que ser uno de Bloom Board. Hemos emparejado los que reconocemos; revisa el resto.",
+    "review": "Por revisar ({{count}})",
+    "all": "Todos ({{count}})",
+    "noneToReview": "Todo emparejado. Puedes revisarlo en «Todos» o importar ya.",
+    "status": {
+      "linked": "Como la última vez",
+      "exact": "Mismo nombre",
+      "alias": "Reconocido",
+      "suggested": "Sugerido",
+      "none": "Sin coincidencia"
+    },
+    "actions": {
+      "match": "Emparejar",
+      "create": "Crear propio",
+      "skip": "No importar"
+    },
+    "searchPlaceholder": "Buscar otro ejercicio…",
+    "noResults": "Sin resultados",
+    "own": "Tuyo",
+    "createName": "Nombre del ejercicio",
+    "skipHint": "Sus series no se importarán.",
+    "chooseExercise": "Elige un ejercicio",
+    "quota": "Ejercicios propios: vas a crear {{creating}}; te quedan {{left}} de {{limit}}.",
+    "quotaOver": "Tu plan permite {{limit}} ejercicios propios y ya tienes {{used}}: empareja u omite {{over}} más.",
+    "quotaUnlimited_one": "Vas a crear 1 ejercicio propio.",
+    "quotaUnlimited_other": "Vas a crear {{count}} ejercicios propios.",
+    "sets_one": "1 serie",
+    "sets_other": "{{count}} series",
+    "workouts_one": "1 entrenamiento",
+    "workouts_other": "{{count}} entrenamientos",
+    "change": "Cambiar"
+  },
+  "import": "Importar",
+  "back": "Volver",
+  "done": {
+    "title": "¡Importación completada!",
+    "toWorkouts": "Ver mis entrenamientos",
+    "toMeasurements": "Ver mis medidas",
+    "again": "Importar otra vez",
+    "hint": "Si vuelves a importar una exportación más reciente, solo se añadirá lo nuevo.",
+    "workouts_one": "1 entrenamiento importado ({{sets}} series)",
+    "workouts_other": "{{count}} entrenamientos importados ({{sets}} series)",
+    "measurements_one": "1 día de medidas importado",
+    "measurements_other": "{{count}} días de medidas importados",
+    "created_one": "1 ejercicio propio creado",
+    "created_other": "{{count}} ejercicios propios creados",
+    "already_one": "1 ya estaba importado y no se ha duplicado",
+    "already_other": "{{count}} ya estaban importados y no se han duplicado",
+    "empty_one": "1 entrenamiento sin ejercicios que importar se ha omitido",
+    "empty_other": "{{count}} entrenamientos sin ejercicios que importar se han omitido"
+  },
+  "nothing": "No hay nada nuevo que importar: todo esto ya está en Bloom Board.",
+  "profileCard": {
+    "title": "Tus datos",
+    "measurements": "Medidas corporales",
+    "measurementsHint": "Peso, grasa y perímetros",
+    "import": "Importar desde Hevy",
+    "importHint": "Trae tus entrenamientos y medidas"
+  },
+  "importParts": {
+    "workouts_one": "1 entrenamiento",
+    "workouts_other": "{{count}} entrenamientos",
+    "measurements_one": "1 día de medidas",
+    "measurements_other": "{{count}} días de medidas",
+    "and": "y"
+  },
+  "importAction": "Importar {{what}}"
+}

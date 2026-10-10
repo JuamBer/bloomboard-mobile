@@ -1,0 +1,108 @@
+{
+  "title": "Import from Hevy",
+  "subtitle": "Bring your workouts and measurements over and pick up where you left off.",
+  "howTo": {
+    "title": "Export your data in Hevy",
+    "step1": "In the Hevy app, go to Profile → ⚙️ Settings.",
+    "step2": "Open “Export & import data”.",
+    "step3": "Tap “Export workouts” and, if you like, “Export measurements”. You get two .csv files.",
+    "step4": "Choose them here. Nothing is saved until you confirm."
+  },
+  "drop": "Choose the files you exported from Hevy",
+  "dropHint": "workout_data.csv and/or measurement_data.csv",
+  "choose": "Choose files",
+  "remove": "Remove",
+  "analyze": "Review",
+  "analyzing": "Reading your data…",
+  "importing": "Importing… this may take a moment",
+  "errors": {
+    "IMPORT_UNKNOWN_FILE": "{{file}} is not a Hevy workouts or measurements export.",
+    "IMPORT_NO_FILES": "Choose at least one file.",
+    "generic": "The files couldn't be read. Make sure they are the ones Hevy exports."
+  },
+  "summary": {
+    "range": "From {{first}} to {{last}}",
+    "imperial": "Your data was in pounds and miles: we converted it to kg and km.",
+    "workouts_one": "1 workout",
+    "workouts_other": "{{count}} workouts",
+    "workoutsNew_one": "1 new",
+    "workoutsNew_other": "{{count}} new",
+    "sets_one": "1 set",
+    "sets_other": "{{count}} sets",
+    "measurements_one": "1 day of measurements",
+    "measurements_other": "{{count}} days of measurements",
+    "already_one": "1 already imported",
+    "already_other": "{{count}} already imported",
+    "skippedRows_one": "1 row couldn't be read and will be left out.",
+    "skippedRows_other": "{{count}} rows couldn't be read and will be left out."
+  },
+  "exercises": {
+    "title": "Your exercises",
+    "intro": "Every Hevy exercise has to be one of Bloom Board's. We matched the ones we recognise; review the rest.",
+    "review": "To review ({{count}})",
+    "all": "All ({{count}})",
+    "noneToReview": "Everything is matched. You can check it under “All” or import now.",
+    "status": {
+      "linked": "Same as last time",
+      "exact": "Same name",
+      "alias": "Recognised",
+      "suggested": "Suggested",
+      "none": "No match"
+    },
+    "actions": {
+      "match": "Match",
+      "create": "Create my own",
+      "skip": "Don't import"
+    },
+    "searchPlaceholder": "Search another exercise…",
+    "noResults": "No results",
+    "own": "Yours",
+    "createName": "Exercise name",
+    "skipHint": "Its sets won't be imported.",
+    "chooseExercise": "Choose an exercise",
+    "quota": "Your own exercises: creating {{creating}}; {{left}} of {{limit}} left.",
+    "quotaOver": "Your plan allows {{limit}} exercises of your own and you have {{used}}: match or skip {{over}} more.",
+    "quotaUnlimited_one": "Creating 1 exercise of your own.",
+    "quotaUnlimited_other": "Creating {{count}} exercises of your own.",
+    "sets_one": "1 set",
+    "sets_other": "{{count}} sets",
+    "workouts_one": "1 workout",
+    "workouts_other": "{{count}} workouts",
+    "change": "Change"
+  },
+  "import": "Import",
+  "back": "Back",
+  "done": {
+    "title": "Import complete!",
+    "toWorkouts": "See my workouts",
+    "toMeasurements": "See my measurements",
+    "again": "Import again",
+    "hint": "If you import a newer export later, only what's new is added.",
+    "workouts_one": "1 workout imported ({{sets}} sets)",
+    "workouts_other": "{{count}} workouts imported ({{sets}} sets)",
+    "measurements_one": "1 day of measurements imported",
+    "measurements_other": "{{count}} days of measurements imported",
+    "created_one": "1 exercise of your own created",
+    "created_other": "{{count}} exercises of your own created",
+    "already_one": "1 was already imported and wasn't duplicated",
+    "already_other": "{{count}} were already imported and weren't duplicated",
+    "empty_one": "1 workout with no exercises to import was left out",
+    "empty_other": "{{count}} workouts with no exercises to import were left out"
+  },
+  "nothing": "There's nothing new to import: all of this is already in Bloom Board.",
+  "profileCard": {
+    "title": "Your data",
+    "measurements": "Body measurements",
+    "measurementsHint": "Weight, body fat and circumferences",
+    "import": "Import from Hevy",
+    "importHint": "Bring your workouts and measurements"
+  },
+  "importParts": {
+    "workouts_one": "1 workout",
+    "workouts_other": "{{count}} workouts",
+    "measurements_one": "1 day of measurements",
+    "measurements_other": "{{count}} days of measurements",
+    "and": "and"
+  },
+  "importAction": "Import {{what}}"
+}
