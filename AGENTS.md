@@ -201,8 +201,10 @@ player (with `expo-audio`, a **native** module), white exercise media and the
 range fix are merged but not released — held until 2.1.0 (5) is approved. So
 is the workout logging round (2026-10-10, JS only): sets carry the only ticks
 and nothing folds, a ticked set keeps its hints as values, the plan's notes
-are placeholders, a finished session's workout can be deleted, and the RPE
-hint looks like the others (`specs/member-app.md` decision 5). No version bump
+are placeholders, a finished session's workout can be deleted, the RPE hint
+looks like the others (`specs/member-app.md` decision 5), and the workout's
+note says whose it is when a trainer wrote it from the board (it is the session
+note since backend 2.4.0). No version bump
 yet: releasing it is `chore(release): 2.2.0` and a new store build (an
 over-the-air update cannot add a native module), after backend 2.4.0 is live.
 A development build made before this needs rebuilding (`docs/DEVELOPMENT.md`).

@@ -604,7 +604,11 @@ export interface Workout {
   userId: string;
   name: string;
   description: string | null;
+  /** The day's note — the member's and the trainer's (board), one shared. */
   notes: string | null;
+  /** Who wrote `notes` last, and when (backend 2.4.0). */
+  notesUpdatedAt?: string | null;
+  notesUpdatedBy?: Pick<User, 'id' | 'firstName' | 'lastName'> | null;
   workoutTemplateId: string | null;
   sessionUserId: string | null;
   startedAt: string;
