@@ -45,11 +45,12 @@ accepts **draft** releases through the API, so both submit profiles in
 press *Roll out* in Play Console. Once the app is live, set both to
 `"completed"` and pushes go out on their own.
 
-**Current state (2026-10-07):** 2.1.0 (5) is in Google's first review, sent by
-hand. The Play service account is not yet in EAS, so a push to `beta`/`main`
-builds but uploads nothing — as happened with builds 3 and 4 (pushed on
-2026-10-06). Hold the mobile promotions until the key is in EAS; each one costs
-a build.
+**Current state (2026-10-11):** the app is live (2.1.0 approved), both submit
+profiles are `"completed"`, and the Play service account key is in EAS — a push
+to `beta` reaches testers and a push to `main` reaches production review on its
+own. Before the key existed, pushes built but uploaded nothing (builds 3, 4, 6
+and 7); a finished build is sent later with `eas submit --id <build id>`
+(with `APP_ENV` set, see `store/google-play/README.md`), never rebuilt.
 
 ## The first store builds — what went wrong
 

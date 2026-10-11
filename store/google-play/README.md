@@ -20,7 +20,7 @@ Texts, forms and graphics to paste: [`listing.md`](listing.md),
 | 2. Expo / EAS | ✅ Project `@juamber/bloomboard` (id `4ee08910-fb31-4fda-b84a-c0d5de67c175`), `EXPO_TOKEN` in GitHub (robot user "GitHub App · @JuamBer", Developer role) |
 | 3. App in Play Console | ✅ `pro.bloomboard.app`, store listing (es-ES + en-US), app content, data safety, 6 screenshots |
 | 4. First build, by hand | ✅ Production build **2.1.0 (5)** uploaded to internal testing; installed and checked on a Pixel 7 |
-| 5. Service account for EAS Submit | ⏳ Not done — until then pushes to `beta`/`main` build but cannot upload |
+| 5. Service account for EAS Submit | ✅ `eas-submit@bloomworkouts.iam.gserviceaccount.com` (Google Cloud project `bloomworkouts`), key stored in EAS on 2026-10-11 — pushes to `beta`/`main` build **and** upload |
 | 6. Production | ✅ **2.1.0 (5) approved** (submitted 2026-10-07, approved by 2026-10-11), Spain + United States, managed publishing **off**. `releaseStatus` is `"completed"` in `eas.json` since 2.2.0 |
 
 `beta` and `main` were pushed on 2026-10-06 (at the screenshots commit): their
@@ -28,6 +28,15 @@ workflows queued EAS builds 3 (beta) and 4 (production), which built fine but
 uploaded nothing — no service account yet (EAS lists no submissions). No
 `v2.1.0` tag reached GitHub from that run; check the *Deploy Mobile PRODUCTION*
 run's *Tag release* job in the Actions tab. iOS / App Store: not started.
+
+2.2.0 hit the same wall on 2026-10-11: builds **6** (beta) and **7** (production)
+finished on EAS, then the workflows failed with "Google Service Account Keys
+cannot be set up in --non-interactive mode". Once the key existed they were sent
+with `eas submit --id <build id>` (no rebuild): 6 to internal testing, 7 to
+production **as a draft** so the release notes could be pasted before sending it
+for review. Running `eas submit` by hand from a PC needs `APP_ENV=beta` or
+`production` in the environment — without it `app.config.ts` resolves the dev
+package `pro.bloomboard.app.dev`.
 
 **Next release: 2.2.0** (merged 2026-10-11). The Work/Rest player with sound,
 exercise media on white, equal-ended ranges, the workout logging round (set
@@ -200,7 +209,7 @@ sits on the internal track: that way the same build could be promoted to
 production. Builds from the `beta` branch will point at the beta API and show as
 "Bloom Board (beta)".
 
-## 5. Let EAS upload for you (once) — pending
+## 5. Let EAS upload for you (once) — done
 
 1. **Google Cloud**: <https://console.cloud.google.com> → new project (e.g.
    "bloomboard-play") → *APIs & Services → Library* → enable **Google Play
@@ -213,10 +222,15 @@ production. Builds from the `beta` branch will point at the beta API and show as
    app* → **Bloom Board** → grant releasing to testing tracks, releasing to
    production, and managing testing tracks → invite.
 4. `npx eas-cli credentials --platform android` → `production` → *Google Service
-   Account* → *Upload a Google Service Account Key* → the `.json`. Then delete
-   the file.
+   Account* → *Manage your Google Service Account Key for Play Store
+   Submissions* → *Set up a Google Service Account Key* → the `.json` (it is
+   offered when it sits at the project root). Then delete the file. The key is
+   the app's in EAS, not a profile's: `beta` uses it too. Nothing goes into
+   GitHub or AWS — the workflows only need `EXPO_TOKEN`.
 
-From then on, pushing `beta` or `main` builds **and** uploads.
+From then on, pushing `beta` or `main` builds **and** uploads. One thing EAS
+Submit cannot do is attach release notes: a release pushed through `main` goes to
+review without them — add them in Play Console while it is in review if wanted.
 
 ## 6. Production — approved
 
