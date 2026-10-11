@@ -12,7 +12,7 @@ as it is). Once set up, releasing is automatic:
 Texts, forms and graphics to paste: [`listing.md`](listing.md),
 [`graphics/`](graphics/), [`screenshots/`](screenshots/).
 
-## Status (2026-10-07)
+## Status (2026-10-11)
 
 | Step | State |
 |---|---|
@@ -21,7 +21,7 @@ Texts, forms and graphics to paste: [`listing.md`](listing.md),
 | 3. App in Play Console | ✅ `pro.bloomboard.app`, store listing (es-ES + en-US), app content, data safety, 6 screenshots |
 | 4. First build, by hand | ✅ Production build **2.1.0 (5)** uploaded to internal testing; installed and checked on a Pixel 7 |
 | 5. Service account for EAS Submit | ⏳ Not done — until then pushes to `beta`/`main` build but cannot upload |
-| 6. Production | ⏳ **2.1.0 (5) submitted for review on 2026-10-07**, countries Spain + United States, managed publishing **off** (goes live as soon as Google approves). After approval: `releaseStatus` → `"completed"` in `eas.json` |
+| 6. Production | ✅ **2.1.0 (5) approved** (submitted 2026-10-07, approved by 2026-10-11), Spain + United States, managed publishing **off**. `releaseStatus` is `"completed"` in `eas.json` since 2.2.0 |
 
 `beta` and `main` were pushed on 2026-10-06 (at the screenshots commit): their
 workflows queued EAS builds 3 (beta) and 4 (production), which built fine but
@@ -29,19 +29,38 @@ uploaded nothing — no service account yet (EAS lists no submissions). No
 `v2.1.0` tag reached GitHub from that run; check the *Deploy Mobile PRODUCTION*
 run's *Tag release* job in the Actions tab. iOS / App Store: not started.
 
-**Next release, waiting on `develop`** (merged 2026-10-07, not released): the
-Work/Rest player with sound, exercise media on white, equal-ended ranges; and
-(merged 2026-10-10) the workout logging round — set ticks only and nothing
-folded, a ticked set keeps its hints, the plan's notes as placeholders,
-deleting a finished session's workout, the trainer's note on the workout signed
-"Nota de …" (needs backend 2.4.0 live first). Once backend 2.4.0 is live, 2.1.0
-users stop seeing the plan's notes in a workout until this build reaches them
-(`specs/member-app.md` → Known issues) — a reason to ship it soon after.
-Held until 2.1.0 (5) is approved. It adds `expo-audio` (native), so it ships as
-**2.2.0 with a new store build** — bump the version first (`docs/RELEASING.md`).
+**Next release: 2.2.0** (merged 2026-10-11). The Work/Rest player with sound,
+exercise media on white, equal-ended ranges, the workout logging round (set
+ticks only, a ticked set keeps its hints, the plan's notes as placeholders,
+deleting a finished session's workout, the trainer's note signed "Nota de …"),
+**body measurements** and **importing from Hevy**. It adds two native modules,
+`expo-audio` and `expo-document-picker`, so it is a new store build. **Backend
+2.5.0 must be live first** — measurements and the import call its new routes.
 `expo-audio` merges only `MODIFY_AUDIO_SETTINGS` into the manifest (its config
-plugin is deliberately not used), so the Play data-safety and permission
-answers do not change.
+plugin is deliberately not used) and `expo-document-picker` asks for no
+permission (Android's own file picker), so the Play data-safety and permission
+answers do not change — but *data safety* should now say the app collects
+**health and fitness** data the member enters (body measurements), if it did not
+already for workouts.
+
+Release notes for 2.2.0 (Play's limit is 500 characters per language):
+
+```
+<es-ES>
+· Medidas corporales: peso, grasa y perímetros, con su evolución.
+· ¿Vienes de Hevy? Importa tus entrenamientos y tus medidas desde tu perfil.
+· Temporizador de trabajo y descanso con sonido en los bloques HIIT.
+· Apuntar series es más fácil: un solo check por serie, y lo que marcas se queda como valor.
+· Ahora tienes 10 ejercicios propios en el plan gratuito.
+</es-ES>
+<en-US>
+· Body measurements: weight, body fat and girths, with their progress.
+· Coming from Hevy? Import your workouts and measurements from your profile.
+· Work/rest timer with sound for HIIT blocks.
+· Logging sets is easier: one tick per set, and what you tick keeps its values.
+· The free plan now has 10 exercises of your own.
+</en-US>
+```
 
 ---
 
@@ -199,7 +218,7 @@ production. Builds from the `beta` branch will point at the beta API and show as
 
 From then on, pushing `beta` or `main` builds **and** uploads.
 
-## 6. Production — in review
+## 6. Production — approved
 
 1. *Prueba y lanza → Producción → Países/regiones* (Spain, United States) →
    *Crear nueva versión* → **Añadir desde la biblioteca** (the build already

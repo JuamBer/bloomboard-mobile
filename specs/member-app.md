@@ -306,6 +306,9 @@ More in `docs/ARCHITECTURE.md`.
 
 ## Known issues
 
+- **App 2.2.0 against a backend older than 2.5.0:** Medidas and Importar desde
+  Hevy answer 404 (the axios interceptor toasts it). Ship backend 2.5.0 first.
+
 - **Store build 2.1.0 against backend 2.4.0:** it keeps working (nothing it
   calls was removed), but until the next store build its members do not see the
   plan's exercise notes and set comments in a workout — 2.1.0 draws only the

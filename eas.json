@@ -41,13 +41,13 @@
     "beta": {
       "android": {
         "track": "internal",
-        "releaseStatus": "draft"
+        "releaseStatus": "completed"
       }
     },
     "production": {
       "android": {
         "track": "production",
-        "releaseStatus": "draft"
+        "releaseStatus": "completed"
       }
     }
   }
