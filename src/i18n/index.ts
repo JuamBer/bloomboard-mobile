@@ -22,6 +22,10 @@ import enSession from './locales/en/session.json';
 import enClients from './locales/en/clients.json';
 import enRoutines from './locales/en/routines.json';
 import enApp from './locales/en/app.json';
+import esMeasurements from './locales/es/measurements.json';
+import enMeasurements from './locales/en/measurements.json';
+import esImports from './locales/es/imports.json';
+import enImports from './locales/en/imports.json';
 import { deviceLanguage } from './language.store';
 
 /**
@@ -41,6 +45,8 @@ export const NAMESPACES = [
   'session',
   'clients',
   'routines',
+  'measurements',
+  'imports',
   'app',
 ] as const;
 
@@ -56,6 +62,8 @@ export const resources = {
     session: esSession,
     clients: esClients,
     routines: esRoutines,
+    measurements: esMeasurements,
+    imports: esImports,
     app: esApp,
   },
   en: {
@@ -69,6 +77,8 @@ export const resources = {
     session: enSession,
     clients: enClients,
     routines: enRoutines,
+    measurements: enMeasurements,
+    imports: enImports,
     app: enApp,
   },
 } as const;

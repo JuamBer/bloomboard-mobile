@@ -48,10 +48,11 @@ text` — "rr" is the reload shortcut.
 **The API this app needs is backend 2.0.0** (workouts); account deletion needs
 **2.1.0** (`DELETE /me`); deleting a center session's workout and the plan's
 notes as placeholders need **2.4.0** (on an older one the delete is refused and
-the notes fields keep their usual placeholders). Beta and production run
-backend 2.2.0 (by 2026-10-10); 2.4.0 is merged on its `develop`. A change that
-needs a new backend route ships the backend first. How the store build 2.1.0
-behaves against backend 2.4.0: `specs/member-app.md` → Known issues.
+the notes fields keep their usual placeholders); body measurements and the Hevy
+import need **2.5.0** (on an older one both screens are 404s). **App 2.2.0 needs
+backend 2.5.0 live first.** A change that needs a new backend route ships the
+backend first. How the store build 2.1.0 behaves against backend 2.4.0:
+`specs/member-app.md` → Known issues.
 
 ## After every change — run these
 
@@ -191,23 +192,21 @@ production. How it works, versions and rollbacks: `docs/RELEASING.md`.
 Environments and accounts: `docs/ENVIRONMENTS.md`. The Play listing, its
 history and what is pending: `store/google-play/README.md`.
 
-**State (2026-10-07):** 2.1.0 (5) is in Google's first production review. The
-Play service account is not in EAS yet, so a push to `beta`/`main` would build
-but not upload; after the approval, `releaseStatus` in `eas.json` goes from
-`"draft"` to `"completed"`. An EAS build on the free plan waits 2–3 hours in a
+**State (2026-10-11):** 2.1.0 (5) passed Google's first review and is the
+production app; `releaseStatus` in `eas.json` is now `"completed"` (a push to
+`main` sends a full release for review, one to `beta` rolls out to testers at
+once). If the Play service account is still not in EAS
+(`store/google-play/README.md` step 5), a push builds but does not upload — the
+`.aab` then goes up by hand. An EAS build on the free plan waits 2–3 hours in a
 queue.
 
-**`develop` is ahead of the store, on purpose** (2026-10-07): the Work/Rest
-player (with `expo-audio`, a **native** module), white exercise media and the
-range fix are merged but not released — held until 2.1.0 (5) is approved. So
-is the workout logging round (2026-10-10, JS only): sets carry the only ticks
-and nothing folds, a ticked set keeps its hints as values, the plan's notes
-are placeholders, a finished session's workout can be deleted, the RPE hint
-looks like the others (`specs/member-app.md` decision 5), and the workout's
-note says whose it is when a trainer wrote it from the board (it is the session
-note since backend 2.4.0). No version bump
-yet: releasing it is `chore(release): 2.2.0` and a new store build (an
-over-the-air update cannot add a native module), after backend 2.4.0 is live.
-A development build made before this needs rebuilding (`docs/DEVELOPMENT.md`).
+**2.2.0 is the first update after the store's 2.1.0** (2026-10-11): the
+Work/Rest player (with `expo-audio`, a **native** module), white exercise media,
+the range fix, the workout logging round (sets carry the only ticks, a ticked
+set keeps its hints, the plan's notes as placeholders, deleting a finished
+session's workout, "Nota de …"), body measurements and the Hevy import (with
+`expo-document-picker`, **native** too). Native modules mean a new store build —
+an over-the-air update cannot add them. It needs backend 2.5.0 live first. A
+development build made before it needs rebuilding (`docs/DEVELOPMENT.md`).
 
 Do not push `beta` or `main` unless asked — a push there ships to phones.

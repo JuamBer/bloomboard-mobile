@@ -997,3 +997,120 @@ export interface MemberActiveSession extends Omit<
   screens: { id: string; name: string }[];
   screenIds: string[];
 }
+
+// ─── Body measurements (specs/body-measurements.md) ─────────────────────────
+
+/** The values a measurement can carry — kept in step with the backend's
+ *  measurement-fields.ts. */
+export type MeasurementField =
+  | 'weightKg'
+  | 'bodyFatPercent'
+  | 'neckCm'
+  | 'shouldersCm'
+  | 'chestCm'
+  | 'leftBicepCm'
+  | 'rightBicepCm'
+  | 'leftForearmCm'
+  | 'rightForearmCm'
+  | 'abdomenCm'
+  | 'waistCm'
+  | 'hipsCm'
+  | 'leftThighCm'
+  | 'rightThighCm'
+  | 'leftCalfCm'
+  | 'rightCalfCm';
+
+export type MeasurementValues = Partial<
+  Record<MeasurementField, number | null>
+>;
+
+/** One day measured. Every value optional. */
+export type BodyMeasurement = Record<MeasurementField, number | null> & {
+  id: string;
+  userId: string;
+  /** When it was measured (ISO 8601). */
+  measuredAt: string;
+  notes: string | null;
+  /** Imported from another app; null when written here. */
+  importSource: 'HEVY' | null;
+  /** Who wrote it down last — the member or a trainer. */
+  recordedBy: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    role: Role;
+  } | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type MeasurementPayload = MeasurementValues & {
+  measuredAt?: string;
+  notes?: string | null;
+};
+
+// ─── Importing from Hevy (specs/hevy-import.md) ─────────────────────────────
+
+export type HevyMatchStatus =
+  'linked' | 'exact' | 'alias' | 'suggested' | 'none';
+
+export interface HevyExerciseOption {
+  id: string;
+  name: string;
+  /** One of the member's own exercises (not the catalog's). */
+  own: boolean;
+  equipments: string[];
+  imageUrl: string | null;
+}
+
+/** One distinct exercise of the Hevy file, and what it is here. */
+export interface HevyPreviewExercise {
+  title: string;
+  key: string;
+  workouts: number;
+  sets: number;
+  metrics: ('WEIGHT' | 'REPS' | 'DISTANCE' | 'TIME' | 'RPE')[];
+  equipments: string[];
+  lastDone: string;
+  status: HevyMatchStatus;
+  exercise: HevyExerciseOption | null;
+  candidates: HevyExerciseOption[];
+}
+
+export interface HevyPreview {
+  workouts: {
+    total: number;
+    alreadyImported: number;
+    sets: number;
+    first: string | null;
+    last: string | null;
+  } | null;
+  measurements: {
+    total: number;
+    alreadyImported: number;
+    first: string | null;
+    last: string | null;
+  } | null;
+  exercises: HevyPreviewExercise[];
+  /** The plan's custom exercises: what creating ones may still use. */
+  customExercises: { limit: number | null; used: number };
+  skippedRows: number;
+  imperial: boolean;
+}
+
+export type HevyDecision =
+  | { title: string; action: 'match'; exerciseId: string }
+  | { title: string; action: 'create'; name?: string }
+  | { title: string; action: 'skip' };
+
+export interface HevyImportResult {
+  workouts: {
+    imported: number;
+    alreadyImported: number;
+    empty: number;
+    sets: number;
+  };
+  measurements: { imported: number; alreadyImported: number };
+  exercisesCreated: number;
+  exercisesSkipped: number;
+}
