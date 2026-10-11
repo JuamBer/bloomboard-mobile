@@ -38,7 +38,8 @@ for review. Running `eas submit` by hand from a PC needs `APP_ENV=beta` or
 `production` in the environment — without it `app.config.ts` resolves the dev
 package `pro.bloomboard.app.dev`.
 
-**Then 2.3.0: Google Sign-In** (merged 2026-10-11) — "Continuar con Google" on
+**Then 2.3.0: Google Sign-In** (merged 2026-10-11; to internal testing first,
+production only after 2.2.0 is approved) — "Continuar con Google" on
 login, register and activation; a password-less account confirms its deletion
 with Google. Native module again (new store build), **backend 2.6.0 live
 first**, and the Play app-signing key registered as an Android OAuth client
@@ -262,7 +263,10 @@ review without them — add them in Play Console while it is in review if wanted
    approval: off → live at once; on → you press *Publicar*. It is off.
 3. A new app's first review takes **1–7 days**; the result arrives by email
    (and in *Actividad de envío*). Don't edit the listing, forms or release while
-   it is in review — a change can restart it.
+   it is in review — a change can restart it. The same goes for sending the next
+   version: a new production release replaces the one in review (one per
+   track), so hold `main` until the approval and test the next version on
+   internal testing meanwhile (`docs/RELEASING.md`).
 4. Until the app has been published once, Google only accepts **draft**
    releases through the API — hence `"releaseStatus": "draft"` in both submit
    profiles. **After approval**, set both to `"completed"`: from then on a push
