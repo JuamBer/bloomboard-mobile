@@ -24,6 +24,8 @@ import {
   useMemberProfile,
 } from '@features/member/hooks';
 import { MemberPlanCard } from '@features/member/widgets/MemberPlan';
+import { GoogleCancelled, googleIdToken } from '@features/auth/google';
+import { GoogleSignInButton } from '@features/auth/GoogleSignInButton';
 import {
   LANGUAGES,
   useLanguageStore,
@@ -204,7 +206,11 @@ export function ProfileScreen() {
           void logout();
         }}
       />
-      <DeleteAccountSheet open={deleting} onClose={() => setDeleting(false)} />
+      <DeleteAccountSheet
+        open={deleting}
+        onClose={() => setDeleting(false)}
+        hasPassword={profile?.hasPassword ?? true}
+      />
     </Screen>
   );
 }
@@ -212,41 +218,75 @@ export function ProfileScreen() {
 /**
  * Deleting the account: what goes, then the password — the one step that
  * makes an irreversible action deliberate (and that a borrowed, unlocked phone
- * cannot pass). Google Play requires it in the app; the privacy policy
+ * cannot pass). An account that signs in with Google only has no password: it
+ * confirms with Google instead. Google Play requires it in the app; the privacy policy
  * describes it as "Perfil › Eliminar cuenta". DELETE /me removes everything at
  * once, then the member is signed out.
  */
+const DELETE_ERRORS: Record<string, string> = {
+  WRONG_PASSWORD: 'member:profile.deleteWrongPassword',
+  GOOGLE_CONFIRMATION_REQUIRED: 'member:profile.deleteGoogleRequired',
+  GOOGLE_CONFIRMATION_MISMATCH: 'member:profile.deleteGoogleMismatch',
+};
+
 function DeleteAccountSheet({
   open,
   onClose,
+  hasPassword,
 }: {
   open: boolean;
   onClose: () => void;
+  hasPassword: boolean;
 }) {
   const { t } = useTranslation(['member', 'common']);
   const styles = useStyles();
   const theme = useTheme();
   const logout = useMemberLogout();
   const [password, setPassword] = useState('');
+  const [googleToken, setGoogleToken] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const confirmed = hasPassword ? !!password : !!googleToken;
 
   const remove = useMutation({
-    mutationFn: () => meService.deleteAccount(password),
+    mutationFn: () =>
+      meService.deleteAccount(
+        hasPassword ? { password } : { googleIdToken: googleToken! },
+      ),
     onSuccess: async () => {
       await logout();
       toast.success(t('member:profile.deleted'));
     },
-    onError: (e) =>
+    onError: (e) => {
+      const code = errorBody(e)?.code;
+      if (code === 'GOOGLE_CONFIRMATION_MISMATCH') setGoogleToken(null);
       setError(
-        errorBody(e)?.code === 'WRONG_PASSWORD'
-          ? t('member:profile.deleteWrongPassword')
-          : t('member:profile.deleteError'),
-      ),
+        t(
+          (typeof code === 'string' && DELETE_ERRORS[code]) ||
+            'member:profile.deleteError',
+        ),
+      );
+    },
   });
+
+  const confirmWithGoogle = async () => {
+    setError(null);
+    setConfirming(true);
+    try {
+      setGoogleToken(await googleIdToken());
+    } catch (e) {
+      if (!(e instanceof GoogleCancelled)) {
+        setError(t('member:profile.deleteError'));
+      }
+    } finally {
+      setConfirming(false);
+    }
+  };
 
   const close = () => {
     if (remove.isPending) return;
     setPassword('');
+    setGoogleToken(null);
     setError(null);
     onClose();
   };
@@ -270,7 +310,7 @@ function DeleteAccountSheet({
             label={t('member:profile.deleteConfirm')}
             variant="danger"
             flex
-            disabled={!password}
+            disabled={!confirmed}
             loading={remove.isPending}
             onPress={() => {
               setError(null);
@@ -296,19 +336,35 @@ function DeleteAccountSheet({
       <Text variant="caption" muted={0.55}>
         {t('member:profile.deleteCenters')}
       </Text>
-      <TextField
-        label={t('member:profile.deletePassword')}
-        value={password}
-        onChangeText={(next) => {
-          setPassword(next);
-          setError(null);
-        }}
-        secret
-        autoComplete="current-password"
-        textContentType="password"
-        autoCapitalize="none"
-        editable={!remove.isPending}
-      />
+      {hasPassword ? (
+        <TextField
+          label={t('member:profile.deletePassword')}
+          value={password}
+          onChangeText={(next) => {
+            setPassword(next);
+            setError(null);
+          }}
+          secret
+          autoComplete="current-password"
+          textContentType="password"
+          autoCapitalize="none"
+          editable={!remove.isPending}
+        />
+      ) : googleToken ? (
+        <Text variant="bodySmall" weight="bold" color={theme.colors.successInk}>
+          {t('member:profile.deleteGoogleConfirmed')}
+        </Text>
+      ) : (
+        <>
+          <Text variant="caption" weight="bold" muted={0.7}>
+            {t('member:profile.deleteWithGoogle')}
+          </Text>
+          <GoogleSignInButton
+            onPress={confirmWithGoogle}
+            loading={confirming}
+          />
+        </>
+      )}
       {error ? (
         <Text variant="bodySmall" color={theme.colors.dangerInk}>
           {error}

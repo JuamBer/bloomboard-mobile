@@ -252,6 +252,24 @@ web's `/me/measurements` and `/me/import`
 store build and a version bump. The screens need backend **2.5.0**; against an
 older one both are 404s.
 
+## Design decision 14: Google Sign-In (2.6.0 API)
+
+"Continuar con Google" on the login, register and activation screens, and "Confirma que
+eres tú" with Google when an account without a password is deleted — the web's flows
+(`bloomboard-frontend/specs/google-sign-in.md`, backend `specs/google-sign-in.md`).
+
+| Choice | Why |
+|---|---|
+| **Native Google Sign-In** (`@react-native-google-signin/google-signin`) asking for an ID token for the **Web** client (`EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`) | The API accepts one audience for web and phone. Google knows the app by its package and signing certificate — the Android OAuth clients in Google Cloud: Play's app-signing key, EAS's upload key, and the debug keystore for `pro.bloomboard.app.dev`. A build signed with a key Google does not know gets `DEVELOPER_ERROR`. |
+| Rejected: a browser flow (`expo-auth-session`) | A browser tab and a redirect for what the system account picker does in one tap. |
+| **The account picker every time** (`signOut` before `signIn`) | Shared phones, and members with a personal and a work Google account. |
+| **Drawn to Google's guidelines** (four-colour G, neutral outline / dark fill) | Their branding rules; the app's palette does not apply to it. |
+| **Staff refused after Google, as after a password** | The app is for members; their Google account stays linked for the web. |
+| **No config plugin yet** | On Android autolinking is all it needs; the plugin only adds the iOS URL scheme, which comes with an iOS OAuth client when iOS ships. |
+
+A **native module**: a new store build and a version bump. Without the env var, or on the
+web export, no Google buttons render.
+
 ## File map
 
 | Area | Where |
@@ -266,6 +284,7 @@ older one both are 404s.
 | Calendar | `src/features/calendar/` |
 | Body measurements | `src/features/measurements/` (`MeasurementsScreen.tsx`, `widgets/MeasurementSheet.tsx`) |
 | Hevy import | `src/features/imports/` (`HevyImportScreen.tsx`, `widgets/ExerciseDecisionCard.tsx`) |
+| Google Sign-In | `src/features/auth/google.ts` (picker → ID token), `GoogleSignInButton.tsx` (button, `useGoogleSignIn`, divider, consent) |
 | API client, refresh, coded errors, services | `src/shared/api/` |
 | Theme, UI kit | `src/shared/theme/`, `src/shared/ui/` |
 | Native config, variants | `app.config.ts`, `eas.json` |

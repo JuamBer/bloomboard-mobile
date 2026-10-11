@@ -50,8 +50,13 @@ export const meService = {
 
   /** Deletes the account and all its data, for good. 403 WRONG_PASSWORD when
    *  the password is not the account's; the caller shows it inline. */
-  deleteAccount: async (password: string): Promise<void> => {
-    await apiClient.delete('/me', { data: { password }, silentErrors: true });
+  /** Confirmed with the password — or, for an account that signs in with
+   *  Google only, with a fresh Google ID token of that account. */
+  deleteAccount: async (confirm: {
+    password?: string;
+    googleIdToken?: string;
+  }): Promise<void> => {
+    await apiClient.delete('/me', { data: confirm, silentErrors: true });
   },
 
   /** Omitted = unchanged, null = cleared. */

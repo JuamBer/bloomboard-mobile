@@ -8,6 +8,12 @@ import { Button } from '@shared/ui/Button';
 import { Text } from '@shared/ui/Text';
 import { TextField } from '@shared/ui/TextField';
 import { AuthFrame, AuthLink, FormError } from './AuthFrame';
+import { googleAvailable } from './google';
+import {
+  GoogleDivider,
+  GoogleSignInButton,
+  useGoogleSignIn,
+} from './GoogleSignInButton';
 import { SentNotice } from './SentNotice';
 
 const EMAIL = /^\S+@\S+\.\S+$/;
@@ -18,12 +24,16 @@ const EMAIL = /^\S+@\S+\.\S+$/;
  * Only the email: the business already has their name. Nothing is created for
  * an unknown email (that is the register screen), and the screen says the same
  * whether or not a link went out.
+ *
+ * Or continue with Google: when its email is the one the business has, that
+ * account is claimed and linked at once — no email to wait for.
  */
 export function RequestActivationScreen() {
   const { t } = useTranslation(['auth']);
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const google = useGoogleSignIn(setError);
 
   const request = useMutation({
     mutationFn: () => authService.requestActivation(email.trim()),
@@ -76,6 +86,8 @@ export function RequestActivationScreen() {
         </>
       ) : (
         <>
+          <GoogleSignInButton onPress={google.start} loading={google.pending} />
+          <GoogleDivider label={t('auth:google.orEmail')} />
           <TextField
             label={t('auth:login.emailLabel')}
             hint={t('auth:requestActivation.emailHint')}
@@ -85,7 +97,8 @@ export function RequestActivationScreen() {
             autoComplete="email"
             keyboardType="email-address"
             textContentType="emailAddress"
-            autoFocus
+            // The keyboard would cover the Google button.
+            autoFocus={!googleAvailable}
             returnKeyType="send"
             onSubmitEditing={submit}
           />

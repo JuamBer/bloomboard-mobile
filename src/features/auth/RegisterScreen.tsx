@@ -15,6 +15,12 @@ import { Text } from '@shared/ui/Text';
 import { TextField } from '@shared/ui/TextField';
 import { AuthFrame, AuthLink, FormError } from './AuthFrame';
 import { SentNotice } from './SentNotice';
+import {
+  GoogleConsent,
+  GoogleDivider,
+  GoogleSignInButton,
+  useGoogleSignIn,
+} from './GoogleSignInButton';
 
 const EMAIL = /^\S+@\S+\.\S+$/;
 
@@ -32,6 +38,8 @@ export function RegisterScreen() {
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '' });
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Google has verified the address already: the account is ready at once.
+  const google = useGoogleSignIn(setError);
 
   const register = useMutation({
     mutationFn: () =>
@@ -83,6 +91,13 @@ export function RegisterScreen() {
         />
       ) : (
         <>
+          <GoogleSignInButton
+            onPress={google.start}
+            loading={google.pending}
+            label={t('auth:google.signUp')}
+          />
+          <GoogleConsent />
+          <GoogleDivider label={t('auth:google.orEmail')} />
           <View style={{ flexDirection: 'row', gap: 12 }}>
             <TextField
               containerStyle={{ flex: 1 }}

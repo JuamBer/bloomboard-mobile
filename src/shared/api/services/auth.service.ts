@@ -11,6 +11,18 @@ export const authService = {
     return data;
   },
 
+  /** Continue with Google: signs in, links the account with the same email,
+   *  or creates a member account. Errors are shown inline by the caller. */
+  google: async (dto: {
+    idToken: string;
+    language?: 'es' | 'en';
+  }): Promise<AuthResponse> => {
+    const { data } = await apiClient.post<AuthResponse>('/auth/google', dto, {
+      silentErrors: true,
+    });
+    return data;
+  },
+
   /** A person creating their own account; the password is set from the
    *  emailed link. Answers the same whether or not the email had an account. */
   registerMember: async (dto: {
