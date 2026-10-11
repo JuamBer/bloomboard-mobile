@@ -47,9 +47,10 @@ The app runs in a **development build**, not Expo Go: it uses
 see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)); after that `npm start` is
 enough until a native dependency changes.
 
-**Status (2026-10-07):** on Google Play as `pro.bloomboard.app` — 2.1.0 (5) on
-internal testing and in its first production review. Details and what is
-pending: [store/google-play/README.md](store/google-play/README.md).
+**Status (2026-10-11):** live on Google Play as `pro.bloomboard.app` (Spain,
+United States) — 2.1.0 (5) in production, 2.2.0 (6) on internal testing, 2.2.0
+(7) going to review. A push to `beta` / `main` builds and uploads on its own.
+Details: [store/google-play/README.md](store/google-play/README.md).
 
 ## Scripts
 

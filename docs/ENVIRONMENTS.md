@@ -17,13 +17,14 @@ and which API the JavaScript is compiled against (`EXPO_PUBLIC_API_URL` /
 bundle — so they live in `eas.json`, not in secrets.
 
 **The API must be 2.0.0 or later** in the environment a build points at; account
-deletion (*Perfil › Eliminar cuenta*) needs **2.1.0** (`DELETE /me`). Production
-and beta run 2.1.0 since 2026-10-07.
+deletion (*Perfil › Eliminar cuenta*) needs **2.1.0** (`DELETE /me`); body
+measurements and the Hevy import (app 2.2.0) need **2.5.0**. Production runs
+backend 2.5.0 since 2026-10-11.
 
 The first store build, **2.1.0 (5)**, was built with the `production` profile and
 uploaded to the *internal testing* track by hand, so that one internal build
-talks to production. From the first automatic `beta` build on, internal testing
-gets beta-API builds ("Bloom Board (beta)").
+talks to production. From the first `beta` build on — **2.2.0 (6)**, 2026-10-11 —
+internal testing gets beta-API builds ("Bloom Board (beta)").
 
 ## Identifiers
 
@@ -40,7 +41,7 @@ one-off build.
 
 ## Accounts and services
 
-What exists today (2026-10-07). Step-by-step history and the pending steps:
+What exists today (2026-10-11). Step-by-step history:
 **`store/google-play/README.md`**.
 
 | What | Where / value |
@@ -52,7 +53,7 @@ What exists today (2026-10-07). Step-by-step history and the pending steps:
 | Google Play developer account | **Organization** — no closed-test requirement before production |
 | Play app | `pro.bloomboard.app`, "Bloom Board", default language es-ES (+ en-US), category Health & Fitness, contact `contacto@bloomfitness.es` |
 | Countries | Spain, United States |
-| Play service account (EAS Submit) | **pending** — its JSON key goes into EAS (`eas credentials`), never into GitHub or the repo |
+| Play service account (EAS Submit) | `eas-submit@bloomworkouts.iam.gserviceaccount.com` (Google Cloud project `bloomworkouts`), release permissions on Bloom Board only. Its JSON key is in EAS (`eas credentials`, 2026-10-11), never in GitHub or the repo |
 | Review account (*App access*) | a dedicated CLIENT on the **production** API, booked on a center |
 | EAS plan | free: builds wait **2–3 h** in a queue before starting |
 
