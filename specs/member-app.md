@@ -233,8 +233,9 @@ web's `/me/measurements` and `/me/import`
 - **Medidas** (`(member)/measurements`): the latest value of each measure with
   its change, the evolution chart (the workouts' `ProgressChart`, fed one
   measure at a time), the history with edit / delete, and a full sheet to record
-  a day. The list is the same one their trainers read and write from the client
-  profile; each row says who wrote it.
+  one at a date and time (`DateField mode="datetime"`). The list is the same one
+  their trainers read and write from the client profile; each row says who
+  wrote it.
 - **Importar desde Hevy** (`(member)/import`): how to export from Hevy, the
   files (`expo-document-picker`), a review of every exercise (match to one here,
   create as their own — counted against the Free plan's 10 —, or not import),

@@ -8,7 +8,7 @@ import type {
 export interface MeasurementsApi {
   list: () => Promise<BodyMeasurement[]>;
   create: (
-    payload: MeasurementPayload & { measuredOn: string },
+    payload: MeasurementPayload & { measuredAt: string },
   ) => Promise<BodyMeasurement>;
   update: (id: string, payload: MeasurementPayload) => Promise<BodyMeasurement>;
   remove: (id: string) => Promise<void>;

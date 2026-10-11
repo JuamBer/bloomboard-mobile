@@ -2,58 +2,71 @@ import { describe, expect, it } from '@jest/globals';
 import type { BodyMeasurement } from '@shared/types/api.types';
 import {
   MEASUREMENT_FIELDS,
-  dateToDay,
   formatChange,
   formatMeasurement,
   latestValues,
   parseMeasurementInput,
+  toTime,
+  withTime,
 } from './measurements';
 
 const row = (
-  measuredOn: string,
+  measuredAt: string,
   values: Partial<BodyMeasurement>,
 ): BodyMeasurement =>
   ({
     ...Object.fromEntries(MEASUREMENT_FIELDS.map((f) => [f, null])),
-    id: measuredOn,
+    id: measuredAt,
     userId: 'u',
-    measuredOn,
+    measuredAt,
     notes: null,
     importSource: null,
     recordedBy: null,
-    createdAt: `${measuredOn}T10:00:00Z`,
-    updatedAt: `${measuredOn}T10:00:00Z`,
+    createdAt: measuredAt,
+    updatedAt: measuredAt,
     ...values,
   }) as BodyMeasurement;
 
 describe('latestValues', () => {
   it('reads every field on its own, with the value before it', () => {
     const rows = [
-      row('2026-03-10', { weightKg: 100.7, bodyFatPercent: 22.3 }),
-      row('2026-02-13', { weightKg: 99.2 }),
-      row('2026-02-01', { weightKg: 99.2, bodyFatPercent: 19.6, waistCm: 90 }),
+      row('2026-03-10T07:30:00.000Z', {
+        weightKg: 100.7,
+        bodyFatPercent: 22.3,
+      }),
+      row('2026-02-13T07:30:00.000Z', { weightKg: 99.2 }),
+      row('2026-02-01T07:30:00.000Z', {
+        weightKg: 99.2,
+        bodyFatPercent: 19.6,
+        waistCm: 90,
+      }),
     ];
     expect(latestValues(rows)).toEqual([
       {
         field: 'weightKg',
         value: 100.7,
-        measuredOn: '2026-03-10',
-        previous: { value: 99.2, measuredOn: '2026-02-13' },
+        measuredAt: '2026-03-10T07:30:00.000Z',
+        previous: { value: 99.2, measuredAt: '2026-02-13T07:30:00.000Z' },
       },
       {
         field: 'bodyFatPercent',
         value: 22.3,
-        measuredOn: '2026-03-10',
-        previous: { value: 19.6, measuredOn: '2026-02-01' },
+        measuredAt: '2026-03-10T07:30:00.000Z',
+        previous: { value: 19.6, measuredAt: '2026-02-01T07:30:00.000Z' },
       },
-      { field: 'waistCm', value: 90, measuredOn: '2026-02-01', previous: null },
+      {
+        field: 'waistCm',
+        value: 90,
+        measuredAt: '2026-02-01T07:30:00.000Z',
+        previous: null,
+      },
     ]);
   });
 
   it('does not depend on the order it is given', () => {
     const rows = [
-      row('2026-01-01', { weightKg: 90 }),
-      row('2026-02-01', { weightKg: 91 }),
+      row('2026-01-01T07:30:00.000Z', { weightKg: 90 }),
+      row('2026-02-01T07:30:00.000Z', { weightKg: 91 }),
     ];
     expect(latestValues(rows)[0].value).toBe(91);
   });
@@ -72,8 +85,24 @@ describe('formatting', () => {
     expect(formatChange('waistCm', 0.001, 'es')).toBe('±0 cm');
   });
 
-  it('writes a local day', () => {
-    expect(dateToDay(new Date(2026, 9, 5))).toBe('2026-10-05');
+  it('reads and sets the time of a local date', () => {
+    const date = new Date(2026, 9, 5, 7, 5);
+    expect(toTime(date)).toBe('07:05');
+    const later = withTime(date, '18:30');
+    expect([later.getDate(), later.getHours(), later.getMinutes()]).toEqual([
+      5, 18, 30,
+    ]);
+  });
+
+  it('orders two measurements of one day by their time', () => {
+    const rows = [
+      row('2026-02-01T07:00:00.000Z', { weightKg: 80 }),
+      row('2026-02-01T19:00:00.000Z', { weightKg: 81 }),
+    ];
+    expect(latestValues(rows)[0]).toMatchObject({
+      value: 81,
+      previous: { value: 80 },
+    });
   });
 });
 

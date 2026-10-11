@@ -15,8 +15,6 @@ import { TextField } from '@shared/ui/TextField';
 import {
   MEASUREMENT_FIELDS,
   MEASUREMENT_GROUPS,
-  dateToDay,
-  dayToDate,
   parseMeasurementInput,
   unitOf,
 } from '../lib/measurements';
@@ -25,7 +23,7 @@ const toText = (value: number | null | undefined) =>
   value == null ? '' : String(value);
 
 /**
- * One day's measurements — the web's MeasurementDialog: the date, then every
+ * One measurement — the web's MeasurementDialog: its date and time, then every
  * value grouped the way a tape measure goes. Fill in only what was measured;
  * editing sends every value, so clearing a field clears it.
  */
@@ -40,12 +38,12 @@ export function MeasurementSheet({
   initial?: BodyMeasurement;
   saving: boolean;
   onClose: () => void;
-  onSubmit: (payload: MeasurementPayload & { measuredOn: string }) => void;
+  onSubmit: (payload: MeasurementPayload & { measuredAt: string }) => void;
 }) {
   const { t } = useTranslation(['measurements', 'common']);
   const styles = useStyles();
   const [date, setDate] = useState<Date>(
-    initial ? dayToDate(initial.measuredOn) : new Date(),
+    initial ? new Date(initial.measuredAt) : new Date(),
   );
   const [texts, setTexts] = useState<Record<MeasurementField, string>>(
     () =>
@@ -65,7 +63,7 @@ export function MeasurementSheet({
   const submit = () => {
     if (invalid || empty || saving) return;
     onSubmit({
-      measuredOn: dateToDay(date),
+      measuredAt: date.toISOString(),
       ...Object.fromEntries(
         parsed.map((p) => [p.field, p.result.ok ? p.result.value : null]),
       ),
@@ -111,7 +109,8 @@ export function MeasurementSheet({
     >
       <View style={styles.body}>
         <DateField
-          label={t('measurements:dialog.date')}
+          mode="datetime"
+          label={t('measurements:dialog.dateTime')}
           value={date}
           onChange={(d) => d && setDate(d)}
           maximumDate={new Date()}

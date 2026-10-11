@@ -83,28 +83,44 @@ export function formatChange(
   return `${sign}${formatMeasurement(field, Math.abs(rounded), language)}`;
 }
 
-/** A day as a local date, so 'YYYY-MM-DD' never shows as the day before. */
-export const dayToDate = (day: string) => new Date(`${day}T12:00:00`);
+const pad = (n: number) => String(n).padStart(2, '0');
 
-/** 'YYYY-MM-DD' of a local date. */
-export const dateToDay = (date: Date) => {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+/** 'HH:mm' of a local date — what a time picker shows. */
+export const toTime = (date: Date) =>
+  `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+
+/** The same day at a given 'HH:mm', local time. */
+export const withTime = (date: Date, time: string) => {
+  const [h, m] = time.split(':').map(Number);
+  const out = new Date(date);
+  out.setHours(h || 0, m || 0, 0, 0);
+  return out;
 };
 
-export const formatDay = (day: string, language: string) =>
-  dayToDate(day).toLocaleDateString(locale(language), {
+/** "10 oct 2026" — the day of an instant, in the viewer's time zone. */
+export const formatDate = (iso: string, language: string) =>
+  new Date(iso).toLocaleDateString(locale(language), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   });
 
+/** "10 oct 2026, 8:30" — when a measurement was taken. */
+export const formatDateTime = (iso: string, language: string) =>
+  new Date(iso).toLocaleString(locale(language), {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+
 export interface LatestValue {
   field: MeasurementField;
   value: number;
-  measuredOn: string;
+  measuredAt: string;
   /** The value before it, when there is one — what "change" is measured from. */
-  previous: { value: number; measuredOn: string } | null;
+  previous: { value: number; measuredAt: string } | null;
 }
 
 /**
@@ -115,7 +131,7 @@ export interface LatestValue {
 export function latestValues(rows: BodyMeasurement[]): LatestValue[] {
   const ordered = [...rows].sort(
     (a, b) =>
-      b.measuredOn.localeCompare(a.measuredOn) ||
+      b.measuredAt.localeCompare(a.measuredAt) ||
       b.createdAt.localeCompare(a.createdAt),
   );
   const out: LatestValue[] = [];
@@ -126,9 +142,9 @@ export function latestValues(rows: BodyMeasurement[]): LatestValue[] {
     out.push({
       field,
       value: latest[field]!,
-      measuredOn: latest.measuredOn,
+      measuredAt: latest.measuredAt,
       previous: previous
-        ? { value: previous[field]!, measuredOn: previous.measuredOn }
+        ? { value: previous[field]!, measuredAt: previous.measuredAt }
         : null,
     });
   }

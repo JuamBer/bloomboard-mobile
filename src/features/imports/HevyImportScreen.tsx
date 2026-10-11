@@ -5,7 +5,7 @@ import { CheckCircle2, FileSpreadsheet, Upload, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { formatDay } from '@features/measurements/lib/measurements';
+import { formatDate } from '@features/measurements/lib/measurements';
 import { errorBody } from '@shared/api/errors';
 import {
   importsService,
@@ -123,8 +123,7 @@ export function HevyImportScreen() {
     (q?.over ?? 0) > 0 ||
     Object.values(drafts).some(incomplete) ||
     newWorkouts + newMeasurements === 0;
-  const dateOf = (iso: string | null) =>
-    iso ? formatDay(iso.slice(0, 10), lang) : '';
+  const dateOf = (iso: string | null) => (iso ? formatDate(iso, lang) : '');
   const toReview = preview?.exercises.filter(needsReview) ?? [];
   const shown = showAll ? (preview?.exercises ?? []) : toReview;
 

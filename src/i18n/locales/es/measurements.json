@@ -44,6 +44,8 @@
     "titleNew": "Registrar medidas",
     "titleEdit": "Editar medidas",
     "date": "Fecha",
+    "time": "Hora",
+    "dateTime": "Fecha y hora",
     "hint": "Rellena solo lo que hayas medido.",
     "notes": "Notas",
     "notesPlaceholder": "En ayunas, tras vacaciones…",

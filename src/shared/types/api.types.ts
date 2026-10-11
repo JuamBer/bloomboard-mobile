@@ -1028,8 +1028,8 @@ export type MeasurementValues = Partial<
 export type BodyMeasurement = Record<MeasurementField, number | null> & {
   id: string;
   userId: string;
-  /** 'YYYY-MM-DD' */
-  measuredOn: string;
+  /** When it was measured (ISO 8601). */
+  measuredAt: string;
   notes: string | null;
   /** Imported from another app; null when written here. */
   importSource: 'HEVY' | null;
@@ -1045,7 +1045,7 @@ export type BodyMeasurement = Record<MeasurementField, number | null> & {
 };
 
 export type MeasurementPayload = MeasurementValues & {
-  measuredOn?: string;
+  measuredAt?: string;
   notes?: string | null;
 };
 

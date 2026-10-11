@@ -29,9 +29,9 @@ import { Text } from '@shared/ui/Text';
 import { toast } from '@shared/ui/toast/toast.store';
 import {
   MEASUREMENT_FIELDS,
-  dayToDate,
   formatChange,
-  formatDay,
+  formatDate,
+  formatDateTime,
   formatMeasurement,
   latestValues,
 } from './lib/measurements';
@@ -69,7 +69,7 @@ export function MeasurementsScreen() {
     queryClient.invalidateQueries({ queryKey: MY_MEASUREMENTS_KEY });
 
   const save = useMutation({
-    mutationFn: (payload: MeasurementPayload & { measuredOn: string }) =>
+    mutationFn: (payload: MeasurementPayload & { measuredAt: string }) =>
       editing && editing !== 'new'
         ? api.update(editing.id, payload)
         : api.create(payload),
@@ -91,8 +91,8 @@ export function MeasurementsScreen() {
 
   const latest = latestValues(rows);
   const points = [...rows]
-    .sort((a, b) => a.measuredOn.localeCompare(b.measuredOn))
-    .map((r) => ({ ...r, performedAt: dayToDate(r.measuredOn).toISOString() }));
+    .sort((a, b) => a.measuredAt.localeCompare(b.measuredAt))
+    .map((r) => ({ ...r, performedAt: r.measuredAt }));
   const measures = MEASUREMENT_FIELDS.map((field) => ({
     key: field,
     label: t(`measurements:fields.${field}`),
@@ -164,9 +164,9 @@ export function MeasurementsScreen() {
                               l.value - l.previous.value,
                               lang,
                             ),
-                            date: formatDay(l.previous.measuredOn, lang),
+                            date: formatDate(l.previous.measuredAt, lang),
                           })
-                        : formatDay(l.measuredOn, lang)}
+                        : formatDate(l.measuredAt, lang)}
                     </Text>
                   </Card>
                 </View>
@@ -187,7 +187,7 @@ export function MeasurementsScreen() {
                 >
                   <View style={styles.flex}>
                     <Text variant="bodySmall" weight="bold">
-                      {formatDay(row.measuredOn, lang)}
+                      {formatDateTime(row.measuredAt, lang)}
                     </Text>
                     <View style={styles.chips}>
                       {MEASUREMENT_FIELDS.filter((f) => row[f] != null).map(
@@ -247,7 +247,7 @@ export function MeasurementsScreen() {
       <ActionSheet
         open={!!menu}
         onClose={() => setMenu(null)}
-        title={menu ? formatDay(menu.measuredOn, lang) : undefined}
+        title={menu ? formatDateTime(menu.measuredAt, lang) : undefined}
         actions={[
           {
             key: 'edit',
@@ -278,7 +278,7 @@ export function MeasurementsScreen() {
         description={
           deleting
             ? t('measurements:confirmDelete.text', {
-                date: formatDay(deleting.measuredOn, lang),
+                date: formatDateTime(deleting.measuredAt, lang),
               })
             : undefined
         }

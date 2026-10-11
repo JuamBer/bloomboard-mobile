@@ -44,6 +44,8 @@
     "titleNew": "Log measurements",
     "titleEdit": "Edit measurements",
     "date": "Date",
+    "time": "Time",
+    "dateTime": "Date and time",
     "hint": "Fill in only what you measured.",
     "notes": "Notes",
     "notesPlaceholder": "Fasted, after holidays…",
