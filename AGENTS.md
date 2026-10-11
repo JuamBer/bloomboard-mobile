@@ -203,7 +203,9 @@ plan waits 2–3 hours in a queue.
 
 **2.3.0 adds Google Sign-In** (2026-10-11, `specs/member-app.md` decision 14):
 another native module (`@react-native-google-signin/google-signin`), so another
-store build, after backend 2.6.0 is live. It needs the Android OAuth clients in
+store build, after backend 2.6.0 is live — to internal testing first, and to
+production (`main`) only once 2.2.0's review is over: a new production release
+replaces the one in review (`docs/RELEASING.md`). It needs the Android OAuth clients in
 Google Cloud (`docs/ENVIRONMENTS.md`) — a build signed with a key Google does
 not know cannot sign in with Google.
 

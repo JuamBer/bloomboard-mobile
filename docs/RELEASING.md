@@ -105,6 +105,13 @@ it needs, and moves on its own from there.
 **Each push to `beta` or `main` costs one EAS build.** The free plan has a
 monthly allowance — promote in batches, not on every commit.
 
+**One production release in review at a time.** Play keeps a single release in
+review per track: pushing `main` while the previous version is still in review
+sends a new release that **replaces** it in the queue, and the review may start
+over. While one is in review, push `beta` (internal testing has no review) and
+hold `main` until the email says it was approved. Seen on 2026-10-11: 2.2.0 in
+review, 2.3.0 went to internal testing and waited.
+
 ## Over-the-air updates (not used yet)
 
 EAS Update can replace an installed app's JavaScript without a store release.
