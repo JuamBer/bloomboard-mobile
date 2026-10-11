@@ -190,7 +190,7 @@ feature branch ──PR──► develop ──merge──► beta ──merge�
 Google Play's internal testing track; a push to `main` builds and submits to
 production. How it works, versions and rollbacks: `docs/RELEASING.md`.
 Environments and accounts: `docs/ENVIRONMENTS.md`. The Play listing, its
-history and what is pending: `store/google-play/README.md`.
+history and its state: `store/google-play/README.md`.
 
 **State (2026-10-11):** 2.1.0 (5) passed Google's first review and is the
 production app; `releaseStatus` in `eas.json` is now `"completed"` (a push to
