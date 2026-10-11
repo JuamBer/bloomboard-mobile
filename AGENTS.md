@@ -195,10 +195,10 @@ history and what is pending: `store/google-play/README.md`.
 **State (2026-10-11):** 2.1.0 (5) passed Google's first review and is the
 production app; `releaseStatus` in `eas.json` is now `"completed"` (a push to
 `main` sends a full release for review, one to `beta` rolls out to testers at
-once). If the Play service account is still not in EAS
-(`store/google-play/README.md` step 5), a push builds but does not upload — the
-`.aab` then goes up by hand. An EAS build on the free plan waits 2–3 hours in a
-queue.
+once). The Play service account key is in EAS since 2026-10-11, so a push
+builds **and** uploads with no manual step; release notes are not attached
+(EAS Submit cannot) and go in by hand in Play Console. An EAS build on the free
+plan waits 2–3 hours in a queue.
 
 **2.2.0 is the first update after the store's 2.1.0** (2026-10-11): the
 Work/Rest player (with `expo-audio`, a **native** module), white exercise media,
