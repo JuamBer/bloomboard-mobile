@@ -49,8 +49,9 @@ text` — "rr" is the reload shortcut.
 **2.1.0** (`DELETE /me`); deleting a center session's workout and the plan's
 notes as placeholders need **2.4.0** (on an older one the delete is refused and
 the notes fields keep their usual placeholders); body measurements and the Hevy
-import need **2.5.0** (on an older one both screens are 404s). **App 2.2.0 needs
-backend 2.5.0 live first.** A change that needs a new backend route ships the
+import need **2.5.0** (on an older one both screens are 404s); Google sign-in
+needs **2.6.0** (on an older one "Continuar con Google" ends in a generic error).
+**App 2.2.0 needs backend 2.5.0 live first; app 2.3.0 needs 2.6.0.** A change that needs a new backend route ships the
 backend first. How the store build 2.1.0 behaves against backend 2.4.0:
 `specs/member-app.md` → Known issues.
 
@@ -199,6 +200,12 @@ once). The Play service account key is in EAS since 2026-10-11, so a push
 builds **and** uploads with no manual step; release notes are not attached
 (EAS Submit cannot) and go in by hand in Play Console. An EAS build on the free
 plan waits 2–3 hours in a queue.
+
+**2.3.0 adds Google Sign-In** (2026-10-11, `specs/member-app.md` decision 14):
+another native module (`@react-native-google-signin/google-signin`), so another
+store build, after backend 2.6.0 is live. It needs the Android OAuth clients in
+Google Cloud (`docs/ENVIRONMENTS.md`) — a build signed with a key Google does
+not know cannot sign in with Google.
 
 **2.2.0 is the first update after the store's 2.1.0** (2026-10-11): the
 Work/Rest player (with `expo-audio`, a **native** module), white exercise media,

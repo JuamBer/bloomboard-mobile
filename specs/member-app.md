@@ -326,6 +326,10 @@ More in `docs/ARCHITECTURE.md`.
 
 ## Known issues
 
+- **App 2.3.0 against a backend older than 2.6.0:** "Continuar con Google"
+  reaches no `/auth/google` and ends in the generic Google error. Ship backend
+  2.6.0 first.
+
 - **App 2.2.0 against a backend older than 2.5.0:** Medidas and Importar desde
   Hevy answer 404 (the axios interceptor toasts it). Ship backend 2.5.0 first.
 
