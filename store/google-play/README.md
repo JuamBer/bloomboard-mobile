@@ -38,7 +38,27 @@ for review. Running `eas submit` by hand from a PC needs `APP_ENV=beta` or
 `production` in the environment — without it `app.config.ts` resolves the dev
 package `pro.bloomboard.app.dev`.
 
-**Next release: 2.2.0** (merged 2026-10-11). The Work/Rest player with sound,
+**Then 2.3.0: Google Sign-In** (merged 2026-10-11) — "Continuar con Google" on
+login, register and activation; a password-less account confirms its deletion
+with Google. Native module again (new store build), **backend 2.6.0 live
+first**, and the Play app-signing key registered as an Android OAuth client
+(done 2026-10-11, `docs/ENVIRONMENTS.md`). *Data safety*: nothing new is
+collected (name, email and photo were already collected at sign-up).
+
+Release notes for 2.3.0:
+
+```
+<es-ES>
+· Entra o crea tu cuenta con Google, en un toque.
+· Si ya tenías cuenta con ese email, se conecta sola.
+</es-ES>
+<en-US>
+· Sign in or create your account with Google, in one tap.
+· If you already had an account with that email, it connects on its own.
+</en-US>
+```
+
+**Release 2.2.0** (merged 2026-10-11). The Work/Rest player with sound,
 exercise media on white, equal-ended ranges, the workout logging round (set
 ticks only, a ticked set keeps its hints, the plan's notes as placeholders,
 deleting a finished session's workout, the trainer's note signed "Nota de …"),

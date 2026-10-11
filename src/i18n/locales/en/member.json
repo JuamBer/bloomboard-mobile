@@ -100,7 +100,11 @@
     "deleteConfirm": "Delete my account",
     "deleteWrongPassword": "The password is not correct.",
     "deleteError": "The account could not be deleted. Try again.",
-    "deleted": "Your account and your data have been deleted."
+    "deleted": "Your account and your data have been deleted.",
+    "deleteWithGoogle": "Your account signs in with Google: confirm it is you.",
+    "deleteGoogleConfirmed": "Confirmed with Google.",
+    "deleteGoogleRequired": "Confirm with Google to delete the account.",
+    "deleteGoogleMismatch": "That is not the Google account you sign in with."
   },
   "errors": {
     "load": "Couldn't load this. Please try again.",

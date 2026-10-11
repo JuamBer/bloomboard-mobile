@@ -68,6 +68,10 @@ export function Avatar({
 }) {
   const theme = useTheme();
   const initials = `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase();
+  // Avatars are hotlinked (Google, Timp): one that does not load shows the
+  // initials, not an empty tile.
+  const [failed, setFailed] = useState<string | null>(null);
+  const showPhoto = !!url && failed !== url;
   return (
     <View
       style={{
@@ -82,12 +86,13 @@ export function Avatar({
         overflow: 'hidden',
       }}
     >
-      {url ? (
+      {showPhoto ? (
         <Image
           source={{ uri: url }}
           style={{ width: size, height: size }}
           contentFit="cover"
           accessibilityIgnoresInvertColors
+          onError={() => setFailed(url)}
         />
       ) : (
         <Text variant="heading" accent>

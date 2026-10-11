@@ -9,13 +9,20 @@ import { Text } from '@shared/ui/Text';
 import { TextField } from '@shared/ui/TextField';
 import { useAuthStore } from './auth.store';
 import { AuthFrame, AuthLink, FormError } from './AuthFrame';
+import {
+  GoogleConsent,
+  GoogleDivider,
+  GoogleSignInButton,
+  useGoogleSignIn,
+} from './GoogleSignInButton';
 
 const EMAIL = /^\S+@\S+\.\S+$/;
 
 /**
- * Sign-in. Only members get in: a staff account is told to use the web app
- * (its portal is the trainer's tool, not this one) and nothing is stored.
- * No center to pick either — a member may train with several companies.
+ * Sign-in, by password or with Google. Only members get in: a staff account
+ * is told to use the web app (its portal is the trainer's tool, not this one)
+ * and nothing is stored. No center to pick either — a member may train with
+ * several companies.
  */
 export function LoginScreen() {
   const { t } = useTranslation(['auth', 'common', 'app']);
@@ -30,6 +37,9 @@ export function LoginScreen() {
     root?: string;
   }>({});
   const [submitting, setSubmitting] = useState(false);
+  const google = useGoogleSignIn((message) =>
+    setErrors(message ? { root: message } : {}),
+  );
 
   const submit = async () => {
     const next: typeof errors = {};
@@ -95,6 +105,9 @@ export function LoginScreen() {
         </>
       }
     >
+      <GoogleSignInButton onPress={google.start} loading={google.pending} />
+      <GoogleConsent />
+      <GoogleDivider label={t('auth:google.or')} />
       <TextField
         label={t('auth:login.emailLabel')}
         value={email}

@@ -837,6 +837,8 @@ export interface AuthResponse {
   /** Present when staff have exactly one centre: it is already baked into the
    *  tokens, so the login skips the picker. */
   center?: SelectableCenter;
+  /** Google sign-in only: true when it created the account. */
+  created?: boolean;
 }
 
 export interface LoginDto {
@@ -889,6 +891,9 @@ export interface MemberProfile {
   birthday: string | null;
   avatarUrl: string | null;
   claimedAt: string | null;
+  /** A password-less account (Google only) confirms its deletion with Google. */
+  hasPassword: boolean;
+  googleLinked: boolean;
   affiliations: MemberAffiliation[];
 }
 

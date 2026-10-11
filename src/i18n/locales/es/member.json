@@ -100,7 +100,11 @@
     "deleteConfirm": "Eliminar mi cuenta",
     "deleteWrongPassword": "La contraseña no es correcta.",
     "deleteError": "No se ha podido eliminar la cuenta. Inténtalo de nuevo.",
-    "deleted": "Tu cuenta y tus datos se han eliminado."
+    "deleted": "Tu cuenta y tus datos se han eliminado.",
+    "deleteWithGoogle": "Tu cuenta entra con Google: confirma que eres tú.",
+    "deleteGoogleConfirmed": "Confirmado con Google.",
+    "deleteGoogleRequired": "Confirma con Google para eliminar la cuenta.",
+    "deleteGoogleMismatch": "Esa no es la cuenta de Google con la que entras."
   },
   "errors": {
     "load": "No se ha podido cargar. Inténtalo de nuevo.",

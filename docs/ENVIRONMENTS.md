@@ -53,6 +53,7 @@ What exists today (2026-10-11). Step-by-step history:
 | Google Play developer account | **Organization** — no closed-test requirement before production |
 | Play app | `pro.bloomboard.app`, "Bloom Board", default language es-ES (+ en-US), category Health & Fitness, contact `contacto@bloomfitness.es` |
 | Countries | Spain, United States |
+| Google Sign-In (OAuth, Google Cloud project `bloomworkouts`) | The app asks for an ID token for the **Web** client `168821909356-ikh1kdc6ut5kfce9lh39tumn3funk869` (`EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` in `eas.json`; the API checks that audience). Google recognises the app through three **Android** clients, one per signing key — never referenced in code: *Play* (`pro.bloomboard.app`, Play's app-signing key; every install from Play) `…6hvst0frmu50s2kks3u3krie50s3uc90`, *EAS* (`pro.bloomboard.app`, the EAS upload key `AC:C7:52:…`; builds installed from expo.dev) `…8tt8hq490fu2jcngkvud1ne86ii8pb0k`, *dev* (`pro.bloomboard.app.dev`, the debug keystore `5E:8F:16:…`) `…l7odcu30c39sfvpnb7m39gve2md69nd9`. A new signing key needs its own Android client |
 | Play service account (EAS Submit) | `eas-submit@bloomworkouts.iam.gserviceaccount.com` (Google Cloud project `bloomworkouts`), release permissions on Bloom Board only. Its JSON key is in EAS (`eas credentials`, 2026-10-11), never in GitHub or the repo |
 | Review account (*App access*) | a dedicated CLIENT on the **production** API, booked on a center |
 | EAS plan | free: builds wait **2–3 h** in a queue before starting |
