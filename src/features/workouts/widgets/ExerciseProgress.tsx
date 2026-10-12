@@ -4,6 +4,7 @@ import { Trophy } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useUnitSystem } from '@features/units/useUnitSystem';
 import { workoutsService } from '@shared/api/services/workouts.service';
 import { radius } from '@shared/theme/theme';
 import { makeStyles, useTheme } from '@shared/theme/ThemeProvider';
@@ -24,7 +25,10 @@ import {
   formatRecordAt,
   formatRecordValue,
   recordLabel,
+  paceLabel,
+  weightLabel,
 } from '../lib/records';
+import { paceIn, weightIn } from '@shared/lib/unit-system';
 import { ProgressChart, type ProgressMeasure } from './ProgressChart';
 
 const trim = (n: number) =>
@@ -40,6 +44,7 @@ export function ExerciseProgress({ exerciseId }: { exerciseId: string }) {
   const { t, i18n } = useTranslation(['workouts']);
   const styles = useStyles();
   const theme = useTheme();
+  const unitSystem = useUnitSystem();
   const router = useRouter();
   const [templateId, setTemplateId] = useState<string>();
   const openWorkout = (workoutId: string) =>
@@ -73,30 +78,39 @@ export function ExerciseProgress({ exerciseId }: { exerciseId: string }) {
       plans.set(p.workoutTemplate.id, p.workoutTemplate.name);
   const date = (iso: string) => formatWorkoutDate(iso, i18n.language);
 
+  // Charted in the member's units, so the axis lands on round numbers of
+  // them; the API speaks kg, m and s/km.
+  const weight = (kg: number | null) =>
+    kg == null ? null : weightIn(kg, unitSystem);
+  const inWeight = (n: number) => weightLabel(n, unitSystem);
+  const kgLabel = (kg: number) => formatKg(kg, unitSystem);
+  const distanceLabel = (m: number) => formatDistance(m, unitSystem);
+  const paceOf = (sPerKm: number) => formatPace(sPerKm, unitSystem);
+
   const measures: ProgressMeasure<ExerciseSessionPoint>[] = [
     {
       key: 'maxWeight',
       label: t('workouts:measures.maxWeight'),
-      value: (p) => p.maxWeight,
-      format: formatKg,
+      value: (p) => weight(p.maxWeight),
+      format: inWeight,
     },
     {
       key: 'bestE1rm',
       label: t('workouts:measures.bestE1rm'),
-      value: (p) => p.bestE1rm,
-      format: formatKg,
+      value: (p) => weight(p.bestE1rm),
+      format: inWeight,
     },
     {
       key: 'bestSetVolume',
       label: t('workouts:measures.bestSetVolume'),
-      value: (p) => p.bestSetVolume,
-      format: formatKg,
+      value: (p) => weight(p.bestSetVolume),
+      format: inWeight,
     },
     {
       key: 'volume',
       label: t('workouts:measures.volume'),
-      value: (p) => p.volume,
-      format: formatKg,
+      value: (p) => weight(p.volume),
+      format: inWeight,
     },
     {
       key: 'totalReps',
@@ -114,7 +128,7 @@ export function ExerciseProgress({ exerciseId }: { exerciseId: string }) {
       key: 'totalDistance',
       label: t('workouts:measures.totalDistance'),
       value: (p) => p.totalDistance,
-      format: formatDistance,
+      format: distanceLabel,
     },
     {
       key: 'totalDuration',
@@ -125,8 +139,9 @@ export function ExerciseProgress({ exerciseId }: { exerciseId: string }) {
     {
       key: 'bestPace',
       label: t('workouts:measures.bestPace'),
-      value: (p) => p.bestPace,
-      format: formatPace,
+      value: (p) =>
+        p.bestPace == null ? null : paceIn(p.bestPace, unitSystem),
+      format: (s) => paceLabel(s, unitSystem),
       lowerIsBetter: true,
     },
     {
@@ -169,17 +184,17 @@ export function ExerciseProgress({ exerciseId }: { exerciseId: string }) {
   const withReps = (b: BestValue) =>
     b.reps ? t('workouts:records.reps', { count: b.reps }) : null;
   const weightTimesReps = (b: BestValue) =>
-    b.weightKg != null && b.reps ? `${trim(b.weightKg)} kg × ${b.reps}` : null;
+    b.weightKg != null && b.reps ? `${kgLabel(b.weightKg)} × ${b.reps}` : null;
   const bests = [
-    best('maxWeight', formatKg, withReps),
-    best('bestE1rm', formatKg, weightTimesReps),
-    best('bestSetVolume', formatKg, weightTimesReps),
-    best('bestSessionVolume', formatKg),
+    best('maxWeight', kgLabel, withReps),
+    best('bestE1rm', kgLabel, weightTimesReps),
+    best('bestSetVolume', kgLabel, weightTimesReps),
+    best('bestSessionVolume', kgLabel),
     best('maxReps', trim),
     best('maxDuration', formatDuration),
-    best('maxDistance', formatDistance),
-    best('bestSessionDistance', formatDistance),
-    best('bestPace', formatPace),
+    best('maxDistance', distanceLabel),
+    best('bestSessionDistance', distanceLabel),
+    best('bestPace', paceOf),
   ].filter(Boolean);
 
   return (
@@ -238,7 +253,7 @@ export function ExerciseProgress({ exerciseId }: { exerciseId: string }) {
                   {t('workouts:progress.repMax', { count: r.reps })}
                 </Text>
                 <Text variant="bodySmall" weight="bold" style={styles.tabular}>
-                  {formatKg(r.weightKg)}
+                  {kgLabel(r.weightKg)}
                 </Text>
                 <Text variant="caption" muted={0.45} style={styles.repDate}>
                   {date(r.performedAt)}
@@ -268,8 +283,8 @@ export function ExerciseProgress({ exerciseId }: { exerciseId: string }) {
                 <View style={styles.flex}>
                   <Text variant="bodySmall" weight="bold">
                     {recordLabel(t, r.kind)}
-                    {formatRecordAt(t, r.kind, r.at)
-                      ? ` ${formatRecordAt(t, r.kind, r.at)}`
+                    {formatRecordAt(t, r.kind, r.at, unitSystem)
+                      ? ` ${formatRecordAt(t, r.kind, r.at, unitSystem)}`
                       : ''}
                   </Text>
                   <Text variant="caption" muted={0.45} numberOfLines={1}>
@@ -283,12 +298,17 @@ export function ExerciseProgress({ exerciseId }: { exerciseId: string }) {
                     weight="bold"
                     style={styles.tabular}
                   >
-                    {formatRecordValue(t, r.kind, r.value)}
+                    {formatRecordValue(t, r.kind, r.value, unitSystem)}
                   </Text>
                   {r.previous != null && (
                     <Text variant="caption" muted={0.4} style={styles.tabular}>
                       {t('workouts:records.before', {
-                        value: formatRecordValue(t, r.kind, r.previous),
+                        value: formatRecordValue(
+                          t,
+                          r.kind,
+                          r.previous,
+                          unitSystem,
+                        ),
                       })}
                     </Text>
                   )}

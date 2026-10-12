@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useUnitSystem } from '@features/units/useUnitSystem';
 import { makeStyles } from '@shared/theme/ThemeProvider';
 import type {
   BodyMeasurement,
@@ -16,11 +17,9 @@ import {
   MEASUREMENT_FIELDS,
   MEASUREMENT_GROUPS,
   parseMeasurementInput,
+  toMeasurementText,
   unitOf,
 } from '../lib/measurements';
-
-const toText = (value: number | null | undefined) =>
-  value == null ? '' : String(value);
 
 /**
  * One measurement — the web's MeasurementDialog: its date and time, then every
@@ -42,20 +41,25 @@ export function MeasurementSheet({
 }) {
   const { t } = useTranslation(['measurements', 'common']);
   const styles = useStyles();
+  // Typed in the member's units (lb, in); stored in kg and cm.
+  const unitSystem = useUnitSystem();
   const [date, setDate] = useState<Date>(
     initial ? new Date(initial.measuredAt) : new Date(),
   );
   const [texts, setTexts] = useState<Record<MeasurementField, string>>(
     () =>
       Object.fromEntries(
-        MEASUREMENT_FIELDS.map((f) => [f, toText(initial?.[f])]),
+        MEASUREMENT_FIELDS.map((f) => [
+          f,
+          toMeasurementText(f, initial?.[f], unitSystem),
+        ]),
       ) as Record<MeasurementField, string>,
   );
   const [notes, setNotes] = useState(initial?.notes ?? '');
 
   const parsed = MEASUREMENT_FIELDS.map((field) => ({
     field,
-    result: parseMeasurementInput(field, texts[field]),
+    result: parseMeasurementInput(field, texts[field], unitSystem),
   }));
   const invalid = parsed.some((p) => !p.result.ok);
   const empty = parsed.every((p) => p.result.ok && p.result.value === null);
@@ -122,7 +126,11 @@ export function MeasurementSheet({
             </Text>
             <View style={styles.grid}>
               {group.fields.map((field) => {
-                const bad = !parseMeasurementInput(field, texts[field]).ok;
+                const bad = !parseMeasurementInput(
+                  field,
+                  texts[field],
+                  unitSystem,
+                ).ok;
                 return (
                   <View key={field} style={styles.cell}>
                     <TextField
@@ -135,7 +143,7 @@ export function MeasurementSheet({
                       error={bad ? ' ' : undefined}
                       trailing={
                         <Text variant="caption" muted={0.45}>
-                          {unitOf(field)}
+                          {unitOf(field, unitSystem)}
                         </Text>
                       }
                     />

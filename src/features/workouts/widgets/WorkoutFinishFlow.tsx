@@ -10,6 +10,7 @@ import {
 import { useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useUnitSystem } from '@features/units/useUnitSystem';
 import { canonicalUnit } from '@features/editor/lib/logged-values';
 import { workoutQueryKey } from '@features/editor/lib/editor-source';
 import { workoutsService } from '@shared/api/services/workouts.service';
@@ -165,6 +166,7 @@ function WorkoutSummarySheet({
   const theme = useTheme();
   const { done, total } = progressSummary(flattenExercises(workout));
   const { sets, volume } = workoutTotals(workout);
+  const unitSystem = useUnitSystem();
   const records = recordsByExercise(workout);
   const recordCount = records.reduce((n, e) => n + e.records.length, 0);
   const minutes = workout.finishedAt
@@ -224,7 +226,7 @@ function WorkoutSummarySheet({
         <Stat
           icon={icon(Dumbbell)}
           label={t('workouts:summary.volume')}
-          value={formatKg(volume)}
+          value={formatKg(volume, unitSystem)}
         />
       </View>
       {recordCount > 0 && (

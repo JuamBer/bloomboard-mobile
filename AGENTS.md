@@ -50,8 +50,10 @@ text` — "rr" is the reload shortcut.
 notes as placeholders need **2.4.0** (on an older one the delete is refused and
 the notes fields keep their usual placeholders); body measurements and the Hevy
 import need **2.5.0** (on an older one both screens are 404s); Google sign-in
-needs **2.6.0** (on an older one "Continuar con Google" ends in a generic error).
-**App 2.2.0 needs backend 2.5.0 live first; app 2.3.0 needs 2.6.0.** A change that needs a new backend route ships the
+needs **2.6.0** (on an older one "Continuar con Google" ends in a generic error);
+units and the new composite units need **2.7.0** (on an older one Unidades does not stick and a
+set with a speed or a pace is refused).
+**App 2.2.0 needs backend 2.5.0 live first; app 2.3.0 needs 2.6.0; app 2.4.0 needs 2.7.0.** A change that needs a new backend route ships the
 backend first. How the store build 2.1.0 behaves against backend 2.4.0:
 `specs/member-app.md` → Known issues.
 
@@ -200,6 +202,11 @@ once). The Play service account key is in EAS since 2026-10-11, so a push
 builds **and** uploads with no manual step; release notes are not attached
 (EAS Submit cannot) and go in by hand in Play Console. An EAS build on the free
 plan waits 2–3 hours in a queue.
+
+**2.4.0 adds units and the metrics cleanup** (2026-10-12, `specs/member-app.md`
+decision 15): Unidades (metric or imperial) on Perfil, everything shown in the member's units,
+composite units in two pickers, plan-only metrics read-only in a workout. JavaScript only, but a
+new version, so a store build, after backend 2.7.0 is live — one Play review at a time, as below.
 
 **2.3.0 adds Google Sign-In** (2026-10-11, `specs/member-app.md` decision 14):
 another native module (`@react-native-google-signin/google-signin`), so another

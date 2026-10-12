@@ -8,6 +8,7 @@ import type {
   SetType,
 } from '@shared/types/api.types';
 import type { EditableWorkoutSet } from '../types/workout-set.types';
+import { compositeDefaultUnit, compositeUnits } from '../lib/compound-units';
 
 export type MetricInputType = 'number' | 'string';
 
@@ -26,6 +27,11 @@ export interface MetricColDef {
   format?: string | null;
   unit?: string;
   unitOptions?: string[];
+  /** The unit a multi-unit column falls back to while no set states one. */
+  defaultUnit?: string;
+  /** A plan's instruction (tempo, rest…): a workout shows the plan's value,
+   *  read-only, instead of a field. */
+  planOnly?: boolean;
   step?: number;
   min?: number;
   max?: number;
@@ -70,6 +76,8 @@ export function metricToColDef(m: Metric): MetricColDef {
     format: m.valueType === 'FORMAT_TEXT' ? m.format : undefined,
     unitOptions: hasUnitOptions ? m.units : undefined,
     unit: hasUnitOptions ? undefined : (m.defaultUnit ?? m.units[0]),
+    defaultUnit: m.defaultUnit ?? m.units[0],
+    planOnly: !!m.isPlanOnly,
     maxDigits: m.valueType === 'NUMBER' ? METRIC_MAX_DIGITS[m.key] : undefined,
     width,
   };
@@ -81,7 +89,9 @@ export function compositeMetricToColDef(m: CompositeMetric): MetricColDef {
   // table as simple metrics, so the unit plumbing below is deliberately the
   // same as `metricToColDef`'s — the column header, the in-cell suffix and the
   // unit picker all read these two fields.
-  const units = m.units ?? [];
+  // One unit per combination of the components' units (km/h is
+  // KILOMETERS/HOURS).
+  const units = compositeUnits(m);
   const hasUnitOptions = units.length > 1;
   return {
     key: m.key,
@@ -90,7 +100,8 @@ export function compositeMetricToColDef(m: CompositeMetric): MetricColDef {
     valueType: isNumber ? 'number' : 'string',
     metricValueType: m.valueType,
     unitOptions: hasUnitOptions ? units : undefined,
-    unit: hasUnitOptions ? undefined : (m.defaultUnit ?? units[0]),
+    unit: hasUnitOptions ? undefined : units[0],
+    defaultUnit: compositeDefaultUnit(m),
     width: 72,
   };
 }
@@ -182,12 +193,15 @@ const createDefaultMetrics = (
   const result: SetMetrics = {};
   for (const m of metrics) {
     const value: MetricValue = { mode: 'EXACT', value: null };
-    if (m.units.length > 1) value.unit = m.defaultUnit ?? m.units[0];
+    // Every value carries its unit, even a single-unit metric's: values are
+    // shown converted to each viewer's units (kg ↔ lb), which only works
+    // when a value says what it is in.
+    if (m.units.length > 0) value.unit = m.defaultUnit ?? m.units[0];
     result[m.key] = value;
   }
   for (const cm of compositeMetrics ?? []) {
     const value: MetricValue = { mode: 'EXACT', value: null };
-    if ((cm.units ?? []).length > 1) value.unit = cm.defaultUnit ?? cm.units[0];
+    if (compositeUnits(cm).length > 0) value.unit = compositeDefaultUnit(cm);
     result[cm.key] = value;
   }
   return result;

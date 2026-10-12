@@ -3,10 +3,12 @@ import type {
   CompositeMetric,
   Metric,
   EditorExercise,
+  UnitSystem,
 } from '@shared/types/api.types';
 import type { SuperSetSlotPayload } from '@shared/api/services/workout-templates.service';
 import type { WorkoutSuperSetSlotPayload } from '@shared/api/services/workouts.service';
 import type { EditorKind } from './editor-source';
+import { compositesIn, metricsIn } from './display-sets';
 import {
   buildColDefs,
   type MetricColDef,
@@ -105,6 +107,7 @@ export const countSlotsFor = (slots: SuperSetSlot[], entryId: string): number =>
 export const unionColumns = (
   members: EditorExercise[],
   columnOrder: string[],
+  unitSystem: UnitSystem = 'METRIC',
 ): MetricColDef[] => {
   const metrics = new Map<string, Metric>();
   const composites = new Map<string, CompositeMetric>();
@@ -114,8 +117,8 @@ export const unionColumns = (
       composites.set(composite.key, composite);
   }
   return buildColDefs(
-    [...metrics.values()],
-    [...composites.values()],
+    metricsIn([...metrics.values()], unitSystem),
+    compositesIn([...composites.values()], unitSystem),
     columnOrder,
   );
 };

@@ -73,5 +73,19 @@
     "custom": "Custom colour",
     "hex": "Colour code",
     "pick": "Pick with the system picker"
+  },
+  "unitSystem": {
+    "title": "Units",
+    "description": "How you see weights, distances and body measurements. Saved data does not change: it is only shown converted.",
+    "options": {
+      "METRIC": {
+        "label": "Metric",
+        "hint": "kg, km, cm"
+      },
+      "IMPERIAL": {
+        "label": "Imperial",
+        "hint": "lb, mi, in"
+      }
+    }
   }
 }

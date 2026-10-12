@@ -38,6 +38,27 @@ for review. Running `eas submit` by hand from a PC needs `APP_ENV=beta` or
 `production` in the environment — without it `app.config.ts` resolves the dev
 package `pro.bloomboard.app.dev`.
 
+**Then 2.4.0: units** (2026-10-12) — Unidades on Perfil (metric or imperial): plans,
+workouts, records, charts and measurements in kg/km/cm or lb/mi/in; speed and pace units in two
+parts; tempo, cardio zone and rest read-only in a workout. JavaScript only, but a new version,
+so a store build; **backend 2.7.0 live first**, and production only once the release before it
+has been reviewed. *Data safety*: nothing new is collected (a display preference).
+
+Release notes for 2.4.0:
+
+```
+<es-ES>
+· Elige tus unidades en Perfil: kilos, kilómetros y centímetros, o libras, millas y pulgadas.
+· Tus entrenamientos, récords y medidas se ven en tus unidades, aunque tu entrenador escriba en otras.
+· Velocidad y ritmo, en la unidad que quieras: km/h, mi/h, min/km, min/mi…
+</es-ES>
+<en-US>
+· Choose your units on Profile: kilograms, kilometres and centimetres, or pounds, miles and inches.
+· Your workouts, records and measurements show in your units, even if your coach writes in others.
+· Speed and pace in the unit you want: km/h, mi/h, min/km, min/mi…
+</en-US>
+```
+
 **Then 2.3.0: Google Sign-In** (merged 2026-10-11; to internal testing first,
 production only after 2.2.0 is approved) — "Continuar con Google" on
 login, register and activation; a password-less account confirms its deletion

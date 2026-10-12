@@ -2,6 +2,7 @@ import { Trophy } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useUnitSystem } from '@features/units/useUnitSystem';
 import { radius } from '@shared/theme/theme';
 import { makeStyles, useTheme } from '@shared/theme/ThemeProvider';
 import type { RecordDetail } from '@shared/types/api.types';
@@ -20,15 +21,17 @@ export function RecordList({ records }: { records: RecordDetail[] }) {
   const { t } = useTranslation(['workouts']);
   const styles = useStyles();
   const theme = useTheme();
+  const unitSystem = useUnitSystem();
   return (
     <View style={styles.list}>
       {records.map((record) => {
-        const at = formatRecordAt(t, record.kind, record.at);
+        const at = formatRecordAt(t, record.kind, record.at, unitSystem);
         const gain = formatRecordGain(
           t,
           record.kind,
           record.value,
           record.previous,
+          unitSystem,
         );
         return (
           <View key={`${record.kind}-${record.at ?? ''}`} style={styles.row}>
@@ -45,14 +48,19 @@ export function RecordList({ records }: { records: RecordDetail[] }) {
               {record.previous !== null && (
                 <Text variant="caption" muted={0.5}>
                   {t('workouts:records.before', {
-                    value: formatRecordValue(t, record.kind, record.previous),
+                    value: formatRecordValue(
+                      t,
+                      record.kind,
+                      record.previous,
+                      unitSystem,
+                    ),
                   })}
                 </Text>
               )}
             </View>
             <View style={styles.right}>
               <Text variant="bodySmall" weight="bold" style={styles.tabular}>
-                {formatRecordValue(t, record.kind, record.value)}
+                {formatRecordValue(t, record.kind, record.value, unitSystem)}
               </Text>
               {gain ? (
                 <Text

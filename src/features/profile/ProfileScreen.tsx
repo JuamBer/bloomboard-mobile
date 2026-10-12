@@ -37,7 +37,8 @@ import { meService } from '@shared/api/services/me.service';
 import { fromDateOnly, toDateOnly } from '@shared/lib/format';
 import { makeStyles, useTheme } from '@shared/theme/ThemeProvider';
 import { useThemeStore, type ThemeMode } from '@shared/theme/theme.store';
-import type { MemberProfile } from '@shared/types/api.types';
+import type { MemberProfile, UnitSystem } from '@shared/types/api.types';
+import { useSetUnitSystem, useUnitSystem } from '@features/units/useUnitSystem';
 import { Button } from '@shared/ui/Button';
 import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
 import { Card, Divider, Section, Segmented } from '@shared/ui/controls';
@@ -170,6 +171,7 @@ export function ProfileScreen() {
           </Section>
 
           <AppearanceSection />
+          <UnitsSection />
 
           <Section title={t('member:profile.language')}>
             <LanguagePicker />
@@ -520,6 +522,31 @@ function AppearanceSection() {
           { value: 'LIGHT', label: t('app:theme.light'), icon: Sun },
           { value: 'DARK', label: t('app:theme.dark'), icon: Moon },
         ]}
+      />
+    </Section>
+  );
+}
+
+/** Metric (kg, km, cm) or imperial (lb, mi, in): how every weight, distance
+ *  and body measurement reads — the same setting as on the web. */
+function UnitsSection() {
+  const { t } = useTranslation(['common']);
+  const unitSystem = useUnitSystem();
+  const { setUnitSystem } = useSetUnitSystem();
+  return (
+    <Section
+      title={t('common:unitSystem.title')}
+      subtitle={t('common:unitSystem.description')}
+    >
+      <Segmented<UnitSystem>
+        value={unitSystem}
+        onChange={setUnitSystem}
+        options={(['METRIC', 'IMPERIAL'] as const).map((value) => ({
+          value,
+          label: `${t(`common:unitSystem.options.${value}.label`)} · ${t(
+            `common:unitSystem.options.${value}.hint`,
+          )}`,
+        }))}
       />
     </Section>
   );

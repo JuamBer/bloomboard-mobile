@@ -73,5 +73,19 @@
     "custom": "Color personalizado",
     "hex": "Código de color",
     "pick": "Elegir en la paleta del sistema"
+  },
+  "unitSystem": {
+    "title": "Unidades",
+    "description": "Cómo ves pesos, distancias y medidas. Los datos guardados no cambian: solo se muestran convertidos.",
+    "options": {
+      "METRIC": {
+        "label": "Métrico",
+        "hint": "kg, km, cm"
+      },
+      "IMPERIAL": {
+        "label": "Imperial",
+        "hint": "lb, mi, in"
+      }
+    }
   }
 }

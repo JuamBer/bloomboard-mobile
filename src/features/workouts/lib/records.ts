@@ -1,10 +1,12 @@
 import type { TFunction } from 'i18next';
-import type { RecordKind } from '@shared/types/api.types';
+import type { RecordKind, UnitSystem } from '@shared/types/api.types';
+import { paceIn, weightIn, weightUnitLabel } from '@shared/lib/unit-system';
 
 /**
  * Personal records, as the app says them. The backend decides what is a record
  * (src/workouts/personal-records.ts); this is how each kind and its value read.
- * Values arrive in kilograms, metres, seconds and seconds per kilometre.
+ * Values arrive in kilograms, metres, seconds and seconds per kilometre, and
+ * read in the viewer's unit system (lb, mi, /mi for imperial).
  */
 
 export const recordLabel = (t: TFunction, kind: RecordKind) =>
@@ -13,10 +15,21 @@ export const recordLabel = (t: TFunction, kind: RecordKind) =>
 const trim = (n: number, digits = 1) =>
   Number.isInteger(n) ? String(n) : n.toFixed(digits).replace(/\.0+$/, '');
 
-export const formatKg = (kg: number) => `${trim(kg)} kg`;
+/** A weight already in the system's unit: "132.3 lb". */
+export const weightLabel = (n: number, system: UnitSystem = 'METRIC') =>
+  `${trim(n)} ${weightUnitLabel(system)}`;
 
-export const formatDistance = (m: number) =>
-  m >= 1000 ? `${trim(m / 1000, 2)} km` : `${trim(m, 0)} m`;
+/** Kilograms, read in the system's unit. */
+export const formatKg = (kg: number, system: UnitSystem = 'METRIC') =>
+  weightLabel(weightIn(kg, system), system);
+
+/** Metres: a long distance in km or mi, a short one in metres either way. */
+export const formatDistance = (m: number, system: UnitSystem = 'METRIC') =>
+  m < 1000
+    ? `${trim(m, 0)} m`
+    : system === 'IMPERIAL'
+      ? `${trim(m / 1609.344, 2)} mi`
+      : `${trim(m / 1000, 2)} km`;
 
 export const formatDuration = (seconds: number) => {
   const total = Math.round(seconds);
@@ -27,9 +40,15 @@ export const formatDuration = (seconds: number) => {
   return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
 };
 
-/** Seconds per km as "4:35 /km". */
-export const formatPace = (secondsPerKm: number) =>
-  `${formatDuration(secondsPerKm)} /km`;
+/** A pace already in seconds per the system's unit: "7:22 /mi". */
+export const paceLabel = (seconds: number, system: UnitSystem = 'METRIC') =>
+  `${formatDuration(seconds)} /${system === 'IMPERIAL' ? 'mi' : 'km'}`;
+
+/** Seconds per km, read in the system: "4:35 /km" or "7:22 /mi". */
+export const formatPace = (
+  secondsPerKm: number,
+  system: UnitSystem = 'METRIC',
+) => paceLabel(paceIn(secondsPerKm, system), system);
 
 /** Which unit a record kind's value is in. */
 const KIND_UNIT: Record<
@@ -55,20 +74,21 @@ export function formatRecordValue(
   t: TFunction,
   kind: RecordKind,
   value: number,
+  system: UnitSystem = 'METRIC',
 ) {
   switch (KIND_UNIT[kind]) {
     case 'kg':
-      return formatKg(value);
+      return formatKg(value, system);
     case 'reps':
       return t('workouts:records.reps', { count: value });
     case 'rpe':
       return `RPE ${trim(value)}`;
     case 'm':
-      return formatDistance(value);
+      return formatDistance(value, system);
     case 's':
       return formatDuration(value);
     case 'pace':
-      return formatPace(value);
+      return formatPace(value, system);
   }
 }
 
@@ -77,17 +97,18 @@ export function formatRecordAt(
   t: TFunction,
   kind: RecordKind,
   at: number | undefined,
+  system: UnitSystem = 'METRIC',
 ) {
   if (at === undefined) return null;
   switch (kind) {
     case 'REPS_AT_WEIGHT':
     case 'EFFORT_AT_LOAD':
-      return t('workouts:records.atLoad', { load: formatKg(at) });
+      return t('workouts:records.atLoad', { load: formatKg(at, system) });
     case 'DISTANCE_AT_TIME':
       return t('workouts:records.inTime', { time: formatDuration(at) });
     case 'TIME_AT_DISTANCE':
       return t('workouts:records.overDistance', {
-        distance: formatDistance(at),
+        distance: formatDistance(at, system),
       });
     default:
       return null;
@@ -109,10 +130,11 @@ export function formatRecordGain(
   kind: RecordKind,
   value: number,
   previous: number | null,
+  system: UnitSystem = 'METRIC',
 ) {
   if (previous === null) return null;
   const diff = Math.abs(value - previous);
   const sign = lowerIsBetter(kind) ? '−' : '+';
   if (KIND_UNIT[kind] === 'rpe') return `${sign}${trim(diff)} RPE`;
-  return `${sign}${formatRecordValue(t, kind, diff)}`;
+  return `${sign}${formatRecordValue(t, kind, diff, system)}`;
 }

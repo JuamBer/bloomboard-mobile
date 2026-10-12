@@ -11,6 +11,7 @@ import {
 import { useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useUnitSystem } from '@features/units/useUnitSystem';
 import { useMemberProfile } from '@features/member/hooks';
 import { ProgressChart } from '@features/workouts/widgets/ProgressChart';
 import { measurementsService } from '@shared/api/services/measurements.service';
@@ -33,6 +34,8 @@ import {
   formatDate,
   formatDateTime,
   formatMeasurement,
+  formatMeasurementValue,
+  measurementIn,
   latestValues,
 } from './lib/measurements';
 import { MeasurementSheet } from './widgets/MeasurementSheet';
@@ -48,6 +51,8 @@ export const MY_MEASUREMENTS_KEY = ['me', 'measurements'] as const;
 export function MeasurementsScreen() {
   const { t, i18n } = useTranslation(['measurements', 'common']);
   const lang = i18n.language;
+  // Read in the member's units (lb, in); stored in kg and cm.
+  const unitSystem = useUnitSystem();
   const styles = useStyles();
   const theme = useTheme();
   const router = useRouter();
@@ -96,8 +101,10 @@ export function MeasurementsScreen() {
   const measures = MEASUREMENT_FIELDS.map((field) => ({
     key: field,
     label: t(`measurements:fields.${field}`),
-    value: (p: BodyMeasurement) => p[field],
-    format: (v: number) => formatMeasurement(field, v, lang),
+    // Charted in the member's units, so the axis reads round numbers of them.
+    value: (p: BodyMeasurement) =>
+      p[field] == null ? null : measurementIn(field, p[field], unitSystem),
+    format: (v: number) => formatMeasurementValue(field, v, lang, unitSystem),
   }));
 
   const author = (row: BodyMeasurement) => {
@@ -154,7 +161,7 @@ export function MeasurementsScreen() {
                       {t(`measurements:fields.${l.field}`)}
                     </Text>
                     <Text variant="heading" style={styles.value}>
-                      {formatMeasurement(l.field, l.value, lang)}
+                      {formatMeasurement(l.field, l.value, lang, unitSystem)}
                     </Text>
                     <Text variant="micro" muted={0.45}>
                       {l.previous
@@ -163,6 +170,7 @@ export function MeasurementsScreen() {
                               l.field,
                               l.value - l.previous.value,
                               lang,
+                              unitSystem,
                             ),
                             date: formatDate(l.previous.measuredAt, lang),
                           })
@@ -196,7 +204,12 @@ export function MeasurementsScreen() {
                             <Text variant="caption" muted={0.7}>
                               {t(`measurements:fields.${f}`)}{' '}
                               <Text variant="caption" weight="bold">
-                                {formatMeasurement(f, row[f]!, lang)}
+                                {formatMeasurement(
+                                  f,
+                                  row[f]!,
+                                  lang,
+                                  unitSystem,
+                                )}
                               </Text>
                             </Text>
                           </View>

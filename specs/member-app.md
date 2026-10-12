@@ -270,6 +270,22 @@ eres tú" with Google when an account without a password is deleted — the web'
 A **native module**: a new store build and a version bump. Without the env var, or on the
 web export, no Google buttons render.
 
+## Design decision 15: units and the metrics cleanup (2.7.0 API)
+
+The web's 2.7.0 round, ported as-is (`bloomboard-frontend/specs/metrics-and-units.md`, backend
+`specs/metrics-and-units.md`):
+
+| Choice | Why |
+|---|---|
+| **Unidades** on Perfil (Métrico · kg, km, cm / Imperial · lb, mi, in), saved to the account (`PATCH /configurations/me { unitSystem }`) | The same setting as on the web; read through the configuration query `AppEffects` already makes (`features/units/useUnitSystem.ts`). |
+| **Display-only conversion** — the editor converts at render (`SetsEditor`, `SuperSetCard` view) and saves untouched values exactly as stored (`shared/lib/unit-system.ts`, `features/editor/lib/display-sets.ts`) | A coach's plan in kg reads in lb for a member who reads lb; only what the member types is saved in lb. |
+| **A composite's unit in two pickers** (numerator / denominator, `CompositeUnitPicker` in `MetricSelectorSheet`), the label above them | Two segmented controls side by side leave no room for the label on a phone. |
+| **Plan-only metrics** (TEMPO, CARDIO_ZONE, REST) read-only in a workout; **REVOLUTIONS** not offered alone | `Metric.isPlanOnly` / `isHidden`, as on the web. |
+| Records, charts, measurements (lb, in), the Work/Rest player and the references sheet read in the member's units | Same helpers as the web: `records.ts`, `measurements.ts`, `workoutInUnits`. |
+
+JavaScript only — no native module. It is still a store build, because the version moved and
+updates are keyed to it (`runtimeVersion: appVersion`).
+
 ## File map
 
 | Area | Where |
@@ -325,6 +341,10 @@ More in `docs/ARCHITECTURE.md`.
   any "rr".
 
 ## Known issues
+
+- **App 2.4.0 against a backend older than 2.7.0:** the old backend drops the unknown
+  `unitSystem` (whitelist), so Unidades snaps back to Métrico; and composite units in the new
+  form (`KILOMETERS/HOURS`) are refused when a set is saved. Ship backend 2.7.0 first.
 
 - **App 2.3.0 against a backend older than 2.6.0:** "Continuar con Google"
   reaches no `/auth/google` and ends in the generic Google error. Ship backend

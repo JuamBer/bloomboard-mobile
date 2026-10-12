@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Check, ClipboardCopy, MessageSquare } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useUnitSystem } from '@features/units/useUnitSystem';
+import { convertSetMetrics } from '@shared/lib/unit-system';
 import { isCompoundSetType } from '@features/editor/constants/metric-field-config';
 import { SET_TYPE_INITIALS } from '@features/editor/constants/template.labels';
 import { useUnitAcronym } from '@features/editor/hooks/useMetricsCatalog';
@@ -56,6 +58,7 @@ export function WorkoutReferencesSheet({
   const styles = useStyles();
   const theme = useTheme();
   const unitAcronym = useUnitAcronym();
+  const unitSystem = useUnitSystem();
   const colorsOf = useSetTypeColors();
   const { data, isLoading } = useQuery({
     queryKey: ['workout', workoutId, 'references', entry.id],
@@ -156,8 +159,10 @@ export function WorkoutReferencesSheet({
       {sets && sets.length > 0 ? (
         <View style={styles.sets}>
           {sets.map((set, i) => {
+            // Read in the member's units; copying takes the stored values,
+            // which the editor then shows converted the same way.
             const text = formatSetMetrics(
-              set.metrics,
+              convertSetMetrics(set.metrics, unitSystem),
               entry.metrics,
               entry.compositeMetrics,
               unitAcronym,

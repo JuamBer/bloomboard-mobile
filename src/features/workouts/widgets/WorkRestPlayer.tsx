@@ -8,11 +8,12 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
+import { useUnitSystem } from '@features/units/useUnitSystem';
 import { useUnitAcronym } from '@features/editor/hooks/useMetricsCatalog';
 import { formatSetMetricChips } from '@features/editor/lib/metric-format';
 import { rpeTone } from '@features/editor/lib/rpe';
 import { EXERCISE_MEDIA_BG } from '@shared/lib/exercise-media';
-import { displayWorkout } from '@shared/lib/workout-display';
+import { displayWorkout, workoutInUnits } from '@shared/lib/workout-display';
 import { alpha, fonts, radius } from '@shared/theme/theme';
 import {
   makeStyles,
@@ -88,12 +89,17 @@ function PlayerBody({
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const unitAcronym = useUnitAcronym();
+  const unitSystem = useUnitSystem();
   useKeepAwake();
 
   // A workout's sets start empty, the plan riding along as the target: read
-  // them the way the wall does, logged value first and the plan where none.
+  // them the way the wall does, logged value first and the plan where none —
+  // in the member's own units.
   const [slots] = useState(() =>
-    buildWorkRestSlots(displayWorkout({ blocks: [block] }).blocks?.[0]),
+    buildWorkRestSlots(
+      displayWorkout(workoutInUnits({ blocks: [block] }, unitSystem))
+        .blocks?.[0],
+    ),
   );
 
   // The run's origin, moved forward by every pause so the clock resumes where

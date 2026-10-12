@@ -69,6 +69,9 @@ export interface MetricCellProps {
   logging?: boolean;
   placeholder?: string;
   unit?: string;
+  /** A workout's: the plan's value, which a plan-only column (tempo, rest…)
+   *  shows read-only in place of a field. */
+  planValue?: MetricValue | null;
   /** The field's place in its table's chain ("next" and the digit cap). */
   position: number;
 }
@@ -80,6 +83,11 @@ export interface MetricCellProps {
  */
 export function MetricCell(props: MetricCellProps) {
   const { col, value, isReadOnly, modeEditing, logging = false } = props;
+  // A plan-only metric is the plan's to say: a workout reads it like a locked
+  // plan does, and never takes a value of its own.
+  if (logging && col.planOnly) {
+    return <ReadOnlyValue col={col} value={props.planValue ?? undefined} />;
+  }
   if (isReadOnly && !modeEditing)
     return <ReadOnlyValue col={col} value={value} />;
   if (modeEditing) return <ModeCell {...props} />;

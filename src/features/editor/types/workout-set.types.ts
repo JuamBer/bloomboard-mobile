@@ -8,6 +8,7 @@ import type {
 import type { UpsertWorkoutSetPayload } from '@shared/api/services/workout-templates.service';
 import type { UpsertWorkoutExerciseSetPayload } from '@shared/api/services/workouts.service';
 import type { EditorKind } from '../lib/editor-source';
+import { toStoredMetrics } from '@shared/lib/unit-system';
 
 /** Working copy of a set/sub-set while it's being edited in the UI. */
 export interface EditableWorkoutSet {
@@ -51,7 +52,9 @@ export const toUpsertPayload = (
   set: EditableWorkoutSet,
 ): UpsertWorkoutSetPayload => ({
   setType: set.setType,
-  metrics: set.metrics,
+  // An editor shows values in the viewer's units; what nobody touched is
+  // saved exactly as it was stored (shared/lib/unit-system.ts).
+  metrics: toStoredMetrics(set.metrics),
   notes: set.notes?.trim() || null,
   subSets: set.subSets?.map(toUpsertPayload),
 });
@@ -72,8 +75,8 @@ export const toWorkoutSetPayload = (
   set: EditableWorkoutSet,
 ): UpsertWorkoutExerciseSetPayload => ({
   setType: set.setType,
-  metrics: loggedValues(set.metrics),
-  targetMetrics: set.targetMetrics ?? null,
+  metrics: loggedValues(toStoredMetrics(set.metrics)),
+  targetMetrics: toStoredMetrics(set.targetMetrics ?? null),
   notes: set.notes?.trim() || null,
   planNotes: set.planNotes ?? null,
   completed: !!set.completed,

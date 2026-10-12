@@ -85,6 +85,14 @@ import { rebuildMetrics, WORK_REST_METRIC_KEYS } from './ExerciseEntryCard';
 import { ExercisePickerSheet } from './ExercisePickerSheet';
 import { MetricCell } from './MetricCell';
 import { MetricSelectorSheet } from './MetricSelectorSheet';
+import { useUnitSystem } from '@features/units/useUnitSystem';
+import {
+  compositesIn,
+  metricsIn,
+  previousSetsIn,
+  toDisplaySet,
+  toStoredPatch,
+} from '../lib/display-sets';
 import { SetTick, SetTypeBadge, useRowTint } from './SetControls';
 import {
   AddRowButton,
@@ -206,7 +214,23 @@ export function SuperSetCard({
   const [groupGone, setGroupGone] = useState(false);
 
   const byId = useMemo(() => new Map(members.map((e) => [e.id, e])), [members]);
-  const cols = useMemo(() => unionColumns(members, []), [members]);
+  // The slots are kept as stored; what is drawn, and what a tick or a new
+  // sub-set copies from, is `view` — the same slots in the member's units
+  // (kg or lb…). Every write goes back through `toStoredPatch`, so a value
+  // nobody touched is saved exactly as it was stored.
+  const unitSystem = useUnitSystem();
+  const view = useMemo(
+    () =>
+      slots.map((slot) => ({
+        ...slot,
+        set: toDisplaySet(slot.set, unitSystem),
+      })),
+    [slots, unitSystem],
+  );
+  const cols = useMemo(
+    () => unionColumns(members, [], unitSystem),
+    [members, unitSystem],
+  );
 
   const writeDoc = (updated: EditorDoc) =>
     queryClient.setQueryData(editor.queryKey, updated);
@@ -383,16 +407,19 @@ export function SuperSetCard({
 
   // ─── Sequence editing ──────────────────────────────────────────────────────
 
-  const updateSlot = (index: number, patch: Partial<EditableWorkoutSet>) =>
+  const updateSlot = (index: number, patch: Partial<EditableWorkoutSet>) => {
+    const stored = toStoredPatch(patch);
     setSlots((prev) =>
       prev.map((slot, i) =>
-        i === index ? { ...slot, set: { ...slot.set, ...patch } } : slot,
+        i === index ? { ...slot, set: { ...slot.set, ...stored } } : slot,
       ),
     );
+  };
 
-  const metricsOf = (entryId: string) => meta[entryId]?.metrics ?? [];
+  const metricsOf = (entryId: string) =>
+    metricsIn(meta[entryId]?.metrics ?? [], unitSystem);
   const compositesOf = (entryId: string) =>
-    meta[entryId]?.compositeMetrics ?? [];
+    compositesIn(meta[entryId]?.compositeMetrics ?? [], unitSystem);
   const hasMetrics = (entryId: string) =>
     metricsOf(entryId).length > 0 || compositesOf(entryId).length > 0;
   const keysOf = (entryId: string) =>
@@ -425,7 +452,7 @@ export function SuperSetCard({
       compositesOf(slot.entryId),
     );
     const withUnits = { ...base.metrics };
-    for (const [key, v] of Object.entries(slot.set.metrics)) {
+    for (const [key, v] of Object.entries(view[index].set.metrics)) {
       if (v?.unit && withUnits[key])
         withUnits[key] = { ...withUnits[key]!, unit: v.unit };
     }
@@ -453,17 +480,27 @@ export function SuperSetCard({
   };
 
   const toggleSlotDone = (index: number) => {
-    const slot = slots[index];
+    const slot = view[index];
     const done = !slot.set.completed;
     // Ticked, the empty fields keep the hints they showed (the plan, else
     // this member's last time) as real values; unticked, what is there stays.
     const set = done
-      ? withPlaceholderValues(slot.set, [...keysOf(slot.entryId)], {
-          previousSets: byId.get(slot.entryId)?.previousSets,
-          index: memberSetIndexOf(slots, index),
-          unitOf: (key) =>
-            activeUnitKey(key, cols.find((c) => c.key === key)?.unit),
-        })
+      ? withPlaceholderValues(
+          slot.set,
+          // A plan-only column logs nothing, so a tick copies nothing into it.
+          [...keysOf(slot.entryId)].filter(
+            (key) => !cols.find((c) => c.key === key)?.planOnly,
+          ),
+          {
+            previousSets: previousSetsIn(
+              byId.get(slot.entryId)?.previousSets,
+              unitSystem,
+            ),
+            index: memberSetIndexOf(slots, index),
+            unitOf: (key) =>
+              activeUnitKey(key, cols.find((c) => c.key === key)?.unit),
+          },
+        )
       : slot.set;
     updateSlot(index, {
       ...set,
@@ -561,10 +598,20 @@ export function SuperSetCard({
               ...slot,
               set: {
                 ...slot.set,
-                metrics: rebuildMetrics(slot.set.metrics, keys, sel.units),
+                metrics: rebuildMetrics(
+                  slot.set.metrics,
+                  keys,
+                  sel.units,
+                  unitSystem,
+                ),
                 subSets: slot.set.subSets?.map((sub) => ({
                   ...sub,
-                  metrics: rebuildMetrics(sub.metrics, keys, sel.units),
+                  metrics: rebuildMetrics(
+                    sub.metrics,
+                    keys,
+                    sel.units,
+                    unitSystem,
+                  ),
                 })),
               },
             }
@@ -577,7 +624,7 @@ export function SuperSetCard({
     setMeta((prev) => ({ ...prev, [entryId]: { ...prev[entryId], ...patch } }));
 
   const dialogUnits = (entryId: string) => {
-    const first = slots.find((slot) => slot.entryId === entryId)?.set;
+    const first = view.find((slot) => slot.entryId === entryId)?.set;
     const units: Record<string, string> = {};
     for (const [key, v] of Object.entries(first?.metrics ?? {}))
       if (v?.unit) units[key] = v.unit;
@@ -615,7 +662,7 @@ export function SuperSetCard({
   };
 
   const activeUnitKey = (key: string, fallback?: string) => {
-    for (const s of slots) {
+    for (const s of view) {
       const u = s.set.metrics[key]?.unit ?? s.set.targetMetrics?.[key]?.unit;
       if (u) return canonicalUnit(u) ?? undefined;
     }
@@ -729,7 +776,7 @@ export function SuperSetCard({
             {!isReadOnly && <FixedCell width={COL.action} />}
           </GridRow>
 
-          {slots.map((slot, index) => {
+          {view.map((slot, index) => {
             const label = slotLabel(slots, index, members);
             const color = memberColor(label);
             const editable = keysOf(slot.entryId);
@@ -802,7 +849,10 @@ export function SuperSetCard({
                             formatTarget(slot.set.targetMetrics?.[col.key]) ??
                             (isWorkout
                               ? previousPlaceholder(
-                                  member?.previousSets,
+                                  previousSetsIn(
+                                    member?.previousSets,
+                                    unitSystem,
+                                  ),
                                   memberSetIndex,
                                   col.key,
                                 )
@@ -812,6 +862,7 @@ export function SuperSetCard({
                             slot.set.metrics[col.key]?.unit ??
                             activeUnitKey(col.key, col.unit)
                           }
+                          planValue={slot.set.targetMetrics?.[col.key]}
                           position={fieldPosition(index, colIndex)}
                         />
                       ) : (
@@ -887,6 +938,7 @@ export function SuperSetCard({
                                 sub.targetMetrics?.[col.key],
                               )}
                               unit={activeUnitKey(col.key, col.unit)}
+                              planValue={sub.targetMetrics?.[col.key]}
                               position={fieldPosition(
                                 index,
                                 colIndex,
@@ -1123,7 +1175,9 @@ export function SuperSetCard({
               selectedMetricKeys={
                 hasMetrics(entry.id)
                   ? m.metrics.map((x) => x.key)
-                  : entry.exercise.metrics.map((x) => x.key)
+                  : entry.exercise.metrics
+                      .filter((x) => !(isWorkout && x.isPlanOnly))
+                      .map((x) => x.key)
               }
               selectedCompositeMetricKeys={
                 hasMetrics(entry.id)
@@ -1133,6 +1187,7 @@ export function SuperSetCard({
               selectedUnits={dialogUnits(entry.id)}
               currentMetricOrder={m.metricOrder}
               lockedMetricKeys={isWorkRest ? WORK_REST_METRIC_KEYS : undefined}
+              forWorkout={isWorkout}
               onConfirm={(sel) => applyMetrics(entry.id, sel)}
             />
             <NameSheet

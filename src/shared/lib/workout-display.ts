@@ -3,7 +3,9 @@ import type {
   EditorSet,
   MetricValue,
   SetMetrics,
+  UnitSystem,
 } from '@shared/types/api.types';
+import { convertSetMetrics } from './unit-system';
 
 /**
  * A workout's set holds two maps: what was logged (`metrics`, exact) and the
@@ -54,6 +56,47 @@ export function displayWorkout<W extends { blocks?: EditorBlock[] | null }>(
       exercises: block.exercises.map((entry) => ({
         ...entry,
         sets: entry.sets.map(displaySet),
+      })),
+    })),
+  };
+}
+
+const setInUnits = <S extends EditorSet>(set: S, system: UnitSystem): S => ({
+  ...set,
+  metrics: convertSetMetrics(set.metrics, system),
+  ...(set.targetMetrics
+    ? { targetMetrics: convertSetMetrics(set.targetMetrics, system) }
+    : {}),
+  ...(set.subSets
+    ? { subSets: set.subSets.map((sub) => setInUnits(sub, system)) }
+    : {}),
+});
+
+/**
+ * A copy of the workout with every value read in `system` (kg or lb, km or
+ * mi), for the views that only show it: the wall, the Work/Rest player.
+ * Editors convert on their own, keeping what was stored (see SetsEditor).
+ */
+export function workoutInUnits<W extends { blocks?: EditorBlock[] | null }>(
+  workout: W,
+  system: UnitSystem,
+): W;
+export function workoutInUnits<W extends { blocks?: EditorBlock[] | null }>(
+  workout: W | null | undefined,
+  system: UnitSystem,
+): W | null;
+export function workoutInUnits<W extends { blocks?: EditorBlock[] | null }>(
+  workout: W | null | undefined,
+  system: UnitSystem,
+): W | null {
+  if (!workout) return null;
+  return {
+    ...workout,
+    blocks: (workout.blocks ?? []).map((block) => ({
+      ...block,
+      exercises: block.exercises.map((entry) => ({
+        ...entry,
+        sets: entry.sets.map((set) => setInUnits(set, system)),
       })),
     })),
   };

@@ -21,6 +21,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { useUnitSystem } from '@features/units/useUnitSystem';
 import { meService } from '@shared/api/services/me.service';
 import { workoutsService } from '@shared/api/services/workouts.service';
 import { radius } from '@shared/theme/theme';
@@ -157,6 +158,7 @@ function WorkoutRow({
   onPress: () => void;
 }) {
   const { t, i18n } = useTranslation(['workouts']);
+  const unitSystem = useUnitSystem();
   const styles = useStyles();
   const theme = useTheme();
   return (
@@ -223,7 +225,7 @@ function WorkoutRow({
           </Text>
           {w.volume > 0 && (
             <Text variant="caption" muted={0.6}>
-              {formatKg(w.volume)}
+              {formatKg(w.volume, unitSystem)}
             </Text>
           )}
           {w.records > 0 && (

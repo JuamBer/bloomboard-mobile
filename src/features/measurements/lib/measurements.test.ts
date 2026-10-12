@@ -124,3 +124,29 @@ describe('parseMeasurementInput', () => {
     expect(parseMeasurementInput('bodyFatPercent', '80').ok).toBe(false);
   });
 });
+
+describe('measurements in imperial units', () => {
+  it('reads kg as lb and cm as inches', () => {
+    expect(formatMeasurement('weightKg', 82.5, 'en', 'IMPERIAL')).toBe(
+      '181.9 lb',
+    );
+    expect(formatMeasurement('waistCm', 81.28, 'en', 'IMPERIAL')).toBe('32 in');
+    expect(formatMeasurement('bodyFatPercent', 18.2, 'en', 'IMPERIAL')).toBe(
+      '18.2 %',
+    );
+  });
+
+  it('stores what was typed in lb as kg, and reads it back the same', () => {
+    const parsed = parseMeasurementInput('weightKg', '150', 'IMPERIAL');
+    expect(parsed.ok && parsed.value).toBeCloseTo(68.0389, 4);
+    if (!parsed.ok || parsed.value === null) throw new Error('unparsed');
+    expect(formatMeasurement('weightKg', parsed.value, 'en', 'IMPERIAL')).toBe(
+      '150 lb',
+    );
+  });
+
+  it('checks the range in stored units', () => {
+    // 900 lb is 408 kg, past the 400 kg the API takes.
+    expect(parseMeasurementInput('weightKg', '900', 'IMPERIAL').ok).toBe(false);
+  });
+});

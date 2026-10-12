@@ -14,6 +14,10 @@ export type CenterKind = 'PHYSICAL' | 'VIRTUAL';
 
 export type ThemeMode = 'SYSTEM' | 'LIGHT' | 'DARK';
 
+/** Which units a person reads weights and distances in: kg / km / cm, or
+ *  lb / mi / in. Display only — stored values keep their own unit. */
+export type UnitSystem = 'METRIC' | 'IMPERIAL';
+
 // Brand colour profile a company's UI is painted in (see shared/theme).
 export type ColorPalette = 'BLOOM' | 'SUNSET' | 'LAVENDER' | 'PULSE' | 'MENTAL';
 
@@ -59,6 +63,12 @@ export interface Metric {
   defaultUnit: string | null;
   format: string | null;
   source: string | null;
+  /** Only ever a component of a composite (REVOLUTIONS): the metric pickers
+   *  don't offer it on its own. */
+  isHidden?: boolean;
+  /** A plan's instruction (TEMPO, CARDIO_ZONE, REST): a workout shows the
+   *  plan's value, read-only, and never logs one. */
+  isPlanOnly?: boolean;
   options: MetricOption[];
 }
 
@@ -77,8 +87,9 @@ export interface CompositeMetric {
   acronym?: string | null;
   description?: string | null;
   valueType: MetricValueType;
-  /** Compound Unit.key values, e.g. KILOMETERS_PER_HOUR. */
-  units: string[];
+  /** Every numerator unit over every denominator unit, "KILOMETERS/HOURS".
+   *  Sent by the catalog; derive it with `compositeUnits` everywhere else. */
+  units?: string[];
   defaultUnit: string | null;
   numerator: {
     id: string;
@@ -291,6 +302,7 @@ export interface Configuration {
   id: string;
   userId: string;
   theme: ThemeMode;
+  unitSystem: UnitSystem;
   createdAt: string;
   updatedAt: string;
 }

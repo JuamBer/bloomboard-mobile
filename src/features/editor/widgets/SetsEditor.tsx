@@ -2,6 +2,15 @@ import { CornerDownRight, Plus, Trash2, X } from 'lucide-react-native';
 import { Fragment, useMemo } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useUnitSystem } from '@features/units/useUnitSystem';
+import { toStoredValue } from '@shared/lib/unit-system';
+import {
+  compositesIn,
+  metricsIn,
+  previousSetsIn,
+  toDisplaySet,
+  toStoredSet,
+} from '../lib/display-sets';
 import { useTheme } from '@shared/theme/ThemeProvider';
 import type {
   CompositeMetric,
@@ -74,20 +83,42 @@ interface SetsEditorProps {
  * the card autosaves.
  */
 export function SetsEditor({
-  metrics,
-  compositeMetrics = [],
+  metrics: storedMetrics,
+  compositeMetrics: storedComposites = [],
   columnOrder,
-  sets,
-  onChange,
+  sets: storedSets,
+  onChange: onStoredChange,
   isReadOnly = false,
   modeEditing = false,
   onExitModeEditing,
   commentsEditing = false,
   logging = false,
   onTickChanged,
-  previousSets,
+  previousSets: storedPreviousSets,
 }: SetsEditorProps) {
   const { t } = useTranslation(['templates', 'common']);
+  // Everything below works in the member's units (kg or lb, km or mi): the
+  // sets, their hints and the units a new value takes. The sets go back out
+  // with every untouched value exactly as it was stored.
+  const unitSystem = useUnitSystem();
+  const metrics = useMemo(
+    () => metricsIn(storedMetrics, unitSystem),
+    [storedMetrics, unitSystem],
+  );
+  const compositeMetrics = useMemo(
+    () => compositesIn(storedComposites, unitSystem),
+    [storedComposites, unitSystem],
+  );
+  const sets = useMemo(
+    () => storedSets.map((set) => toDisplaySet(set, unitSystem)),
+    [storedSets, unitSystem],
+  );
+  const previousSets = useMemo(
+    () => previousSetsIn(storedPreviousSets, unitSystem),
+    [storedPreviousSets, unitSystem],
+  );
+  const onChange = (next: EditableWorkoutSet[]) =>
+    onStoredChange(next.map(toStoredSet));
   const theme = useTheme();
   const rowTint = useRowTint();
   const unitAcronym = useUnitAcronym();
@@ -111,7 +142,7 @@ export function SetsEditor({
       const u = s.metrics[col.key]?.unit ?? s.targetMetrics?.[col.key]?.unit;
       if (u) return canonicalUnit(u) ?? undefined;
     }
-    return col.unit ?? col.unitOptions?.[0];
+    return col.unit ?? col.defaultUnit ?? col.unitOptions?.[0];
   };
 
   // The plan's value; with no plan, what was done the last time.
@@ -146,7 +177,8 @@ export function SetsEditor({
     const set = done
       ? withPlaceholderValues(
           sets[index],
-          cols.map((col) => col.key),
+          // A plan-only column logs nothing, so a tick copies nothing into it.
+          cols.filter((col) => !col.planOnly).map((col) => col.key),
           {
             previousSets,
             index,
@@ -218,7 +250,12 @@ export function SetsEditor({
   const applyColumnMode = (key: string, mode: MetricMode) => {
     const patch = (m: SetMetrics): SetMetrics => ({
       ...m,
-      [key]: { ...(m[key] ?? { value: null }), mode } as MetricValue,
+      // On the stored value: a mode says nothing about units, so changing it
+      // must not re-save the column's numbers converted.
+      [key]: {
+        ...(m[key] ? toStoredValue(m[key]) : { value: null }),
+        mode,
+      } as MetricValue,
     });
     onChange(
       sets.map((set) => ({
@@ -291,6 +328,7 @@ export function SetsEditor({
                       logging={logging}
                       placeholder={placeholderFor(index, col.key)}
                       unit={activeUnitKey(col)}
+                      planValue={set.targetMetrics?.[col.key]}
                       position={fieldPosition(index, colIndex)}
                     />
                   </MetricColumn>
@@ -344,6 +382,7 @@ export function SetsEditor({
                             sub.targetMetrics?.[col.key],
                           )}
                           unit={activeUnitKey(col)}
+                          planValue={sub.targetMetrics?.[col.key]}
                           position={fieldPosition(index, colIndex, subIndex)}
                         />
                       </MetricColumn>

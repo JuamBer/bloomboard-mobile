@@ -109,7 +109,6 @@ export const BODY_PART_LABELS: Record<BodyPart, string> = {
 
 export const EXERCISE_METRIC_LABELS: Record<ExerciseMetric, string> = {
   ABSOLUTE_WEIGHT: 'Peso absoluto',
-  ASSISTANCE_WEIGHT: 'Asistencia',
   ADDED_WEIGHT: 'Peso añadido',
   RELATIVE_WEIGHT_PERCENT: 'Peso relativo (%1RM)',
   REPS: 'Repeticiones',
@@ -122,10 +121,6 @@ export const EXERCISE_METRIC_LABELS: Record<ExerciseMetric, string> = {
   CALORIES: 'Calorías',
   CALORIES_PER_TIME: 'Calorías/Tiempo',
   CARDIO_ZONE: 'Zona cardiovascular',
-  ABSOLUTE_POWER: 'Potencia absoluta',
-  RELATIVE_POWER: 'Potencia relativa',
-  RPM: 'RPM',
-  RPM_PER_TIME: 'RPM/Tiempo',
 };
 
 export const DIFFICULTY_LABELS: Record<Difficulty, string> = {

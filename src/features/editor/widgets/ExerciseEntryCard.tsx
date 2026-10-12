@@ -18,6 +18,9 @@ import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { newRecordsToast } from '@features/workouts/lib/record-toast';
 import { WorkoutReferencesSheet } from '@features/workouts/widgets/WorkoutReferencesSheet';
+import { useUnitSystem } from '@features/units/useUnitSystem';
+import { systemUnit } from '@shared/lib/unit-system';
+import { canonicalUnit } from '../lib/logged-values';
 import type { UpsertWorkoutTemplateExercisePayload } from '@shared/api/services/workout-templates.service';
 import type { UpsertWorkoutExercisePayload } from '@shared/api/services/workouts.service';
 import { makeStyles } from '@shared/theme/ThemeProvider';
@@ -28,6 +31,7 @@ import type {
   Exercise,
   Metric,
   MetricValue,
+  UnitSystem,
 } from '@shared/types/api.types';
 import { ActionSheet } from '@shared/ui/ActionSheet';
 import { IconButton } from '@shared/ui/Button';
@@ -67,16 +71,24 @@ import { SetsEditor } from './SetsEditor';
 export const WORK_REST_METRIC_KEYS = ['TIME', 'REST'];
 
 /** Rebuilds a set's metrics for a new selection: keeps the values of the
- *  metrics that stay, adds empty ones, drops the rest — in column order. */
+ *  metrics that stay, adds empty ones, drops the rest — in column order.
+ *  The sheet speaks the member's units: a stored "5 km" a mile-reader left on
+ *  miles is the same choice, not a relabel to "5 mi". */
 export const rebuildMetrics = (
   existing: EditableWorkoutSet['metrics'],
   keys: string[],
   units: Record<string, string>,
+  unitSystem: UnitSystem,
 ): EditableWorkoutSet['metrics'] => {
   const next: EditableWorkoutSet['metrics'] = {};
   for (const key of keys) {
     let base = existing[key] ?? ({ mode: 'EXACT', value: null } as MetricValue);
-    if (units[key]) base = { ...base, unit: units[key] };
+    if (
+      units[key] &&
+      units[key] !== canonicalUnit(systemUnit(base.unit ?? '', unitSystem))
+    ) {
+      base = { ...base, unit: units[key] };
+    }
     next[key] = base;
   }
   return next;
@@ -164,9 +176,11 @@ export function ExerciseEntryCard({
   const hasMetrics = metrics.length > 0 || compositeMetrics.length > 0;
   const entrySeconds = exerciseSeconds(entry);
 
+  // In the member's units, like everything the sheet shows.
+  const unitSystem = useUnitSystem();
   const selectedUnits: Record<string, string> = {};
   for (const [key, v] of Object.entries(sets[0]?.metrics ?? {})) {
-    if (v?.unit) selectedUnits[key] = v.unit;
+    if (v?.unit) selectedUnits[key] = systemUnit(v.unit, unitSystem);
   }
 
   // ─── Autosave ──────────────────────────────────────────────────────────────
@@ -295,21 +309,23 @@ export function ExerciseEntryCard({
     setSets(
       sets.map((set) => ({
         ...set,
-        metrics: rebuildMetrics(set.metrics, keys, units),
+        metrics: rebuildMetrics(set.metrics, keys, units, unitSystem),
         subSets: set.subSets?.map((sub) => ({
           ...sub,
-          metrics: rebuildMetrics(sub.metrics, keys, units),
+          metrics: rebuildMetrics(sub.metrics, keys, units, unitSystem),
         })),
       })),
     );
   };
 
   // With nothing selected yet (just added, or cleared), the sheet starts from
-  // the exercise's own defaults.
+  // the exercise's own defaults — in a workout, the ones it can log.
   const openMetrics = () => {
     if (!hasMetrics) {
       setAutoSeed({
-        simple: entry.exercise.metrics.map((x) => x.key),
+        simple: entry.exercise.metrics
+          .filter((x) => !(isWorkout && x.isPlanOnly))
+          .map((x) => x.key),
         composite: (entry.exercise.compositeMetrics ?? []).map((x) => x.key),
       });
     }
@@ -575,6 +591,7 @@ export function ExerciseEntryCard({
         selectedUnits={selectedUnits}
         currentMetricOrder={metricOrder}
         lockedMetricKeys={isWorkRest ? WORK_REST_METRIC_KEYS : undefined}
+        forWorkout={isWorkout}
         onConfirm={applyMetrics}
       />
 

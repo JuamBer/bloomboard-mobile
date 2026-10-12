@@ -1,9 +1,11 @@
 import { apiClient } from '../client';
 import type { Configuration } from '../../types/api.types';
 
-export type ConfigurationUpdate = Partial<Pick<Configuration, 'theme'>>;
+export type ConfigurationUpdate = Partial<
+  Pick<Configuration, 'theme' | 'unitSystem'>
+>;
 
-/** The member's settings, shared with the web (theme). */
+/** The member's settings, shared with the web (theme, units). */
 export const configurationsService = {
   getMine: async (): Promise<Configuration> => {
     const { data } = await apiClient.get<Configuration>('/configurations/me');

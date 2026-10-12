@@ -19,6 +19,14 @@ import { Text } from '@shared/ui/Text';
 import { orderByKeys } from '../constants/metric-field-config';
 import { unitLabel } from '../constants/unit.labels';
 import { useMetricsCatalog } from '../hooks/useMetricsCatalog';
+import { useUnitSystem } from '@features/units/useUnitSystem';
+import { compositesIn, metricsIn } from '../lib/display-sets';
+import {
+  compositeDefaultUnit,
+  compositeUnits,
+  compoundUnitKey,
+  splitCompoundUnit,
+} from '../lib/compound-units';
 
 export interface MetricSelection {
   metrics: Metric[];
@@ -37,7 +45,10 @@ type SelectedItem =
  * Which columns an exercise's sets have — weight, reps, RPE, time… — their
  * order and their units. The exercise's own defaults are marked; a composite
  * (speed = distance / time) excludes logging one of its parts on its own;
- * a Work/Rest block keeps TIME and REST, which its clock reads.
+ * a Work/Rest block keeps TIME and REST, which its clock reads. A composite's
+ * unit is two picks, its numerator's over its denominator's (km / h). A hidden
+ * metric is never offered (it only lives inside a composite), nor, in a
+ * workout, a plan-only one (tempo, rest…), which a workout never logs.
  *
  * A member has no company, so the "default" order is the catalog's.
  */
@@ -51,6 +62,7 @@ export function MetricSelectorSheet({
   selectedUnits,
   currentMetricOrder = [],
   lockedMetricKeys = [],
+  forWorkout = false,
   onConfirm,
 }: {
   open: boolean;
@@ -62,12 +74,25 @@ export function MetricSelectorSheet({
   selectedUnits: Record<string, string>;
   currentMetricOrder?: string[];
   lockedMetricKeys?: string[];
+  forWorkout?: boolean;
   onConfirm: (selection: MetricSelection) => void;
 }) {
   const { t } = useTranslation(['templates', 'common']);
   const styles = useStyles();
   const theme = useTheme();
-  const { data: catalog, isLoading } = useMetricsCatalog();
+  const { data: rawCatalog, isLoading } = useMetricsCatalog();
+  // Units are offered in the member's system only: weight is kg or lb, not a
+  // choice between them; distance is m and km, or m and mi.
+  const unitSystem = useUnitSystem();
+  const catalog = useMemo(
+    () =>
+      rawCatalog && {
+        ...rawCatalog,
+        metrics: metricsIn(rawCatalog.metrics, unitSystem),
+        compositeMetrics: compositesIn(rawCatalog.compositeMetrics, unitSystem),
+      },
+    [rawCatalog, unitSystem],
+  );
   const locked = useMemo(() => new Set(lockedMetricKeys), [lockedMetricKeys]);
 
   const [simpleKeys, setSimpleKeys] = useState<string[]>(selectedMetricKeys);
@@ -144,7 +169,12 @@ export function MetricSelectorSheet({
   }, [order, catalog, simpleKeys, compositeKeys]);
 
   const available = {
-    simple: (catalog?.metrics ?? []).filter((m) => !simpleKeys.includes(m.key)),
+    simple: (catalog?.metrics ?? []).filter(
+      (m) =>
+        !simpleKeys.includes(m.key) &&
+        !m.isHidden &&
+        !(forWorkout && m.isPlanOnly),
+    ),
     composite: (catalog?.compositeMetrics ?? []).filter(
       (m) => !compositeKeys.includes(m.key),
     ),
@@ -152,14 +182,22 @@ export function MetricSelectorSheet({
 
   const unitAcronym = (key: string) =>
     catalog?.units.find((u) => u.key === key)?.acronym ?? key;
-  const unitFor = (m: Metric | CompositeMetric) =>
+  const unitFor = (m: Metric) =>
     units[m.key] ?? selectedUnits[m.key] ?? m.defaultUnit ?? m.units[0];
+  /** A composite's chosen unit, while it is still one of its combinations. */
+  const compositeUnitFor = (cm: CompositeMetric) => {
+    const chosen = units[cm.key] ?? selectedUnits[cm.key];
+    return chosen && compositeUnits(cm).includes(chosen)
+      ? chosen
+      : (compositeDefaultUnit(cm) ?? '');
+  };
   const unitOptionLabel = (key: string) =>
     `${unitLabel(key)} (${unitAcronym(key)})`;
   const compositeSublabel = (cm: CompositeMetric) => {
     const parts = `${cm.numerator.name} / ${cm.denominator.name}`;
-    return (cm.units ?? []).length === 1
-      ? `${parts} · ${unitAcronym(cm.units[0])}`
+    const cmUnits = compositeUnits(cm);
+    return cmUnits.length === 1
+      ? `${parts} · ${unitAcronym(cmUnits[0])}`
       : parts;
   };
 
@@ -187,8 +225,16 @@ export function MetricSelectorSheet({
       )
       .map((i) => i.metric);
     const finalUnits: Record<string, string> = {};
-    for (const m of [...metrics, ...compositeMetrics]) {
-      if ((m.units ?? []).length > 1) finalUnits[m.key] = unitFor(m);
+    // Every metric with a unit hands it back, a single-unit one too: a value
+    // must say what it is in to be shown converted to another viewer's units.
+    for (const m of metrics) {
+      if (m.units.length > 1) finalUnits[m.key] = unitFor(m);
+      else if (m.units.length === 1) finalUnits[m.key] = m.units[0];
+    }
+    for (const cm of compositeMetrics) {
+      if (compositeUnits(cm).length > 0) {
+        finalUnits[cm.key] = compositeUnitFor(cm);
+      }
     }
     // An explicit order only when it was customised (now or before);
     // otherwise the entry keeps following the default.
@@ -298,12 +344,15 @@ export function MetricSelectorSheet({
               {selectedItems.map((item, index) => {
                 const m = item.metric;
                 const isLocked = locked.has(m.key);
-                const multi = (m.units ?? []).length > 1;
+                const multi =
+                  item.type === 'composite'
+                    ? compositeUnits(item.metric).length > 1
+                    : item.metric.units.length > 1;
                 const sublabel =
                   item.type === 'composite'
                     ? compositeSublabel(item.metric)
-                    : !multi && m.units[0]
-                      ? unitOptionLabel(m.units[0])
+                    : !multi && item.metric.units[0]
+                      ? unitOptionLabel(item.metric.units[0])
                       : undefined;
                 return (
                   <View key={m.key} style={[styles.selected]}>
@@ -369,23 +418,33 @@ export function MetricSelectorSheet({
                         onPress={() => move(index, 1)}
                       />
                     </View>
-                    {multi && (
+                    {multi && item.type === 'simple' && (
                       <View style={styles.units}>
                         <Text variant="caption" muted={0.5}>
                           {t('templates:metricSelector.unit')}
                         </Text>
                         <Segmented
-                          value={unitFor(m)}
+                          value={unitFor(item.metric)}
                           onChange={(u) =>
                             setUnits((prev) => ({ ...prev, [m.key]: u }))
                           }
-                          options={m.units.map((u) => ({
+                          options={item.metric.units.map((u) => ({
                             value: u,
                             label: unitAcronym(u),
                           }))}
                           style={styles.flex}
                         />
                       </View>
+                    )}
+                    {multi && item.type === 'composite' && (
+                      <CompositeUnitPicker
+                        composite={item.metric}
+                        value={compositeUnitFor(item.metric)}
+                        onChange={(u) =>
+                          setUnits((prev) => ({ ...prev, [m.key]: u }))
+                        }
+                        unitAcronym={unitAcronym}
+                      />
                     )}
                   </View>
                 );
@@ -423,6 +482,68 @@ export function MetricSelectorSheet({
         </>
       )}
     </Sheet>
+  );
+}
+
+/**
+ * A composite's unit, as two picks: the numerator's unit over the
+ * denominator's (m · km · mi / s · min · h for speed). A side with a single
+ * unit is just shown.
+ */
+function CompositeUnitPicker({
+  composite,
+  value,
+  onChange,
+  unitAcronym,
+}: {
+  composite: CompositeMetric;
+  /** The compound unit key, "KILOMETERS/HOURS". */
+  value: string;
+  onChange: (unit: string) => void;
+  unitAcronym: (key: string) => string;
+}) {
+  const { t } = useTranslation(['templates']);
+  const styles = useStyles();
+  const { numerator, denominator } = splitCompoundUnit(value);
+
+  const side = (
+    component: CompositeMetric['numerator'],
+    current: string,
+    pick: (unit: string) => void,
+  ) =>
+    component.units.length > 1 ? (
+      <Segmented
+        value={current}
+        onChange={pick}
+        options={component.units.map((u) => ({
+          value: u,
+          label: unitAcronym(u),
+        }))}
+        style={styles.flex}
+      />
+    ) : (
+      <Text variant="bodySmall" muted={0.6}>
+        {current ? unitAcronym(current) : component.name}
+      </Text>
+    );
+
+  return (
+    <View style={styles.compositeUnits}>
+      <Text variant="caption" muted={0.5}>
+        {t('templates:metricSelector.unit')}
+      </Text>
+      <View style={styles.compositeUnitRow}>
+        {side(composite.numerator, numerator, (n) =>
+          onChange(compoundUnitKey(n, denominator)),
+        )}
+        <Text variant="bodySmall" muted={0.45}>
+          /
+        </Text>
+        {side(composite.denominator, denominator, (d) =>
+          onChange(compoundUnitKey(numerator, d)),
+        )}
+      </View>
+    </View>
   );
 }
 
@@ -476,4 +597,8 @@ const useStyles = makeStyles((t) => ({
     gap: 8,
     paddingLeft: 32,
   },
+  // Two pickers side by side don't leave room for the label on a phone, so
+  // it sits above them.
+  compositeUnits: { gap: 6, paddingLeft: 32 },
+  compositeUnitRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
 }));

@@ -1,7 +1,16 @@
 import type {
   BodyMeasurement,
   MeasurementField,
+  UnitSystem,
 } from '@shared/types/api.types';
+import {
+  lengthIn,
+  lengthToCm,
+  lengthUnitLabel,
+  weightIn,
+  weightToKg,
+  weightUnitLabel,
+} from '@shared/lib/unit-system';
 
 /**
  * The measurements, grouped the way a tape-measure session goes: composition
@@ -54,34 +63,97 @@ export const MEASUREMENT_MAX: Record<MeasurementField, number> = {
   rightCalfCm: 100,
 };
 
-export const unitOf = (field: MeasurementField) =>
-  field === 'weightKg' ? 'kg' : field === 'bodyFatPercent' ? '%' : 'cm';
+// Values are stored in kilograms and centimetres (the columns say so) and
+// read in the person's unit system: lb and in for imperial. Body fat is a
+// percentage either way.
+
+export const unitOf = (
+  field: MeasurementField,
+  system: UnitSystem = 'METRIC',
+) =>
+  field === 'weightKg'
+    ? weightUnitLabel(system)
+    : field === 'bodyFatPercent'
+      ? '%'
+      : lengthUnitLabel(system);
+
+/** A stored value (kg, cm, %) as a number in the system's unit. */
+export const measurementIn = (
+  field: MeasurementField,
+  stored: number,
+  system: UnitSystem = 'METRIC',
+) =>
+  field === 'weightKg'
+    ? weightIn(stored, system)
+    : field === 'bodyFatPercent'
+      ? stored
+      : lengthIn(stored, system);
+
+/** A number in the system's unit, back to what is stored (kg, cm, %). */
+export const measurementToStored = (
+  field: MeasurementField,
+  n: number,
+  system: UnitSystem = 'METRIC',
+) =>
+  field === 'weightKg'
+    ? weightToKg(n, system)
+    : field === 'bodyFatPercent'
+      ? n
+      : lengthToCm(n, system);
 
 const locale = (language: string) => (language === 'en' ? 'en-GB' : 'es-ES');
 
-/** "82,5 kg", "18,2 %", "41 cm" */
+/** A number already in the system's unit: "181,9 lb", "18,2 %", "16,1 in" */
+export function formatMeasurementValue(
+  field: MeasurementField,
+  n: number,
+  language: string,
+  system: UnitSystem = 'METRIC',
+) {
+  const text = n.toLocaleString(locale(language), {
+    maximumFractionDigits: system === 'IMPERIAL' ? 1 : 2,
+  });
+  return `${text} ${unitOf(field, system)}`;
+}
+
+/** A stored value, read in the system: "82,5 kg" or "181,9 lb" */
 export function formatMeasurement(
   field: MeasurementField,
   value: number,
   language: string,
+  system: UnitSystem = 'METRIC',
 ) {
-  const n = value.toLocaleString(locale(language), {
-    maximumFractionDigits: 2,
-  });
-  return `${n} ${unitOf(field)}`;
+  return formatMeasurementValue(
+    field,
+    measurementIn(field, value, system),
+    language,
+    system,
+  );
 }
 
-/** "+1,2 kg" / "−0,5 cm" / "±0 cm" */
+/** A stored change: "+1,2 kg" / "−0,5 cm" / "±0 cm" (or lb, in) */
 export function formatChange(
   field: MeasurementField,
   change: number,
   language: string,
+  system: UnitSystem = 'METRIC',
 ) {
-  const rounded = Math.round(change * 100) / 100;
-  if (rounded === 0) return `±0 ${unitOf(field)}`;
+  const shown = measurementIn(field, change, system);
+  const rounded = Math.round(shown * 100) / 100;
+  if (rounded === 0) return `±0 ${unitOf(field, system)}`;
   const sign = rounded > 0 ? '+' : '−';
-  return `${sign}${formatMeasurement(field, Math.abs(rounded), language)}`;
+  return `${sign}${formatMeasurementValue(field, Math.abs(rounded), language, system)}`;
 }
+
+/** A stored value as the text of its form field, in the system's unit. */
+export const toMeasurementText = (
+  field: MeasurementField,
+  stored: number | null | undefined,
+  system: UnitSystem = 'METRIC',
+) =>
+  stored == null
+    ? ''
+    : String(Math.round(measurementIn(field, stored, system) * 100) / 100);
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -153,17 +225,23 @@ export function latestValues(rows: BodyMeasurement[]): LatestValue[] {
 
 /**
  * A typed value: empty is "not measured", a comma works as the decimal mark,
- * and anything that is not a number in range is invalid.
+ * and anything that is not a number in range is invalid. Typed in the
+ * system's unit, it comes back as stored (kg, cm), kept precise enough that
+ * reading it back shows exactly what was typed.
  */
 export function parseMeasurementInput(
   field: MeasurementField,
   raw: string,
+  system: UnitSystem = 'METRIC',
 ): { ok: true; value: number | null } | { ok: false } {
   const text = raw.trim().replace(',', '.');
   if (!text) return { ok: true, value: null };
   const n = Number(text);
-  if (!Number.isFinite(n) || n <= 0 || n > MEASUREMENT_MAX[field]) {
+  const stored = measurementToStored(field, n, system);
+  if (!Number.isFinite(n) || n <= 0 || stored > MEASUREMENT_MAX[field]) {
     return { ok: false };
   }
-  return { ok: true, value: Math.round(n * 100) / 100 };
+  const decimals = system === 'IMPERIAL' ? 4 : 2;
+  const factor = 10 ** decimals;
+  return { ok: true, value: Math.round(stored * factor) / factor };
 }
