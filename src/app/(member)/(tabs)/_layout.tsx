@@ -7,16 +7,15 @@ import {
 
 /**
  * The member's destinations. The calendar exists only for someone who trains
- * somewhere with sessions; someone who trains on their own (at a regular gym)
- * has their routines, workouts and exercises.
+ * somewhere with sessions; everyone has their routines (where training
+ * starts) and their profile (their workouts, exercises, measurements and
+ * workout calendar, and Ajustes).
  */
 export default function MemberTabsLayout() {
   const hasSessions = useHasSessions();
   const visible: MemberTab[] = [
     ...(hasSessions ? (['calendar'] as const) : []),
     'routines',
-    'workouts',
-    'exercises',
     'profile',
   ];
   return (
@@ -27,8 +26,6 @@ export default function MemberTabsLayout() {
       <Tabs.Screen name="index" options={{ href: null }} />
       <Tabs.Screen name="calendar" />
       <Tabs.Screen name="routines" />
-      <Tabs.Screen name="workouts" />
-      <Tabs.Screen name="exercises" />
       <Tabs.Screen name="profile" />
     </Tabs>
   );

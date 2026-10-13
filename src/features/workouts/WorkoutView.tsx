@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import {
   CalendarClock,
+  Check,
   CheckCircle2,
   ClipboardList,
   Flag,
@@ -64,6 +65,10 @@ const KEEP_AWAKE_TAG = 'bloom-workout';
  * The member finishes it here — their own, or their session's, which also
  * takes them off the board (the trainer's Finish does the same there) — and
  * the finish flow follows. One of their own under way can be discarded.
+ *
+ * Once finished it opens as a record: read-only, so a scroll through it never
+ * nudges a value. Editar turns the editor back on (the same cards as while
+ * training, without the live marks) until Hecho.
  */
 export function WorkoutView({
   workoutId,
@@ -83,7 +88,12 @@ export function WorkoutView({
   /** After it is deleted or discarded. */
   onDeleted?: () => void;
 }) {
-  const { t, i18n } = useTranslation(['workouts', 'templates', 'common']);
+  const { t, i18n } = useTranslation([
+    'workouts',
+    'templates',
+    'common',
+    'app',
+  ]);
   const styles = useStyles();
   const theme = useTheme();
   const queryClient = useQueryClient();
@@ -93,6 +103,8 @@ export function WorkoutView({
   const scrollRef = useRef<EditorScrollHandle>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState(false);
+  // A finished workout's sets, opened for changes (Editar … Hecho).
+  const [editingSets, setEditingSets] = useState(false);
   const [confirmFinish, setConfirmFinish] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   // Whether the header card has scrolled out of view — set only when it
@@ -217,6 +229,7 @@ export function WorkoutView({
       queryClient.setQueryData(key, updated);
       invalidateHosts();
       if (finished) {
+        setEditingSets(false);
         startFinishFlow(workoutId);
         onFinished?.();
       }
@@ -247,18 +260,30 @@ export function WorkoutView({
     );
   }
 
-  const isReadOnly = !workout.editable;
+  const finished = !!workout.finishedAt;
+  // Who may change it at all — and, once it is over, only while editing.
+  const canEdit = workout.editable;
+  const isReadOnly = !canEdit || (finished && !editingSets);
   const fromSession = !!workout.sessionUser;
   const session = workout.sessionUser?.session;
   const { done, total } = progressSummary(flattenExercises(workout));
   // The member finishes a session's workout too (their own checkout).
-  const canFinish = !isReadOnly;
+  const canFinish = canEdit;
   // Only one's own: a session's workout is the session's record.
-  const ownUnderWay = !isReadOnly && !fromSession && !workout.finishedAt;
+  const ownUnderWay = canEdit && !fromSession && !finished;
   // Any of theirs once it is over — a session's too (until then it is what
   // the board and the TV run on).
-  const canDelete = !isReadOnly && !!workout.finishedAt;
-  const pinFinish = canFinish && !workout.finishedAt && pastHeader;
+  const canDelete = canEdit && finished;
+  const pinFinish = canFinish && !finished && pastHeader;
+  const pinDone = canEdit && finished && editingSets && pastHeader;
+  const doneButton = (
+    <Button
+      label={t('app:workout.done')}
+      icon={Check}
+      size="sm"
+      onPress={() => setEditingSets(false)}
+    />
+  );
   const finishButton = (
     <Button
       label={t('workouts:detail.finishShort')}
@@ -325,7 +350,7 @@ export function WorkoutView({
               ) : (
                 <ElapsedTimer since={workout.startedAt} variant="heading" />
               )}
-              {!isReadOnly && (
+              {canEdit && (
                 <IconButton
                   icon={MoreVertical}
                   size={34}
@@ -368,29 +393,38 @@ export function WorkoutView({
           ) : null}
 
           {canFinish && !workout.finishedAt && (
+            <Button
+              label={t('workouts:detail.finish')}
+              icon={Flag}
+              fullWidth
+              loading={finish.isPending}
+              disabled={remove.isPending}
+              onPress={() => setConfirmFinish(true)}
+            />
+          )}
+          {canEdit && finished && (
             <View style={styles.actions}>
-              {ownUnderWay && (
+              {editingSets ? (
+                <>
+                  <Text
+                    variant="caption"
+                    weight="bold"
+                    accent
+                    style={styles.editingNote}
+                  >
+                    {t('app:workout.editing')}
+                  </Text>
+                  {doneButton}
+                </>
+              ) : (
                 <Button
-                  label={t('workouts:detail.discardShort')}
-                  icon={Trash2}
+                  label={t('common:edit')}
+                  icon={Pencil}
                   variant="secondary"
-                  disabled={remove.isPending || finish.isPending}
-                  onPress={() => setConfirmDelete(true)}
+                  flex
+                  onPress={() => setEditingSets(true)}
                 />
               )}
-              <Button
-                // Beside Discard there is only room for the short label.
-                label={t(
-                  ownUnderWay
-                    ? 'workouts:detail.finishShort'
-                    : 'workouts:detail.finish',
-                )}
-                icon={Flag}
-                flex
-                loading={finish.isPending}
-                disabled={remove.isPending}
-                onPress={() => setConfirmFinish(true)}
-              />
             </View>
           )}
           {fromSession && !workout.finishedAt && !canFinish && (
@@ -410,7 +444,35 @@ export function WorkoutView({
             emptyReadOnly={t('workouts:detail.empty')}
           />
         </EditorSourceProvider>
+
+        {/* At the foot, after the last exercise — away from Finish. */}
+        {ownUnderWay && (
+          <Button
+            label={t('workouts:detail.discard')}
+            icon={Trash2}
+            variant="dangerSoft"
+            fullWidth
+            disabled={remove.isPending || finish.isPending}
+            onPress={() => setConfirmDelete(true)}
+            style={styles.discard}
+          />
+        )}
       </EditorScroll>
+
+      {/* Editing a finished one, once the header has scrolled away: Hecho. */}
+      {!top && pinDone && (
+        <View style={styles.pinned}>
+          <Text
+            variant="bodySmall"
+            weight="bold"
+            numberOfLines={1}
+            style={styles.flex}
+          >
+            {workout.name}
+          </Text>
+          {doneButton}
+        </View>
+      )}
 
       {/* Once the header has scrolled away: the clock, the progress and Finish. */}
       {!top && pinFinish && (
@@ -445,7 +507,7 @@ export function WorkoutView({
         actions={[
           {
             key: 'edit',
-            label: t('common:edit'),
+            label: t('app:workout.editDetails'),
             icon: Pencil,
             onPress: () => setEditing(true),
           },
@@ -456,7 +518,7 @@ export function WorkoutView({
               icon: Play,
               onPress: () => finish.mutate(false),
             },
-          // Under way, Discard sits beside Finish instead.
+          // Under way, Discard is at the foot of the workout instead.
           canDelete && {
             key: 'delete',
             label: t('common:delete'),
@@ -584,7 +646,9 @@ const useStyles = makeStyles((t) => ({
   },
   progress: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   tabular: { fontVariant: ['tabular-nums'] },
-  actions: { flexDirection: 'row', gap: 8 },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  editingNote: { flex: 1 },
+  discard: { marginTop: 28 },
   pinned: {
     position: 'absolute',
     top: 0,

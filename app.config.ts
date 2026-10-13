@@ -45,9 +45,24 @@ const EAS_OWNER = 'juamber';
 const projectId = process.env.EAS_PROJECT_ID || EAS_PROJECT_ID || undefined;
 const owner = process.env.EAS_OWNER || EAS_OWNER || undefined;
 
-// The splash and the Android adaptive icon sit on the brand's deep navy — the
-// dark Bloom background — in both modes, as the manual's app tile does.
+// The splash sits on the brand's deep navy — the dark Bloom background — in
+// both modes, as the manual's app tile does.
 const NAVY = '#020c1c';
+
+// The icon says which build it is, as the web's favicon does per environment:
+// the brand's blue in production, amber on beta, green in development
+// (drawn by scripts/app-icons.mjs; the splash keeps the full lockup).
+const ICON_SUFFIX: Record<AppEnv, string> = {
+  development: '-dev',
+  beta: '-beta',
+  production: '',
+};
+const ICON_COLOR: Record<AppEnv, string> = {
+  development: '#15803d',
+  beta: '#b45309',
+  production: '#1345a8',
+};
+const icon = ICON_SUFFIX[APP_ENV];
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -58,7 +73,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: 'bloomboard',
   orientation: 'portrait',
   userInterfaceStyle: 'automatic',
-  icon: './assets/images/icon.png',
+  icon: `./assets/images/icon${icon}.png`,
   backgroundColor: NAVY,
   ios: {
     bundleIdentifier: `${BASE_ID}${SUFFIX[APP_ENV]}`,
@@ -71,9 +86,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     package: `${ANDROID_BASE}${SUFFIX[APP_ENV]}`,
     adaptiveIcon: {
-      backgroundColor: NAVY,
+      backgroundColor: ICON_COLOR[APP_ENV],
       foregroundImage: './assets/images/android-icon-foreground.png',
-      backgroundImage: './assets/images/android-icon-background.png',
+      backgroundImage: `./assets/images/android-icon-background${icon}.png`,
       monochromeImage: './assets/images/android-icon-monochrome.png',
     },
     predictiveBackGestureEnabled: false,
@@ -92,6 +107,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-secure-store',
     'expo-web-browser',
     '@react-native-community/datetimepicker',
+    [
+      // The workout under way in the shade (specs/member-app.md, decision
+      // 17): the status-bar icon is the mark, white, tinted with the build's
+      // colour in the shade.
+      'expo-notifications',
+      {
+        icon: './assets/images/notification-icon.png',
+        color: ICON_COLOR[APP_ENV],
+      },
+    ],
     [
       'expo-splash-screen',
       {

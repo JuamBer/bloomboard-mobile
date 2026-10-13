@@ -33,8 +33,8 @@ Tus entrenos, rutinas y sesiones del gimnasio, siempre contigo.
 Bloom Board es la app de entrenamiento para quienes entrenan en su gimnasio, con un entrenador online o en un centro que trabaja con Bloom Board.
 
 REGISTRA CADA ENTRENAMIENTO
-• Empieza un entrenamiento vacío o a partir de tu plan y apunta cada serie: peso, repeticiones, tiempo, RPE…
-• Marca las series según las haces; el ejercicio terminado se pliega y pasa al siguiente.
+• Empieza desde cualquiera de tus rutinas o con un entrenamiento vacío, y apunta cada serie: peso, repeticiones, tiempo, RPE…
+• Marca las series según las haces. Con el móvil bloqueado, el ejercicio y la serie que tocan están en la barra de notificaciones, con un botón para completarla.
 • La pantalla no se apaga mientras entrenas.
 • Al terminar, el resumen: duración, series, volumen y tus récords personales.
 
@@ -42,18 +42,20 @@ TUS RUTINAS Y PLANES
 • Crea tus propias rutinas y entrenamientos con bloques, superseries y series compuestas.
 • Si entrenas con un centro o un entrenador que usa Bloom Board, ves también las rutinas que te preparan.
 
-EJERCICIOS Y PROGRESO
-• Un catálogo de ejercicios con imágenes, filtros por grupo muscular y material.
-• Crea tus propios ejercicios.
+TU PERFIL Y TU PROGRESO
+• Todo lo que has entrenado, entrenamiento a entrenamiento, y un calendario con tu racha de semanas.
+• Un catálogo de ejercicios con imágenes, filtros por grupo muscular y material, y tus propios ejercicios.
 • La evolución de cada ejercicio: tu mejor marca, tu historial y tu progreso.
+• Tus medidas corporales: peso, grasa y perímetros, de los últimos 3 meses, del año o de siempre.
 
 TUS SESIONES EN EL CENTRO
 • Si tu centro trabaja con Bloom Board, consulta tus sesiones en el calendario.
 • Durante la sesión, controla tu entrenamiento desde el móvil: registra, marca y cambia de pantalla de TV. Tu entrenador lo ve al momento.
 
 TU CUENTA
-• Tema claro u oscuro, español o inglés.
+• Tema claro u oscuro, español o inglés, kilos o libras.
 • Plan gratuito para empezar.
+• Preguntas frecuentes y un buzón para enviarnos sugerencias o avisarnos de un problema.
 
 Bloom Board también está en la web: app.bloomboard.pro
 ```
@@ -72,8 +74,8 @@ Your workouts, routines and gym sessions, always with you.
 Bloom Board is the training app for people who train at their own gym, with an online coach, or at a center that runs on Bloom Board.
 
 LOG EVERY WORKOUT
-• Start an empty workout or follow your plan, and log every set: weight, reps, time, RPE…
-• Tick sets as you go; a finished exercise folds away and the next one opens.
+• Start from any of your routines or with an empty workout, and log every set: weight, reps, time, RPE…
+• Tick sets as you go. With your phone locked, the exercise and set you're on are in the notification shade, with a button to complete it.
 • The screen stays on while you train.
 • When you finish: duration, sets, volume and your personal records.
 
@@ -81,18 +83,20 @@ YOUR ROUTINES AND PLANS
 • Build your own routines and workouts with blocks, super-sets and compound sets.
 • If you train with a center or coach that uses Bloom Board, you also see the routines they prepare for you.
 
-EXERCISES AND PROGRESS
-• An exercise catalog with images, filtered by muscle group and equipment.
-• Create your own exercises.
+YOUR PROFILE AND YOUR PROGRESS
+• Everything you've trained, workout by workout, and a calendar with your streak of weeks.
+• An exercise catalog with images, filtered by muscle group and equipment, and your own exercises.
 • Every exercise's history: your best, your log and your progress.
+• Your body measurements: weight, body fat and girths, over the last 3 months, the year or all time.
 
 YOUR SESSIONS AT THE CENTER
 • If your center runs on Bloom Board, see your sessions in the calendar.
 • During a session, control your workout from your phone: log, tick and move between TV screens. Your trainer sees it instantly.
 
 YOUR ACCOUNT
-• Light or dark theme, Spanish or English.
+• Light or dark theme, Spanish or English, kilograms or pounds.
 • A free plan to start.
+• An FAQ and an inbox to send us suggestions or report a problem.
 
 Bloom Board is also on the web: app.bloomboard.pro
 ```
@@ -122,7 +126,9 @@ a workout so every tab has something, and give:
 Username: google-play-review@bloomboard.pro   (or the account you create)
 Password: <its password>
 Instructions: Sign in with the account above. The Calendar tab lists the
-member's sessions; Rutinas, Entrenos and Ejercicios work without a session.
+member's sessions; Rutinas (start a workout from any card) and Perfil (history,
+exercises, measurements, workout calendar; Ajustes behind the gear) work
+without a session.
 ```
 
 ### Data safety
@@ -136,7 +142,7 @@ Account creation: **Username and password** only.
 listing): `https://bloomboard.pro/privacy/#eliminar-cuenta` — privacy policy
 §10, which names Bloom Board, gives the steps and says what is deleted and what
 is kept. Members delete their account themselves, instantly and
-password-confirmed, in the app (*Perfil › Eliminar cuenta*) and on the web
+password-confirmed, in the app (*Perfil › Ajustes › Cuenta › Eliminar cuenta*) and on the web
 (app.bloomboard.pro › *Perfil* › *Eliminar cuenta*); by email or through their
 center otherwise. Deleting some data without deleting the account: **Yes** —
 members delete their own workouts, routines, plans and exercises in the app.
@@ -148,7 +154,7 @@ members delete their own workouts, routines, plans and exercises in the app.
 | Personal info → Phone number | Yes | No | Optional | Account management |
 | Personal info → Other info (birthday, gender, alias) | Yes | No | Optional | App functionality |
 | Health and fitness → Fitness info (workouts, sets, records) | Yes | No | Required | App functionality |
-| App activity → Other user-generated content (notes, own exercises, routines) | Yes | No | Optional | App functionality |
+| App activity → Other user-generated content (notes, own exercises, routines; suggestions and problem reports sent from Ajustes › Contáctanos, with the app version, system and language) | Yes | No | Optional | App functionality, Developer communications |
 | App info and performance → Crash logs | No | — | — | — (no crash reporting SDK today) |
 
 No location, contacts, photos, files, messages, audio, calendar, device IDs or

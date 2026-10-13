@@ -38,6 +38,41 @@ for review. Running `eas submit` by hand from a PC needs `APP_ENV=beta` or
 `production` in the environment — without it `app.config.ts` resolves the dev
 package `pro.bloomboard.app.dev`.
 
+**Then 2.5.0: the redesign** (2026-10-13) — three tabs (Rutinas, Perfil, and Calendario with
+sessions); start a workout from any routine card or empty; the profile holds the history, the
+exercises, the measurements (3 months / year / all) and a workout calendar with the streak;
+Ajustes behind the gear (details, password, plan, units, language, theme, FAQ, Contáctanos,
+about); a finished workout opens read-only; the workout under way in the notification
+shade with "Completar serie"; discard from the floating bar; a new icon (the mark alone).
+**Native modules** (expo-notifications, expo-task-manager, expo-file-system): a new store
+build; **backend 2.9.0 live first**. Android 13+ asks for notification permission when a
+workout starts (nothing to declare: local notifications collect no data). **Upload the new
+`graphics/icon-512.png`** as the listing's app icon so the store matches the launcher,
+**paste the updated full descriptions and review instructions** (`listing.md`: workouts
+start from the routines, the profile, the notification, Ajustes) and **retake the
+screenshots** — the old ones show five tabs. *Data safety*: suggestions and problem reports are new —
+they fall under "Other user-generated content", already declared; **add the purpose
+"Developer communications"** to that row in Play Console before sending 2.5.0 for review
+(`listing.md`). The account-deletion path in the policy and the listing is now *Perfil ›
+Ajustes › Cuenta › Eliminar cuenta* (landing must deploy the policy update with it).
+
+Release notes for 2.5.0:
+
+```
+<es-ES>
+· Más sencilla: empieza un entrenamiento desde cualquier rutina, o uno vacío.
+· Tu perfil reúne todo lo que has entrenado, tus ejercicios, tus medidas y un calendario con tu racha.
+· Nuevo: Ajustes, con tu cuenta, tu plan, tus preferencias, preguntas frecuentes y un buzón de sugerencias.
+· Tu entrenamiento en la barra de notificaciones: el ejercicio, la serie y un botón para completarla.
+</es-ES>
+<en-US>
+· Simpler: start a workout from any routine, or an empty one.
+· Your profile gathers everything you've trained, your exercises, your measurements and a calendar with your streak.
+· New: Settings, with your account, your plan, your preferences, an FAQ and a suggestions inbox.
+· Your workout in the notification shade: the exercise, the set and a button to complete it.
+</en-US>
+```
+
 **Then 2.4.0: units** (2026-10-12) — Unidades on Perfil (metric or imperial): plans,
 workouts, records, charts and measurements in kg/km/cm or lb/mi/in; speed and pace units in two
 parts; tempo, cardio zone and rest read-only in a workout. JavaScript only, but a new version,
@@ -180,7 +215,7 @@ Answers for every form: [`listing.md`](listing.md). The ones that need care:
   the account: **Yes** (members delete their own workouts, routines,
   exercises).
 - **In-app account deletion is required** by Google for any app with sign-up:
-  *Perfil › Eliminar cuenta* (app and web), backed by `DELETE /me` (backend
+  *Perfil › Ajustes › Cuenta › Eliminar cuenta* in the app (*Perfil › Eliminar cuenta* on the web), backed by `DELETE /me` (backend
   2.1.0). Production must run that backend before the review.
 - **App access:** a dedicated CLIENT account **on the production API** (not a
   real member), booked on a center with a session so every tab has content.

@@ -4,7 +4,10 @@ The **Bloom Board member app** for Android and iOS. Everything a member has on
 the web portal, on their phone: their sessions at the centers that run on Bloom
 Board, control of the session while it is on (log, tick, move between TVs),
 their own routines, plans and exercises, every workout they train — at the
-center or on their own — with records and progress, and their profile and plan.
+center or on their own — with records and progress, a profile with their
+history, measurements and a workout calendar (with their streak), the workout
+under way in the notification shade, and their account, plan and help in
+Ajustes.
 
 One of four Bloom Board repos:
 
@@ -24,6 +27,8 @@ One of four Bloom Board repos:
 - **Axios** — HTTP, with token refresh; **Socket.IO client** — live session pings
 - **i18next** — Spanish default, English available (the web's namespaces)
 - **expo-secure-store** — tokens in the Keychain / Keystore
+- **expo-notifications** + **expo-task-manager** — the workout under way in the
+  shade, and its "Completar serie" with the app closed
 - **React Compiler**, TypeScript strict, Jest (`jest-expo`)
 
 ## Quick start
@@ -33,8 +38,9 @@ npm install
 npm start          # Metro; press a (Android), i (iOS), or scan with a dev build
 ```
 
-> **Prerequisites:** Node ≥ 22. A backend at **2.0.0 or later** (workouts) —
-> local on `:3000`, or point at beta with `.env` (see
+> **Prerequisites:** Node ≥ 22. A backend of the same round — **2.9.0** for
+> `develop` today (2.0.0 is the floor) — local on `:3000`, or point at beta
+> with `.env` (see
 > [`.env.example`](.env.example)). Android Studio for the emulator, Xcode for
 > the iOS simulator.
 
@@ -63,6 +69,7 @@ Details: [store/google-play/README.md](store/google-play/README.md).
 | `npm run check:i18n` | es/en parity, every key the code uses exists |
 | `npm run bundle:check` | Android + iOS Hermes bundles compile |
 | `npm run doctor` | `expo-doctor` dependency checks |
+| `node scripts/app-icons.mjs` | Redraws the icons, one colour per build (needs `PLAYWRIGHT`, see its header) |
 
 ## Documentation
 

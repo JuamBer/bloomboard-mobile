@@ -15,7 +15,7 @@ import { METRIC_MODE_SYMBOL, ModeSheet, supportsMode } from './MetricCell';
 /** Fixed columns either side of the metrics, in points. */
 export const COL = {
   label: 40,
-  type: 40,
+  type: 44,
   tick: 46,
   action: 34,
 } as const;

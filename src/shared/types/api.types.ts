@@ -654,6 +654,7 @@ export interface LiveWorkout extends Pick<
 export interface WorkoutSummary {
   id: string;
   name: string;
+  description: string | null;
   startedAt: string;
   finishedAt: string | null;
   durationMinutes: number | null;
@@ -676,6 +677,17 @@ export interface WorkoutSummary {
   volume: number;
   records: number;
   exerciseNames: string[];
+}
+
+/** GET /me/workouts/summary — the profile's count and the calendar's streak
+ *  (backend 2.9.0). */
+export interface TrainingSummary {
+  /** Finished workouts, all time. */
+  total: number;
+  /** Weeks in a row (Monday to Sunday, up to this one) with one finished. */
+  weekStreak: number;
+  /** When the last finished one started; null with none. */
+  lastWorkoutAt: string | null;
 }
 
 export interface ActiveWorkout extends WorkoutSummary {
@@ -1131,3 +1143,16 @@ export interface HevyImportResult {
   exercisesCreated: number;
   exercisesSkipped: number;
 }
+
+// ─── Help (backend specs/member-help.md, 2.9.0) ─────────────────────────────
+
+/** A question of the FAQ, in both languages: the app shows its own. */
+export interface Faq {
+  id: string;
+  questionEs: string;
+  questionEn: string;
+  answerEs: string;
+  answerEn: string;
+}
+
+export type FeedbackKind = 'SUGGESTION' | 'BUG';

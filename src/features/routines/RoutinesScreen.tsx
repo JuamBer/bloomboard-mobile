@@ -1,20 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import {
-  ChevronRight,
   ListOrdered,
-  Lock,
   MoreVertical,
   Pencil,
+  Play,
   Plus,
   Trash2,
 } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { NameSheet } from '@features/editor/widgets/EditorSheets';
 import { useLimitGuard } from '@features/member/hooks';
 import { UpgradeSheet } from '@features/member/widgets/MemberPlan';
+import { useActiveWorkout, useStartWorkout } from '@features/workouts/hooks';
 import { meService } from '@shared/api/services/me.service';
 import { radius } from '@shared/theme/theme';
 import { makeStyles, useTheme } from '@shared/theme/ThemeProvider';
@@ -29,13 +29,18 @@ import { Text } from '@shared/ui/Text';
 
 const ROUTINES_KEY = ['me', 'routines'] as const;
 
+/** The plan's exercises in order, by the name the plan gives them. */
+const exerciseNames = (entry: RoutineWorkout) =>
+  [...entry.workoutTemplate.blocks]
+    .sort((a, b) => a.index - b.index)
+    .flatMap((b) => b.exercises)
+    .map((e) => e.customName || e.exercise.name);
+
 interface RoutineGroup {
   key: string;
   title: string;
   routines: MemberRoutine[];
   editable: boolean;
-  /** The company that prepared them, for the read-only note. */
-  company?: string;
 }
 
 type SheetState =
@@ -45,10 +50,12 @@ type SheetState =
   | null;
 
 /**
- * Every routine the member has, in one list with their workouts in the order
- * they rotate through them — the web's routines workspace on a phone: their
- * own first (editable on their plan), then one read-only group per company.
- * A tap on a workout opens its plan; a routine's settings are in its ⋯.
+ * Where training starts: an empty workout at the top, then every routine the
+ * member has with its workouts in the order they rotate through them — their
+ * own first (editable on their plan), then one group per company that
+ * prepared some (read-only, which shows only as a missing ⋯). Each workout is
+ * a card with its exercises and a Start button; a tap on the card opens its
+ * plan, and a routine's settings are in its ⋯.
  */
 export function RoutinesScreen() {
   const { t } = useTranslation([
@@ -63,6 +70,13 @@ export function RoutinesScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { guard, blocked, dismiss } = useLimitGuard();
+  const start = useStartWorkout();
+  const { data: active } = useActiveWorkout();
+  // A session's workout is reached from its control; this is one's own.
+  const ownActive = active && !active.sessionUserId ? active : null;
+  const startingId = start.isPending
+    ? (start.variables?.workoutTemplateId ?? 'empty')
+    : null;
   const [sheet, setSheet] = useState<SheetState>(null);
   const [menu, setMenu] = useState<{
     title: string;
@@ -99,7 +113,6 @@ export function RoutinesScreen() {
         }),
         routines: [],
         editable: false,
-        company: routine.assignedBy.commercialName,
       };
       group.routines.push(routine);
       byCompany.set(routine.assignedBy.id, group);
@@ -254,6 +267,30 @@ export function RoutinesScreen() {
           />
         }
       />
+      {ownActive ? (
+        <Button
+          label={t('app:routines.continueWorkout')}
+          icon={Play}
+          size="lg"
+          fullWidth
+          onPress={() =>
+            router.push({
+              pathname: '/workouts/[workoutId]',
+              params: { workoutId: ownActive.id },
+            })
+          }
+        />
+      ) : (
+        <Button
+          label={t('app:routines.emptyWorkout')}
+          icon={Play}
+          size="lg"
+          fullWidth
+          loading={startingId === 'empty'}
+          disabled={start.isPending}
+          onPress={() => start.mutate({})}
+        />
+      )}
       <QueryState isLoading={isLoading} isError={isError} onRetry={refetch} />
       {routines &&
         groups.map((group) =>
@@ -287,24 +324,14 @@ export function RoutinesScreen() {
                     <View key={routine.id} style={styles.routine}>
                       <View style={styles.routineHead}>
                         <View style={styles.flex}>
-                          <Text variant="subheading" numberOfLines={2}>
+                          <Text variant="heading" numberOfLines={2}>
                             {routine.name}
                           </Text>
                           {routine.description ? (
-                            <Text variant="caption" muted={0.5}>
+                            <Text variant="bodySmall" muted={0.5}>
                               {routine.description}
                             </Text>
                           ) : null}
-                          {!group.editable && (
-                            <View style={styles.inline}>
-                              <Lock size={11} color={theme.text(0.4)} />
-                              <Text variant="caption" muted={0.45}>
-                                {t('app:routines.readOnlyBy', {
-                                  company: group.company,
-                                })}
-                              </Text>
-                            </View>
-                          )}
                         </View>
                         {!locked && (
                           <IconButton
@@ -320,96 +347,109 @@ export function RoutinesScreen() {
                           />
                         )}
                       </View>
-                      <View>
-                        {entries.map((entry, index) => {
-                          const actions = locked
-                            ? []
-                            : workoutActions(routine, entry);
-                          return (
-                            <View
-                              key={entry.id}
-                              style={[styles.workout, index > 0 && styles.rule]}
+                      {entries.map((entry) => {
+                        const actions = locked
+                          ? []
+                          : workoutActions(routine, entry);
+                        const names = exerciseNames(entry);
+                        return (
+                          <View key={entry.id} style={styles.workout}>
+                            <Pressable
+                              onPress={() =>
+                                openTemplate(entry.workoutTemplateId)
+                              }
+                              accessibilityRole="button"
+                              accessibilityHint={t('app:routines.openPlan')}
+                              style={({ pressed }) => [
+                                styles.workoutPress,
+                                pressed && { opacity: 0.7 },
+                              ]}
                             >
-                              <Pressable
-                                onPress={() =>
-                                  openTemplate(entry.workoutTemplateId)
-                                }
-                                accessibilityRole="button"
-                                style={({ pressed }) => [
-                                  styles.workoutPress,
-                                  pressed && { opacity: 0.7 },
-                                ]}
-                              >
-                                <View style={styles.index}>
-                                  <Text variant="micro" muted={0.45}>
-                                    {index + 1}
-                                  </Text>
-                                </View>
+                              <View style={styles.workoutHead}>
                                 <Text
-                                  variant="bodySmall"
-                                  weight="semibold"
+                                  variant="subheading"
                                   numberOfLines={2}
                                   style={styles.flex}
                                 >
                                   {entry.workoutTemplate.name}
                                 </Text>
-                                {actions.length === 0 && (
-                                  <ChevronRight
-                                    size={16}
-                                    color={theme.text(0.25)}
+                                {actions.length > 0 && (
+                                  <IconButton
+                                    icon={MoreVertical}
+                                    size={32}
+                                    accessibilityLabel={t('common:options')}
+                                    style={styles.cornerMenu}
+                                    onPress={() =>
+                                      setMenu({
+                                        title: entry.workoutTemplate.name,
+                                        actions,
+                                      })
+                                    }
                                   />
                                 )}
-                              </Pressable>
-                              {actions.length > 0 && (
-                                <IconButton
-                                  icon={MoreVertical}
-                                  size={32}
-                                  accessibilityLabel={t('common:options')}
-                                  onPress={() =>
-                                    setMenu({
-                                      title: entry.workoutTemplate.name,
-                                      actions,
-                                    })
-                                  }
-                                />
-                              )}
-                            </View>
-                          );
-                        })}
-                        {entries.length === 0 && locked && (
-                          <Text
-                            variant="caption"
-                            muted={0.4}
-                            style={styles.noWorkouts}
-                          >
-                            {t('clients:routinesSection.noTemplatesInRoutine')}
+                              </View>
+                              {entry.workoutTemplate.description ? (
+                                <Text
+                                  variant="bodySmall"
+                                  muted={0.55}
+                                  numberOfLines={2}
+                                >
+                                  {entry.workoutTemplate.description}
+                                </Text>
+                              ) : null}
+                              <Text
+                                variant="caption"
+                                muted={0.45}
+                                numberOfLines={2}
+                              >
+                                {names.length > 0
+                                  ? names.join(' · ')
+                                  : t('app:routines.noExercises')}
+                              </Text>
+                            </Pressable>
+                            <Button
+                              label={t('app:routines.startWorkout')}
+                              icon={Play}
+                              variant="soft"
+                              fullWidth
+                              loading={startingId === entry.workoutTemplateId}
+                              disabled={start.isPending}
+                              onPress={() =>
+                                start.mutate({
+                                  workoutTemplateId: entry.workoutTemplateId,
+                                })
+                              }
+                            />
+                          </View>
+                        );
+                      })}
+                      {entries.length === 0 && locked && (
+                        <Text variant="caption" muted={0.4}>
+                          {t('clients:routinesSection.noTemplatesInRoutine')}
+                        </Text>
+                      )}
+                      {!locked && (
+                        <Pressable
+                          onPress={() =>
+                            guard('workouts', () =>
+                              setSheet({
+                                kind: 'create-workout',
+                                routineId: routine.id,
+                              }),
+                            )
+                          }
+                          accessibilityRole="button"
+                          style={({ pressed }) => [
+                            styles.addWorkout,
+                            pressed && { opacity: 0.7 },
+                          ]}
+                        >
+                          <Plus size={15} color={theme.colors.accentInk} />
+                          <Text variant="bodySmall" weight="bold" accent>
+                            {t('member:routines.newWorkout')}
                           </Text>
-                        )}
-                        {!locked && (
-                          <Pressable
-                            onPress={() =>
-                              guard('workouts', () =>
-                                setSheet({
-                                  kind: 'create-workout',
-                                  routineId: routine.id,
-                                }),
-                              )
-                            }
-                            accessibilityRole="button"
-                            style={[
-                              styles.workoutPress,
-                              entries.length > 0 && styles.rule,
-                            ]}
-                          >
-                            <View style={[styles.index, styles.addIndex]}>
-                              <Plus size={13} color={theme.colors.accentInk} />
-                            </View>
-                            <Text variant="bodySmall" weight="bold" accent>
-                              {t('member:routines.newWorkout')}
-                            </Text>
-                          </Pressable>
-                        )}
-                      </View>
+                        </Pressable>
+                      )}
                     </View>
                   );
                 })
@@ -521,7 +561,7 @@ export function RoutinesScreen() {
 }
 
 const useStyles = makeStyles((t) => ({
-  group: { gap: 10 },
+  group: { gap: 12 },
   emptyOwn: {
     gap: 12,
     alignItems: 'flex-start',
@@ -531,45 +571,34 @@ const useStyles = makeStyles((t) => ({
     borderStyle: 'dashed',
     borderColor: t.line(0.15),
   },
-  routine: {
-    borderRadius: radius['2xl'],
-    borderWidth: 1,
-    borderColor: t.line(0.08),
-    backgroundColor: t.colors.surface,
-    overflow: 'hidden',
-  },
+  routine: { gap: 10 },
   routineHead: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 8,
-    paddingHorizontal: 14,
-    paddingTop: 12,
-    paddingBottom: 8,
+    paddingHorizontal: 2,
   },
   flex: { flex: 1, minWidth: 0 },
-  inline: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
-  workout: { flexDirection: 'row', alignItems: 'center', paddingRight: 8 },
-  rule: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: t.line(0.08),
+  workout: {
+    gap: 12,
+    padding: 14,
+    borderRadius: radius['2xl'],
+    borderWidth: 1,
+    borderColor: t.line(0.08),
+    backgroundColor: t.colors.surface,
   },
-  workoutPress: {
-    flex: 1,
-    minHeight: 50,
+  workoutPress: { gap: 4 },
+  workoutHead: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
+  cornerMenu: { marginTop: -6, marginRight: -8, marginBottom: -8 },
+  addWorkout: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-  },
-  index: {
-    width: 24,
-    height: 24,
-    borderRadius: radius.md,
-    backgroundColor: t.fill(0.06),
-    alignItems: 'center',
     justifyContent: 'center',
+    gap: 6,
+    minHeight: 48,
+    borderRadius: radius['2xl'],
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: t.ink(0.3),
   },
-  addIndex: { backgroundColor: t.ink(0.1) },
-  noWorkouts: { paddingHorizontal: 14, paddingBottom: 12 },
 }));

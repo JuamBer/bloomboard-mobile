@@ -12,14 +12,18 @@
 | Production | `main` | `service.bloomboard.pro` | `production` | Google Play **production** (automatic, after review) | "Bloom Board" / `pro.bloomboard.app` |
 
 `APP_ENV` (set per profile in `eas.json`) drives `app.config.ts`: name, package,
-and which API the JavaScript is compiled against (`EXPO_PUBLIC_API_URL` /
+the icon's colour — like the web's favicon: production the brand's blue, beta
+amber, development green (since 2.5.0; `scripts/app-icons.mjs`) — and which
+API the JavaScript is compiled against (`EXPO_PUBLIC_API_URL` /
 `EXPO_PUBLIC_WS_URL`, also per profile). Those are public — they end up in the
 bundle — so they live in `eas.json`, not in secrets.
 
 **The API must be 2.0.0 or later** in the environment a build points at; account
-deletion (*Perfil › Eliminar cuenta*) needs **2.1.0** (`DELETE /me`); body
-measurements and the Hevy import (app 2.2.0) need **2.5.0**. Production runs
-backend 2.5.0 since 2026-10-11.
+deletion (*Perfil › Eliminar cuenta*, since app 2.5.0 *Perfil › Ajustes › Cuenta*)
+needs **2.1.0** (`DELETE /me`); body measurements and the Hevy import (app 2.2.0)
+need **2.5.0**; Google sign-in (2.3.0) **2.6.0**; units (2.4.0) **2.7.0**; the
+redesign (2.5.0: the profile's count and streak, FAQ, Contáctanos, password
+change) **2.9.0**. Backend 2.7.0 was on beta and production by 2026-10-12.
 
 The first store build, **2.1.0 (5)**, was built with the `production` profile and
 uploaded to the *internal testing* track by hand, so that one internal build

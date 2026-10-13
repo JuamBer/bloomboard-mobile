@@ -1,9 +1,7 @@
 import type { Tabs } from 'expo-router';
 import {
-  Activity,
   CalendarDays,
   ClipboardList,
-  Dumbbell,
   UserRound,
   type LucideIcon,
 } from 'lucide-react-native';
@@ -20,21 +18,18 @@ type TabBarProps = Parameters<
 /** The bar's height above the home indicator. */
 export const TAB_BAR_HEIGHT = 58;
 
-export type MemberTab =
-  'calendar' | 'routines' | 'workouts' | 'exercises' | 'profile';
+export type MemberTab = 'calendar' | 'routines' | 'profile';
 
 const TABS: Record<MemberTab, { labelKey: string; icon: LucideIcon }> = {
   calendar: { labelKey: 'member:nav.calendar', icon: CalendarDays },
   routines: { labelKey: 'member:nav.routines', icon: ClipboardList },
-  workouts: { labelKey: 'member:nav.workouts', icon: Activity },
-  exercises: { labelKey: 'member:nav.exercises', icon: Dumbbell },
   profile: { labelKey: 'member:nav.profile', icon: UserRound },
 };
 
 /**
- * The member's tab bar — the web portal's phone tab bar: every destination in
- * it, no top bar, signing out at the foot of the profile. The calendar only
- * exists for someone who trains somewhere with sessions.
+ * The member's tab bar: routines and the profile, and the calendar for
+ * someone who trains somewhere with sessions. Workouts and exercises live in
+ * the profile; signing out, in its Ajustes.
  */
 export function MemberTabBar({
   state,

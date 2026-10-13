@@ -1,589 +1,248 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import Constants from 'expo-constants';
-import { useRouter } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
+import { useRouter, type Href } from 'expo-router';
 import {
-  Building2,
-  Download,
-  Laptop,
-  LogOut,
-  Mail,
-  MapPin,
-  Monitor,
-  Moon,
+  CalendarDays,
+  Dumbbell,
   Ruler,
-  Sun,
-  Trash2,
+  Settings,
+  type LucideIcon,
 } from 'lucide-react-native';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { CONFIGURATION_QUERY_KEY } from '@features/auth/AppEffects';
+import { useMemberProfile } from '@features/member/hooks';
 import {
-  MEMBER_PROFILE_KEY,
-  useMemberLogout,
-  useMemberProfile,
-} from '@features/member/hooks';
-import { MemberPlanCard } from '@features/member/widgets/MemberPlan';
-import { GoogleCancelled, googleIdToken } from '@features/auth/google';
-import { GoogleSignInButton } from '@features/auth/GoogleSignInButton';
-import {
-  LANGUAGES,
-  useLanguageStore,
-  type Language,
-} from '@/i18n/language.store';
-import { configurationsService } from '@shared/api/services/configurations.service';
-import { errorBody } from '@shared/api/errors';
-import { meService } from '@shared/api/services/me.service';
-import { fromDateOnly, toDateOnly } from '@shared/lib/format';
+  useTrainingSummary,
+  useWorkoutHistory,
+} from '@features/workouts/hooks';
+import { WorkoutCard } from '@features/workouts/widgets/WorkoutCard';
+import { radius } from '@shared/theme/theme';
 import { makeStyles, useTheme } from '@shared/theme/ThemeProvider';
-import { useThemeStore, type ThemeMode } from '@shared/theme/theme.store';
-import type { MemberProfile, UnitSystem } from '@shared/types/api.types';
-import { useSetUnitSystem, useUnitSystem } from '@features/units/useUnitSystem';
-import { Button } from '@shared/ui/Button';
-import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
-import { Card, Divider, Section, Segmented } from '@shared/ui/controls';
-import { PageHeader, Screen } from '@shared/ui/layout';
-import { Avatar, ListRow } from '@shared/ui/misc';
-import { DateField, SelectField } from '@shared/ui/pickers';
-import { Sheet } from '@shared/ui/Sheet';
-import { QueryState } from '@shared/ui/states';
+import { Button, IconButton } from '@shared/ui/Button';
+import {
+  CONTENT_MAX_WIDTH,
+  PageHeader,
+  useContentBottomPadding,
+} from '@shared/ui/layout';
+import { Avatar } from '@shared/ui/misc';
+import { CenteredSpinner, Spinner } from '@shared/ui/Spinner';
+import { EmptyState, QueryState } from '@shared/ui/states';
 import { Text } from '@shared/ui/Text';
-import { TextField } from '@shared/ui/TextField';
-import { toast } from '@shared/ui/toast/toast.store';
-
-// The values staff pick from (EditClientModal): male, female, unspecified.
-const GENDERS = ['M', 'F', 'N'] as const;
 
 /**
- * The member's own profile: their plan and what they have used of it, then
- * who they are and where they train, their appearance and language, and —
- * the app has no other place for it — signing out and deleting the account.
- *
- * The account is theirs, so they keep the details a business holds about them
- * — nickname (what their centers' TVs show), phone, birthday, gender.
- * Someone who trains with no business has nobody those details are for, so
- * they aren't offered. Name and email stay as they are.
+ * The member's profile: who they are and how much they have trained, the way
+ * into their exercises, measurements and calendar, and every workout they
+ * have done, newest first, loading more as they scroll. Everything about the
+ * account and the app (details, password, plan, units, language, help) is
+ * behind the gear, in Ajustes.
  */
 export function ProfileScreen() {
   const { t } = useTranslation(['member', 'app']);
   const styles = useStyles();
   const theme = useTheme();
-  const { data: profile, isLoading, isError, refetch } = useMemberProfile();
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const bottomPadding = useContentBottomPadding();
   const queryClient = useQueryClient();
-  const logout = useMemberLogout();
-  const [confirmLogout, setConfirmLogout] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const hasCompanies = (profile?.affiliations.length ?? 0) > 0;
+  const { data: profile, isError, refetch } = useMemberProfile();
+  const summary = useTrainingSummary();
+  const history = useWorkoutHistory();
+  const workouts = history.data?.pages.flatMap((p) => p.data) ?? [];
+  const [refreshing, setRefreshing] = useState(false);
+
+  // What they go by: the nickname when they have one.
+  const displayName = profile
+    ? profile.alias?.trim() || `${profile.firstName} ${profile.lastName}`.trim()
+    : '';
+
+  const openWorkout = (workoutId: string) =>
+    router.push({ pathname: '/workouts/[workoutId]', params: { workoutId } });
 
   return (
-    <Screen
-      onRefresh={() =>
-        Promise.all([
-          refetch(),
-          queryClient.invalidateQueries({ queryKey: ['me', 'plan'] }),
-        ])
-      }
-    >
-      <PageHeader
-        title={t('member:profile.title')}
-        subtitle={t('member:profile.subtitle')}
-      />
-      <QueryState isLoading={isLoading} isError={isError} onRetry={refetch} />
-      {profile && (
-        <>
-          <Card style={styles.identity}>
-            <Avatar
-              firstName={profile.firstName}
-              lastName={profile.lastName}
-              url={profile.avatarUrl}
+    <View style={[styles.root, { paddingTop: insets.top }]}>
+      <FlatList
+        data={workouts}
+        keyExtractor={(w) => w.id}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: bottomPadding },
+        ]}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <PageHeader
+              title={t('member:profile.title')}
+              aside={
+                <IconButton
+                  icon={Settings}
+                  size={42}
+                  accessibilityLabel={t('app:settings.title')}
+                  onPress={() => router.push('/settings')}
+                />
+              }
             />
-            <View style={styles.flex}>
-              <Text variant="heading" numberOfLines={2}>
-                {profile.firstName} {profile.lastName}
-              </Text>
-              {hasCompanies && profile.alias ? (
-                <Text variant="bodySmall" muted={0.5} numberOfLines={1}>
-                  “{profile.alias}”
-                </Text>
-              ) : null}
-            </View>
-          </Card>
-
-          <MemberPlanCard />
-
-          <YourDataSection />
-
-          <Section title={t('member:profile.companies')}>
-            {profile.affiliations.length === 0 ? (
-              <Text variant="bodySmall" muted={0.5}>
-                {t('member:profile.noCompanies')}
-              </Text>
-            ) : (
-              profile.affiliations.map((a, i) => (
-                <View key={a.company.id}>
-                  {i > 0 && <Divider style={styles.rule} />}
-                  <View style={styles.company}>
-                    <Building2 size={16} color={theme.text(0.3)} />
-                    <View style={styles.flex}>
-                      <Text variant="bodySmall" weight="semibold">
-                        {a.company.commercialName}
-                      </Text>
-                      <View style={styles.centers}>
-                        {a.centers.length === 0 ? (
-                          <Place
-                            icon={Laptop}
-                            label={t('member:profile.online')}
-                          />
-                        ) : (
-                          a.centers.map((c) => (
-                            <Place key={c.id} icon={MapPin} label={c.name} />
-                          ))
-                        )}
-                      </View>
-                    </View>
-                  </View>
+            <QueryState isLoading={false} isError={isError} onRetry={refetch} />
+            {profile && (
+              <View style={styles.identity}>
+                <Avatar
+                  firstName={profile.firstName}
+                  lastName={profile.lastName}
+                  url={profile.avatarUrl}
+                  size={72}
+                />
+                <View style={styles.flex}>
+                  <Text variant="title" numberOfLines={2}>
+                    {displayName}
+                  </Text>
+                  <Text variant="bodySmall" muted={0.55}>
+                    {summary.data
+                      ? t('app:profile.workoutsCount', {
+                          count: summary.data.total,
+                        })
+                      : ' '}
+                  </Text>
                 </View>
-              ))
+              </View>
             )}
-          </Section>
-
-          <Section
-            title={t('member:profile.details')}
-            subtitle={
-              hasCompanies ? t('member:profile.detailsNote') : undefined
-            }
-          >
-            <View style={styles.emailRow}>
-              <Mail size={16} color={theme.text(0.3)} />
-              <Text variant="bodySmall" muted={0.5} style={styles.emailLabel}>
-                {t('member:profile.email')}
-              </Text>
-              <Text
-                variant="bodySmall"
-                weight="medium"
-                numberOfLines={1}
-                style={styles.flex}
-              >
-                {profile.email || '—'}
-              </Text>
+            <View style={styles.tiles}>
+              <Tile
+                icon={Dumbbell}
+                label={t('app:profile.exercises')}
+                href="/exercises"
+              />
+              <Tile
+                icon={Ruler}
+                label={t('app:profile.measurements')}
+                href="/measurements"
+              />
+              <Tile
+                icon={CalendarDays}
+                label={t('app:profile.calendar')}
+                href="/workouts/calendar"
+              />
             </View>
-            {hasCompanies && <PersonalDetailsForm profile={profile} />}
-          </Section>
-
-          <AppearanceSection />
-          <UnitsSection />
-
-          <Section title={t('member:profile.language')}>
-            <LanguagePicker />
-          </Section>
-
-          <Button
-            label={t('member:nav.logout')}
-            icon={LogOut}
-            variant="dangerSoft"
-            size="lg"
-            fullWidth
-            onPress={() => setConfirmLogout(true)}
-          />
-          <Button
-            label={t('member:profile.deleteAccount')}
-            icon={Trash2}
-            variant="ghost"
-            fullWidth
-            onPress={() => setDeleting(true)}
-          />
-          <Text variant="caption" muted={0.3} center>
-            Bloom Board {Constants.expoConfig?.version ?? ''}
-          </Text>
-        </>
-      )}
-      <ConfirmDialog
-        open={confirmLogout}
-        onClose={() => setConfirmLogout(false)}
-        title={t('app:profile.logoutTitle')}
-        description={t('app:profile.logoutDescription')}
-        confirmLabel={t('member:nav.logout')}
-        onConfirm={() => {
-          setConfirmLogout(false);
-          void logout();
-        }}
-      />
-      <DeleteAccountSheet
-        open={deleting}
-        onClose={() => setDeleting(false)}
-        hasPassword={profile?.hasPassword ?? true}
-      />
-    </Screen>
-  );
-}
-
-/**
- * Deleting the account: what goes, then the password — the one step that
- * makes an irreversible action deliberate (and that a borrowed, unlocked phone
- * cannot pass). An account that signs in with Google only has no password: it
- * confirms with Google instead. Google Play requires it in the app; the privacy policy
- * describes it as "Perfil › Eliminar cuenta". DELETE /me removes everything at
- * once, then the member is signed out.
- */
-const DELETE_ERRORS: Record<string, string> = {
-  WRONG_PASSWORD: 'member:profile.deleteWrongPassword',
-  GOOGLE_CONFIRMATION_REQUIRED: 'member:profile.deleteGoogleRequired',
-  GOOGLE_CONFIRMATION_MISMATCH: 'member:profile.deleteGoogleMismatch',
-};
-
-function DeleteAccountSheet({
-  open,
-  onClose,
-  hasPassword,
-}: {
-  open: boolean;
-  onClose: () => void;
-  hasPassword: boolean;
-}) {
-  const { t } = useTranslation(['member', 'common']);
-  const styles = useStyles();
-  const theme = useTheme();
-  const logout = useMemberLogout();
-  const [password, setPassword] = useState('');
-  const [googleToken, setGoogleToken] = useState<string | null>(null);
-  const [confirming, setConfirming] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const confirmed = hasPassword ? !!password : !!googleToken;
-
-  const remove = useMutation({
-    mutationFn: () =>
-      meService.deleteAccount(
-        hasPassword ? { password } : { googleIdToken: googleToken! },
-      ),
-    onSuccess: async () => {
-      await logout();
-      toast.success(t('member:profile.deleted'));
-    },
-    onError: (e) => {
-      const code = errorBody(e)?.code;
-      if (code === 'GOOGLE_CONFIRMATION_MISMATCH') setGoogleToken(null);
-      setError(
-        t(
-          (typeof code === 'string' && DELETE_ERRORS[code]) ||
-            'member:profile.deleteError',
-        ),
-      );
-    },
-  });
-
-  const confirmWithGoogle = async () => {
-    setError(null);
-    setConfirming(true);
-    try {
-      setGoogleToken(await googleIdToken());
-    } catch (e) {
-      if (!(e instanceof GoogleCancelled)) {
-        setError(t('member:profile.deleteError'));
-      }
-    } finally {
-      setConfirming(false);
-    }
-  };
-
-  const close = () => {
-    if (remove.isPending) return;
-    setPassword('');
-    setGoogleToken(null);
-    setError(null);
-    onClose();
-  };
-
-  return (
-    <Sheet
-      open={open}
-      onClose={close}
-      title={t('member:profile.deleteTitle')}
-      dismissable={!remove.isPending}
-      footer={
-        <>
-          <Button
-            label={t('common:cancel')}
-            variant="secondary"
-            flex
-            disabled={remove.isPending}
-            onPress={close}
-          />
-          <Button
-            label={t('member:profile.deleteConfirm')}
-            variant="danger"
-            flex
-            disabled={!confirmed}
-            loading={remove.isPending}
-            onPress={() => {
-              setError(null);
-              remove.mutate();
+            <Text variant="subheading" style={styles.listTitle}>
+              {t('app:profile.workouts')}
+            </Text>
+          </View>
+        }
+        ListEmptyComponent={
+          history.isLoading ? (
+            <CenteredSpinner />
+          ) : history.isError ? (
+            <QueryState
+              isLoading={false}
+              isError
+              onRetry={() => history.refetch()}
+            />
+          ) : (
+            <EmptyState
+              icon={Dumbbell}
+              description={t('app:profile.workoutsEmpty')}
+              action={
+                <Button
+                  label={t('app:profile.toRoutines')}
+                  variant="soft"
+                  size="sm"
+                  onPress={() => router.navigate('/routines')}
+                />
+              }
+            />
+          )
+        }
+        ListFooterComponent={history.isFetchingNextPage ? <Spinner /> : null}
+        onEndReached={() =>
+          history.hasNextPage &&
+          !history.isFetchingNextPage &&
+          history.fetchNextPage()
+        }
+        onEndReachedThreshold={0.5}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            tintColor={theme.colors.accentInk}
+            colors={[theme.colors.accent]}
+            progressBackgroundColor={theme.colors.surface}
+            onRefresh={async () => {
+              setRefreshing(true);
+              try {
+                await Promise.all([
+                  refetch(),
+                  queryClient.invalidateQueries({
+                    queryKey: ['me', 'workouts'],
+                  }),
+                ]);
+              } finally {
+                setRefreshing(false);
+              }
             }}
           />
-        </>
-      }
-    >
-      <Text variant="bodySmall">{t('member:profile.deleteIntro')}</Text>
-      <View style={styles.deleteList}>
-        {t('member:profile.deleteItems')
-          .split('\n')
-          .map((item) => (
-            <View key={item} style={styles.deleteItem}>
-              <Trash2 size={14} color={theme.colors.dangerInk} />
-              <Text variant="bodySmall" muted={0.7} style={styles.flex}>
-                {item}
-              </Text>
-            </View>
-          ))}
-      </View>
-      <Text variant="caption" muted={0.55}>
-        {t('member:profile.deleteCenters')}
-      </Text>
-      {hasPassword ? (
-        <TextField
-          label={t('member:profile.deletePassword')}
-          value={password}
-          onChangeText={(next) => {
-            setPassword(next);
-            setError(null);
-          }}
-          secret
-          autoComplete="current-password"
-          textContentType="password"
-          autoCapitalize="none"
-          editable={!remove.isPending}
-        />
-      ) : googleToken ? (
-        <Text variant="bodySmall" weight="bold" color={theme.colors.successInk}>
-          {t('member:profile.deleteGoogleConfirmed')}
-        </Text>
-      ) : (
-        <>
-          <Text variant="caption" weight="bold" muted={0.7}>
-            {t('member:profile.deleteWithGoogle')}
-          </Text>
-          <GoogleSignInButton
-            onPress={confirmWithGoogle}
-            loading={confirming}
-          />
-        </>
-      )}
-      {error ? (
-        <Text variant="bodySmall" color={theme.colors.dangerInk}>
-          {error}
-        </Text>
-      ) : null}
-    </Sheet>
-  );
-}
-
-function Place({ icon: Icon, label }: { icon: typeof MapPin; label: string }) {
-  const theme = useTheme();
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-      <Icon size={12} color={theme.text(0.45)} />
-      <Text variant="caption" muted={0.5}>
-        {label}
-      </Text>
+        }
+        renderItem={({ item }) => (
+          <WorkoutCard workout={item} onPress={() => openWorkout(item.id)} />
+        )}
+      />
     </View>
   );
 }
 
-// The details a business keeps about the member, which the member owns: one
-// form, one Save, sending only what changed.
-function PersonalDetailsForm({ profile }: { profile: MemberProfile }) {
-  const { t } = useTranslation(['member', 'profile']);
+/** One of the profile's ways in: an icon over a word. */
+function Tile({
+  icon: Icon,
+  label,
+  href,
+}: {
+  icon: LucideIcon;
+  label: string;
+  href: Href;
+}) {
   const styles = useStyles();
-  const queryClient = useQueryClient();
-  const [alias, setAlias] = useState(profile.alias ?? '');
-  const [phone, setPhone] = useState(profile.phone ?? '');
-  const [gender, setGender] = useState(profile.gender ?? '');
-  const [birthday, setBirthday] = useState(fromDateOnly(profile.birthday));
-
-  const original = profile.birthday?.slice(0, 10) ?? null;
-  const picked = birthday ? toDateOnly(birthday) : null;
-  const changes = {
-    ...(alias.trim() !== (profile.alias ?? '') && {
-      alias: alias.trim() || null,
-    }),
-    ...(phone.trim() !== (profile.phone ?? '') && {
-      phone: phone.trim() || null,
-    }),
-    ...(gender !== (profile.gender ?? '') && { gender: gender || null }),
-    ...(picked !== original && { birthday: picked }),
-  };
-  const dirty = Object.keys(changes).length > 0;
-
-  const save = useMutation({
-    mutationFn: () => meService.updateProfile(changes),
-    onSuccess: (updated) => {
-      queryClient.setQueryData(MEMBER_PROFILE_KEY, updated);
-      toast.success(t('member:profile.saved'));
-    },
-    onError: () => toast.error(t('member:profile.error')),
-  });
-
-  return (
-    <View style={styles.form}>
-      <Divider />
-      <TextField
-        label={t('member:profile.alias.title')}
-        hint={t('member:profile.alias.help')}
-        value={alias}
-        onChangeText={setAlias}
-        maxLength={40}
-        placeholder={t('member:profile.alias.placeholder')}
-      />
-      <TextField
-        label={t('member:profile.phone')}
-        value={phone}
-        onChangeText={setPhone}
-        maxLength={30}
-        placeholder="+34 600 000 000"
-        keyboardType="phone-pad"
-        autoComplete="tel"
-        textContentType="telephoneNumber"
-      />
-      <DateField
-        label={t('member:profile.birthday')}
-        value={birthday}
-        onChange={setBirthday}
-        placeholder={t('member:profile.birthdayPlaceholder')}
-        maximumDate={new Date()}
-        clearable
-      />
-      <SelectField
-        label={t('member:profile.gender')}
-        value={gender}
-        onChange={setGender}
-        options={GENDERS.map((value) => ({
-          value,
-          label: t(`profile:genders.${value}`),
-        }))}
-        placeholder={t('member:profile.genderPlaceholder')}
-        clearable
-      />
-      <Button
-        label={t('member:profile.save')}
-        disabled={!dirty}
-        loading={save.isPending}
-        onPress={() => dirty && save.mutate()}
-        style={styles.save}
-      />
-    </View>
-  );
-}
-
-/** Light, dark or the device's — stored on the server, shared with the web. */
-/** The member's measurements and bringing their history over from Hevy —
- *  the web profile's "Tus datos". */
-function YourDataSection() {
-  const { t } = useTranslation(['imports']);
+  const theme = useTheme();
   const router = useRouter();
   return (
-    <Section title={t('imports:profileCard.title')}>
-      <ListRow
-        icon={Ruler}
-        title={t('imports:profileCard.measurements')}
-        subtitle={t('imports:profileCard.measurementsHint')}
-        numberOfLines={2}
-        onPress={() => router.push('/measurements')}
-      />
-      <ListRow
-        icon={Download}
-        title={t('imports:profileCard.import')}
-        subtitle={t('imports:profileCard.importHint')}
-        numberOfLines={2}
-        onPress={() => router.push('/import')}
-      />
-    </Section>
-  );
-}
-
-function AppearanceSection() {
-  const { t } = useTranslation(['member', 'app']);
-  const mode = useThemeStore((s) => s.mode);
-  const setMode = useThemeStore((s) => s.setMode);
-  const queryClient = useQueryClient();
-  const save = useMutation({
-    mutationFn: (theme: ThemeMode) => configurationsService.update({ theme }),
-    onSuccess: (config) =>
-      queryClient.setQueryData(CONFIGURATION_QUERY_KEY, config),
-  });
-  return (
-    <Section title={t('member:profile.appearance')}>
-      <Segmented<ThemeMode>
-        value={mode}
-        onChange={(next) => {
-          setMode(next); // applied at once; the server follows
-          save.mutate(next);
-        }}
-        options={[
-          { value: 'SYSTEM', label: t('app:theme.system'), icon: Monitor },
-          { value: 'LIGHT', label: t('app:theme.light'), icon: Sun },
-          { value: 'DARK', label: t('app:theme.dark'), icon: Moon },
-        ]}
-      />
-    </Section>
-  );
-}
-
-/** Metric (kg, km, cm) or imperial (lb, mi, in): how every weight, distance
- *  and body measurement reads — the same setting as on the web. */
-function UnitsSection() {
-  const { t } = useTranslation(['common']);
-  const unitSystem = useUnitSystem();
-  const { setUnitSystem } = useSetUnitSystem();
-  return (
-    <Section
-      title={t('common:unitSystem.title')}
-      subtitle={t('common:unitSystem.description')}
+    <Pressable
+      onPress={() => router.push(href)}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => [
+        styles.tile,
+        pressed && { backgroundColor: theme.fill(0.06) },
+      ]}
     >
-      <Segmented<UnitSystem>
-        value={unitSystem}
-        onChange={setUnitSystem}
-        options={(['METRIC', 'IMPERIAL'] as const).map((value) => ({
-          value,
-          label: `${t(`common:unitSystem.options.${value}.label`)} · ${t(
-            `common:unitSystem.options.${value}.hint`,
-          )}`,
-        }))}
-      />
-    </Section>
+      <Icon size={22} color={theme.colors.accentInk} strokeWidth={2} />
+      <Text variant="label" numberOfLines={1}>
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
-function LanguagePicker() {
-  const { t } = useTranslation(['common']);
-  const language = useLanguageStore((s) => s.language);
-  const setLanguage = useLanguageStore((s) => s.setLanguage);
-  return (
-    <Segmented<Language>
-      value={language}
-      onChange={setLanguage}
-      options={LANGUAGES.map(({ value }) => ({
-        value,
-        label: t(`common:language.${value}`),
-      }))}
-    />
-  );
-}
-
-const useStyles = makeStyles(() => ({
-  identity: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  flex: { flex: 1, minWidth: 0 },
-  rule: { marginVertical: 10 },
-  deleteList: { gap: 8 },
-  deleteItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  company: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  centers: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    columnGap: 12,
-    rowGap: 2,
-    marginTop: 2,
+const useStyles = makeStyles((t) => ({
+  root: { flex: 1, backgroundColor: t.colors.background },
+  content: {
+    width: '100%',
+    maxWidth: CONTENT_MAX_WIDTH,
+    alignSelf: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 12,
   },
-  emailRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  emailLabel: { width: 64 },
-  form: { gap: 16 },
-  save: { alignSelf: 'flex-end' },
+  header: { gap: 18, marginBottom: 12 },
+  flex: { flex: 1, minWidth: 0, gap: 2 },
+  identity: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  tiles: { flexDirection: 'row', gap: 10 },
+  tile: {
+    flex: 1,
+    minWidth: 0,
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 6,
+    borderRadius: radius['2xl'],
+    borderWidth: 1,
+    borderColor: t.line(0.08),
+    backgroundColor: t.colors.surface,
+  },
+  listTitle: { marginTop: 6 },
+  separator: { height: 10 },
 }));

@@ -14,18 +14,20 @@ Everything below was worked out on Windows with a Pixel 7.
 1. **Docker Desktop** running (the dev database lives there; it does not start
    on its own after a reboot).
 2. **Backend** on `:3000`: in `bloomboard-backend`, `npm run start:dev`
-   (restarts on change). The app needs backend **2.0.0 or later**.
+   (restarts on change). The app on `develop` needs the backend of the same
+   round — today **2.9.0** (the profile's count, the calendar's streak, the
+   FAQ, Contáctanos, the password change); 2.0.0 is the floor.
 3. **Metro**, advertising the PC's LAN address:
    ```powershell
    cd bloomboard-mobile
-   $env:REACT_NATIVE_PACKAGER_HOSTNAME = "192.168.1.132"
+   $env:REACT_NATIVE_PACKAGER_HOSTNAME = "192.168.1.31"   # the PC's address — ipconfig
    npx expo start --dev-client
    ```
    The app derives the API's address from Metro's (`src/shared/config/env.ts`),
    so this one variable points both Metro and the API at the PC.
 4. On the phone, on the same network: open **Bloom Board (dev)**. It reconnects
    to the last server; otherwise scan Metro's QR code or type
-   `http://192.168.1.132:8081` in the launcher.
+   `http://192.168.1.31:8081` in the launcher.
 
 Shake the phone (or tap the ⚙ *Tools button*) for the dev menu: reload,
 debugger, element inspector, and the *Tools button* toggle itself.
@@ -33,10 +35,12 @@ debugger, element inspector, and the *Tools button* toggle itself.
 ## The network, once
 
 - **Which address.** Use the address of the adapter that is actually connected
-  (`ipconfig`). On this PC that is **Ethernet, `192.168.1.132`**; the Wi-Fi
-  adapter shows `192.168.1.82` but is not connected, and the phone gets "No
-  route to host" on it. DHCP may change the address — check `ipconfig` if the
-  app stops connecting.
+  (`ipconfig`) — it moves: on 2026-10-06 the PC was on **Ethernet,
+  `192.168.1.132`** (its Wi-Fi adapter then showed `192.168.1.82`, not
+  connected: "No route to host"); on 2026-10-13 on **Wi-Fi, `192.168.1.31`**.
+  DHCP may change it too — check `ipconfig` whenever the app stops connecting.
+  Quick test from the phone's browser: `http://<address>:3000/api/plans` shows
+  JSON when the backend is reachable.
 - **The firewall.** Windows treats the networks as *Public* and blocks incoming
   connections, so the phone can reach neither Metro nor the API. One rule, run
   once in an **Administrator** PowerShell — LAN only, two ports:
@@ -67,9 +71,14 @@ Studio; `ANDROID_HOME` is not set globally).
 
 ## A new development build (native changes only)
 
-> **Needed since 2026-10-07:** `develop` added `expo-audio` (the Work/Rest
-> player's sounds). A development build from before that crashes in Metro with
-> *Cannot find native module 'ExpoAudio'* — rebuild it as below.
+> **Needed since 2026-10-13:** app 2.5.0 added `expo-notifications`,
+> `expo-task-manager` and `expo-file-system` (the workout under way in the
+> notification shade). A development build from before that crashes on launch
+> with *Cannot find native module 'ExpoPushTokenManager'* — rebuild it as
+> below. The new one has the green development icon (the mark alone).
+>
+> Earlier, 2026-10-07: `expo-audio` (the Work/Rest player's sounds) — *Cannot
+> find native module 'ExpoAudio'*.
 
 `npx expo run:android` from the repo **does not work on this PC**: the path
 `C:\Users\…\Bloom Fitness\bloomboard\bloomboard-mobile` is long enough that

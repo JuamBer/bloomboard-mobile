@@ -172,7 +172,7 @@ export function UpgradeSheet({
             flex
             onPress={() => {
               onClose();
-              router.navigate('/profile');
+              router.push('/settings/subscription');
             }}
           />
           <Button

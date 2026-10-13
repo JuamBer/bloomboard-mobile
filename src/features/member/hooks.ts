@@ -1,4 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
 import { useState } from 'react';
 import { useAuthStore } from '@features/auth/auth.store';
 import { useFinishFlow } from '@features/workouts/lib/finish-flow';
@@ -26,14 +28,17 @@ export function useHasSessions() {
   return !!data?.affiliations.some((a) => a.hasSessions);
 }
 
-/** Signs the member out: drops the tokens and every cached read, so the next
- *  person on this phone starts clean. The navigator's guard then shows the
- *  login. */
+/** Signs the member out: drops the tokens, every cached read and the workout
+ *  notification, so the next person on this phone starts clean. The
+ *  navigator's guard then shows the login. */
 export function useMemberLogout() {
   const queryClient = useQueryClient();
   const closeFinishFlow = useFinishFlow((s) => s.close);
   return async () => {
     closeFinishFlow();
+    if (Platform.OS !== 'web') {
+      await Notifications.dismissAllNotificationsAsync().catch(() => undefined);
+    }
     await useAuthStore.getState().signOut();
     queryClient.clear();
   };

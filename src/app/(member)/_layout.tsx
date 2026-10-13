@@ -1,4 +1,5 @@
 import { Stack, usePathname, useRouter, useSegments } from 'expo-router';
+import { useState } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -6,9 +7,11 @@ import { useActiveSession } from '@features/member/hooks';
 import { useSessionSocket } from '@features/member/session-socket';
 import { LIVE_PILL_HEIGHT, LivePill } from '@features/member/widgets/LivePill';
 import { TAB_BAR_HEIGHT } from '@features/member/widgets/MemberTabBar';
-import { useActiveWorkout } from '@features/workouts/hooks';
+import { useActiveWorkout, useDiscardWorkout } from '@features/workouts/hooks';
+import { useWorkoutNotification } from '@features/workouts/notification/useWorkoutNotification';
 import { WorkoutFinishFlow } from '@features/workouts/widgets/WorkoutFinishFlow';
 import { useTheme } from '@shared/theme/ThemeProvider';
+import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
 import { BottomInsetContext } from '@shared/ui/layout';
 
 /**
@@ -31,7 +34,11 @@ export default function MemberLayout() {
 
   const { data: activeSession } = useActiveSession();
   const { data: activeWorkout } = useActiveWorkout();
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
+  const discard = useDiscardWorkout(() => setConfirmDiscard(false));
   useSessionSocket(!!activeSession);
+  // The workout under way, in the notification shade too.
+  useWorkoutNotification();
 
   const showSessionPill = !!activeSession && !pathname.startsWith('/session');
   // A workout started on one's own (a session's has the session pill), on
@@ -87,9 +94,22 @@ export default function MemberLayout() {
                 params: { workoutId: ownWorkout.id },
               })
             }
+            onDiscard={() => setConfirmDiscard(true)}
+            discardLabel={t('workouts:detail.discard')}
             bottom={pillBottom}
           />
         )}
+        <ConfirmDialog
+          open={confirmDiscard && !!ownWorkout}
+          onClose={() => !discard.isPending && setConfirmDiscard(false)}
+          title={t('workouts:detail.discardTitle')}
+          description={t('workouts:detail.discardDescription', {
+            name: ownWorkout?.name,
+          })}
+          confirmLabel={t('workouts:detail.discardShort')}
+          loading={discard.isPending}
+          onConfirm={() => ownWorkout && discard.mutate(ownWorkout.id)}
+        />
         <WorkoutFinishFlow />
       </View>
     </BottomInsetContext.Provider>

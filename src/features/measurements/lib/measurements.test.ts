@@ -8,6 +8,7 @@ import {
   parseMeasurementInput,
   toTime,
   withTime,
+  withinRange,
 } from './measurements';
 
 const row = (
@@ -148,5 +149,24 @@ describe('measurements in imperial units', () => {
   it('checks the range in stored units', () => {
     // 900 lb is 408 kg, past the 400 kg the API takes.
     expect(parseMeasurementInput('weightKg', '900', 'IMPERIAL').ok).toBe(false);
+  });
+});
+
+describe('withinRange', () => {
+  const now = new Date('2026-10-13T12:00:00');
+  const at = (iso: string) => new Date(iso).toISOString();
+
+  it('keeps everything for all time', () => {
+    expect(withinRange(at('2020-01-01T08:00:00'), 'ALL', now)).toBe(true);
+  });
+
+  it('reaches back three months', () => {
+    expect(withinRange(at('2026-07-14T08:00:00'), '3M', now)).toBe(true);
+    expect(withinRange(at('2026-07-12T08:00:00'), '3M', now)).toBe(false);
+  });
+
+  it('reaches back a year', () => {
+    expect(withinRange(at('2025-10-14T08:00:00'), '1Y', now)).toBe(true);
+    expect(withinRange(at('2025-10-12T08:00:00'), '1Y', now)).toBe(false);
   });
 });

@@ -27,7 +27,15 @@
   },
   "profile": {
     "logoutTitle": "Sign out?",
-    "logoutDescription": "You'll need your email and password to sign back in."
+    "logoutDescription": "You'll need your email and password to sign back in.",
+    "workoutsCount_one": "{{count}} workout",
+    "workoutsCount_other": "{{count}} workouts",
+    "exercises": "Exercises",
+    "measurements": "Measures",
+    "calendar": "Calendar",
+    "workouts": "Workouts",
+    "workoutsEmpty": "You haven't trained yet. Start from your routines or with an empty workout.",
+    "toRoutines": "Go to Routines"
   },
   "editor": {
     "nextField": "Next",
@@ -38,7 +46,6 @@
   },
   "routines": {
     "readOnly": "Prepared by your center · read-only",
-    "readOnlyBy": "Prepared by {{company}} · read-only",
     "name": "Routine name",
     "workoutName": "Workout name",
     "descriptionPlaceholder": "Description (optional)",
@@ -46,6 +53,132 @@
     "deleteTitle": "Delete the routine?",
     "deleteDescription": "\"{{name}}\" and its workouts will be deleted. What you have already trained stays in your history.",
     "removeWorkoutTitle": "Remove the workout?",
-    "removeWorkoutDescription": "\"{{name}}\" will be removed from this routine. What you have already trained stays in your history."
+    "removeWorkoutDescription": "\"{{name}}\" will be removed from this routine. What you have already trained stays in your history.",
+    "emptyWorkout": "Start empty workout",
+    "continueWorkout": "Continue workout",
+    "startWorkout": "Start workout",
+    "openPlan": "Opens the plan",
+    "noExercises": "No exercises yet"
+  },
+  "workoutCard": {
+    "duration": "Duration",
+    "exercises": "Exercises",
+    "sets": "Sets",
+    "inProgress": "In progress"
+  },
+  "settings": {
+    "title": "Settings",
+    "account": {
+      "title": "Account",
+      "profile": "Profile",
+      "account": "Account",
+      "subscription": "Subscription"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "language": "Language",
+      "systemHint": "Light or dark, following the phone's setting"
+    },
+    "help": {
+      "title": "Help",
+      "faq": "FAQ",
+      "contact": "Contact us",
+      "about": "About Bloom Board"
+    }
+  },
+  "settingsProfile": {
+    "aliasHint": "What your profile shows instead of your name and, if you train at a gym, what its screens show."
+  },
+  "password": {
+    "section": "Password",
+    "change": "Change password",
+    "create": "Create a password",
+    "googleOnlyHint": "You sign in with Google. With a password you can also sign in with your email.",
+    "current": "Current password",
+    "withGoogle": "Your account signs in with Google: confirm it is you.",
+    "new": "New password",
+    "rule": "At least {{count}} characters.",
+    "tooShort": "It needs at least {{count}} characters.",
+    "repeat": "Repeat the new password",
+    "mismatch": "It doesn't match the new password.",
+    "save": "Save",
+    "changed": "Password changed",
+    "created": "Password created: you can now also sign in with your email",
+    "wrong": "The current password is not correct.",
+    "googleRequired": "Confirm with Google to continue.",
+    "error": "The password couldn't be changed. Try again."
+  },
+  "subscription": {
+    "comped": "Bloom Board gives you this plan.",
+    "comingSoon": "Pro is coming soon. Once you can get it, you'll upgrade or cancel your plan here.",
+    "manage": "Upgrade or cancel your plan here."
+  },
+  "faq": {
+    "empty": "There are no questions yet.",
+    "more": "Can't find what you're looking for?"
+  },
+  "contact": {
+    "intro": "We read everything. Tell us what you'd improve or what doesn't work as it should.",
+    "suggestion": "Send a suggestion",
+    "suggestionHint": "Ideas and things you miss",
+    "suggestionLabel": "Your suggestion",
+    "suggestionPlaceholder": "I'd like to be able to…",
+    "bug": "Report a problem",
+    "bugHint": "Something that fails or doesn't do what you expected",
+    "bugLabel": "What happened",
+    "bugHelp": "Tell us what you were doing and what you expected to happen.",
+    "bugPlaceholder": "When I save a set…",
+    "send": "Send",
+    "sent": "Sent",
+    "sentSuggestion": "Thanks for the idea.",
+    "sentBug": "Thanks: we'll look into it as soon as we can.",
+    "attached": "It's sent with the app version ({{version}}), the system and the language.",
+    "orEmail": "Or write to us"
+  },
+  "about": {
+    "tagline": "Your training, with you at the gym",
+    "web": "Website",
+    "email": "Email",
+    "privacy": "Privacy policy",
+    "follow": "Follow us",
+    "version": "Version {{version}}",
+    "versionBuild": "Version {{version}} ({{build}})"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "streak": "Streak",
+    "weeks_one": "{{count}} week",
+    "weeks_other": "{{count}} weeks",
+    "streakHint": "Weeks in a row with at least one workout",
+    "streakNone": "Train this week to start one",
+    "rest": "Rest",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "trainedToday": "You trained today",
+    "restHint": "Since your last workout",
+    "noWorkoutsYet": "You haven't trained yet",
+    "noWorkoutsDay": "You didn't train this day.",
+    "workouts_one": "{{count}} workout",
+    "workouts_other": "{{count}} workouts",
+    "today": "Today"
+  },
+  "workout": {
+    "done": "Done",
+    "editing": "Editing the workout",
+    "editDetails": "Name, time and note"
+  },
+  "measurementsRange": {
+    "3M": "3 months",
+    "1Y": "Last year",
+    "ALL": "All time",
+    "empty": "No measurements in this period."
+  },
+  "workoutNotification": {
+    "channel": "Workout in progress",
+    "channelDescription": "The exercise and set you are on while you train.",
+    "completeSet": "Complete set",
+    "set": "Set {{number}} of {{count}}",
+    "exercise": "Exercise {{number}} of {{count}}",
+    "allDone": "All done: open the workout to finish it."
   }
 }

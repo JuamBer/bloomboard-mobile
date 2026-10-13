@@ -6,6 +6,7 @@ import type {
   PaginatedResponse,
   SetMetrics,
   SetType,
+  TrainingSummary,
   Workout,
   WorkoutBlock,
   WorkoutExercise,
@@ -227,13 +228,25 @@ export const workoutsService = {
   // ─── The member's own (/me) ─────────────────────────────────────────────────
 
   mine: {
+    /** Newest first; `range` (ISO, started within) is the calendar's month. */
     list: async (
       page = 1,
       limit = 20,
+      range?: { from: string; to: string },
     ): Promise<PaginatedResponse<WorkoutSummary>> => {
       const { data } = await apiClient.get<PaginatedResponse<WorkoutSummary>>(
         '/me/workouts',
-        { params: { page, limit } },
+        { params: { page, limit, ...range } },
+      );
+      return data;
+    },
+
+    /** How many finished, the streak of weeks, the last one — weeks counted
+     *  in the phone's time zone. */
+    summary: async (timeZone: string): Promise<TrainingSummary> => {
+      const { data } = await apiClient.get<TrainingSummary>(
+        '/me/workouts/summary',
+        { params: { tz: timeZone } },
       );
       return data;
     },

@@ -14,6 +14,7 @@ import {
   SET_TYPE_INITIALS,
   SET_TYPE_KEYS,
 } from '../constants/template.labels';
+import { FIELD_HEIGHT } from './MetricCell';
 
 /** A set type's badge colours: its hue at 10% / 20%, or the neutral steps. */
 export function useSetTypeColors() {
@@ -124,12 +125,12 @@ export function SetTypeBadge({
 }
 
 /** A workout set's tick: done or not, saved at once. Green with a white check
- *  when done — the web's DONE_TICK. */
+ *  when done — the web's DONE_TICK. As tall as the value fields beside it. */
 export function SetTick({
   done,
   isReadOnly,
   onToggle,
-  size = 34,
+  size = FIELD_HEIGHT,
 }: {
   done: boolean;
   isReadOnly?: boolean;
@@ -172,9 +173,10 @@ export function SetTick({
 }
 
 const useStyles = makeStyles(() => ({
+  // As tall as the value fields beside it (a read-only row has none).
   badge: {
-    width: 32,
-    height: 32,
+    width: FIELD_HEIGHT,
+    height: FIELD_HEIGHT,
     borderRadius: radius.lg,
     borderWidth: 1,
     alignItems: 'center',

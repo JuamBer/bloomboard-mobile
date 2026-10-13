@@ -414,7 +414,7 @@ export function HevyImportScreen() {
             <Button
               label={t('imports:done.toWorkouts')}
               fullWidth
-              onPress={() => router.replace('/workouts')}
+              onPress={() => router.replace('/profile')}
             />
             <Button
               label={t('imports:done.toMeasurements')}

@@ -23,7 +23,7 @@ import type {
 import { ActionSheet } from '@shared/ui/ActionSheet';
 import { Button, IconButton } from '@shared/ui/Button';
 import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
-import { Card, Section } from '@shared/ui/controls';
+import { Card, Section, Segmented } from '@shared/ui/controls';
 import { PageHeader, Screen, StackHeader } from '@shared/ui/layout';
 import { EmptyState, QueryState } from '@shared/ui/states';
 import { Text } from '@shared/ui/Text';
@@ -37,6 +37,9 @@ import {
   formatMeasurementValue,
   measurementIn,
   latestValues,
+  MEASUREMENT_RANGES,
+  withinRange,
+  type MeasurementRange,
 } from './lib/measurements';
 import { MeasurementSheet } from './widgets/MeasurementSheet';
 
@@ -45,11 +48,13 @@ export const MY_MEASUREMENTS_KEY = ['me', 'measurements'] as const;
 /**
  * The member's body measurements (backend specs/body-measurements.md) — the
  * web's /me/measurements: the latest value of each with its change, the
- * evolution of one at a time, and every day measured. Reached from Perfil.
+ * evolution of one at a time, and every day measured — the evolution and the
+ * days narrowed to the last 3 months, the last year or all of it. Reached
+ * from Perfil.
  * Their trainers read and write the same list from the client profile.
  */
 export function MeasurementsScreen() {
-  const { t, i18n } = useTranslation(['measurements', 'common']);
+  const { t, i18n } = useTranslation(['measurements', 'common', 'app']);
   const lang = i18n.language;
   // Read in the member's units (lb, in); stored in kg and cm.
   const unitSystem = useUnitSystem();
@@ -62,6 +67,7 @@ export function MeasurementsScreen() {
   const [editing, setEditing] = useState<BodyMeasurement | 'new' | null>(null);
   const [menu, setMenu] = useState<BodyMeasurement | null>(null);
   const [deleting, setDeleting] = useState<BodyMeasurement | null>(null);
+  const [range, setRange] = useState<MeasurementRange>('3M');
 
   const {
     data: rows = [],
@@ -95,7 +101,8 @@ export function MeasurementsScreen() {
   });
 
   const latest = latestValues(rows);
-  const points = [...rows]
+  const shown = rows.filter((r) => withinRange(r.measuredAt, range));
+  const points = [...shown]
     .sort((a, b) => a.measuredAt.localeCompare(b.measuredAt))
     .map((r) => ({ ...r, performedAt: r.measuredAt }));
   const measures = MEASUREMENT_FIELDS.map((field) => ({
@@ -181,61 +188,78 @@ export function MeasurementsScreen() {
               ))}
             </View>
 
-            {rows.length > 1 && (
+            <Segmented<MeasurementRange>
+              value={range}
+              onChange={setRange}
+              options={MEASUREMENT_RANGES.map((value) => ({
+                value,
+                label: t(`app:measurementsRange.${value}`),
+              }))}
+            />
+
+            {shown.length === 0 && (
+              <Text variant="bodySmall" muted={0.5} center>
+                {t('app:measurementsRange.empty')}
+              </Text>
+            )}
+
+            {shown.length > 1 && (
               <Section title={t('measurements:evolution')}>
                 <ProgressChart points={points} measures={measures} />
               </Section>
             )}
 
-            <Section title={t('measurements:history')}>
-              {rows.map((row, i) => (
-                <View
-                  key={row.id}
-                  style={[styles.row, i > 0 && styles.rowRule]}
-                >
-                  <View style={styles.flex}>
-                    <Text variant="bodySmall" weight="bold">
-                      {formatDateTime(row.measuredAt, lang)}
-                    </Text>
-                    <View style={styles.chips}>
-                      {MEASUREMENT_FIELDS.filter((f) => row[f] != null).map(
-                        (f) => (
-                          <View key={f} style={styles.chip}>
-                            <Text variant="caption" muted={0.7}>
-                              {t(`measurements:fields.${f}`)}{' '}
-                              <Text variant="caption" weight="bold">
-                                {formatMeasurement(
-                                  f,
-                                  row[f]!,
-                                  lang,
-                                  unitSystem,
-                                )}
+            {shown.length > 0 && (
+              <Section title={t('measurements:history')}>
+                {shown.map((row, i) => (
+                  <View
+                    key={row.id}
+                    style={[styles.row, i > 0 && styles.rowRule]}
+                  >
+                    <View style={styles.flex}>
+                      <Text variant="bodySmall" weight="bold">
+                        {formatDateTime(row.measuredAt, lang)}
+                      </Text>
+                      <View style={styles.chips}>
+                        {MEASUREMENT_FIELDS.filter((f) => row[f] != null).map(
+                          (f) => (
+                            <View key={f} style={styles.chip}>
+                              <Text variant="caption" muted={0.7}>
+                                {t(`measurements:fields.${f}`)}{' '}
+                                <Text variant="caption" weight="bold">
+                                  {formatMeasurement(
+                                    f,
+                                    row[f]!,
+                                    lang,
+                                    unitSystem,
+                                  )}
+                                </Text>
                               </Text>
-                            </Text>
-                          </View>
-                        ),
-                      )}
+                            </View>
+                          ),
+                        )}
+                      </View>
+                      {row.notes ? (
+                        <Text variant="caption" muted={0.6}>
+                          {row.notes}
+                        </Text>
+                      ) : null}
+                      {author(row) ? (
+                        <Text variant="micro" muted={0.4}>
+                          {author(row)}
+                        </Text>
+                      ) : null}
                     </View>
-                    {row.notes ? (
-                      <Text variant="caption" muted={0.6}>
-                        {row.notes}
-                      </Text>
-                    ) : null}
-                    {author(row) ? (
-                      <Text variant="micro" muted={0.4}>
-                        {author(row)}
-                      </Text>
-                    ) : null}
+                    <IconButton
+                      icon={MoreVertical}
+                      accessibilityLabel={t('measurements:menu')}
+                      color={theme.text(0.4)}
+                      onPress={() => setMenu(row)}
+                    />
                   </View>
-                  <IconButton
-                    icon={MoreVertical}
-                    accessibilityLabel={t('measurements:menu')}
-                    color={theme.text(0.4)}
-                    onPress={() => setMenu(row)}
-                  />
-                </View>
-              ))}
-            </Section>
+                ))}
+              </Section>
+            )}
 
             <View style={styles.importHint}>
               <Text variant="caption" muted={0.45} center>

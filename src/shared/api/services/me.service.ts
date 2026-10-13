@@ -6,6 +6,8 @@ import type {
   Exercise,
   Muscle,
   ExerciseProgressStatus,
+  Faq,
+  FeedbackKind,
   MemberActiveSession,
   MemberExercise,
   MemberExerciseUsage,
@@ -70,6 +72,36 @@ export const meService = {
       changes,
     );
     return data;
+  },
+
+  /** A new password, confirmed like deleting the account: the current one,
+   *  or a fresh Google ID token for an account without one. 403
+   *  WRONG_PASSWORD / GOOGLE_CONFIRMATION_*; the caller shows it inline. */
+  changePassword: async (dto: {
+    newPassword: string;
+    currentPassword?: string;
+    googleIdToken?: string;
+  }): Promise<void> => {
+    await apiClient.post('/me/password', dto, { silentErrors: true });
+  },
+
+  // ─── Help ──────────────────────────────────────────────────────────────────
+
+  /** The published FAQ, in order, both languages. */
+  getFaqs: async (): Promise<Faq[]> => {
+    const { data } = await apiClient.get<Faq[]>('/me/faqs');
+    return data;
+  },
+
+  /** A suggestion or a problem, with where it is sent from. */
+  sendFeedback: async (dto: {
+    kind: FeedbackKind;
+    message: string;
+    appVersion?: string;
+    platform?: string;
+    lang?: string;
+  }): Promise<void> => {
+    await apiClient.post('/me/feedback', dto);
   },
 
   getPlan: async (): Promise<MemberPlan> => {

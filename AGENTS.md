@@ -29,6 +29,12 @@ coach programs, the one whose center runs on Bloom Board — is in
 | Both native bundles compile | `npm run bundle:check` (Hermes, Android + iOS, into `dist/`) |
 | Dependency sanity | `npm run doctor` |
 
+**The entry is `index.ts`**, not `expo-router/entry`: it defines the workout
+notification's background task first (expo-task-manager runs the bundle
+headless for it), then loads Expo Router. **Icons** are drawn by
+`scripts/app-icons.mjs` from the brand mark, one colour per build (see its
+header); don't hand-edit the PNGs.
+
 There is no `ios/` or `android/` folder, and there must never be one in git:
 native projects are generated from `app.config.ts` (`npx expo prebuild`, or EAS
 does it on its build machines). A native setting goes in `app.config.ts` or a
@@ -52,8 +58,9 @@ the notes fields keep their usual placeholders); body measurements and the Hevy
 import need **2.5.0** (on an older one both screens are 404s); Google sign-in
 needs **2.6.0** (on an older one "Continuar con Google" ends in a generic error);
 units and the new composite units need **2.7.0** (on an older one Unidades does not stick and a
-set with a speed or a pace is refused).
-**App 2.2.0 needs backend 2.5.0 live first; app 2.3.0 needs 2.6.0; app 2.4.0 needs 2.7.0.** A change that needs a new backend route ships the
+set with a speed or a pace is refused); the profile's workout count, the calendar's streak, the
+password change, the FAQ and Contáctanos need **2.9.0** (on an older one they are 404s).
+**App 2.2.0 needs backend 2.5.0 live first; app 2.3.0 needs 2.6.0; app 2.4.0 needs 2.7.0; app 2.5.0 needs 2.9.0.** A change that needs a new backend route ships the
 backend first. How the store build 2.1.0 behaves against backend 2.4.0:
 `specs/member-app.md` → Known issues.
 

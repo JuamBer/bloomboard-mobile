@@ -1,4 +1,4 @@
-import { ChevronRight } from 'lucide-react-native';
+import { ChevronRight, Trash2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Animated, Platform, Pressable, View } from 'react-native';
 import { radius } from '@shared/theme/theme';
@@ -12,19 +12,25 @@ export const LIVE_PILL_HEIGHT = 58;
 /**
  * "Session in progress" / "Workout under way", floating over every member
  * screen while one is on, so the member can wander off to their exercises or
- * profile and always get back in one tap. Sits just above the tab bar.
+ * profile and always get back in one tap. Sits just above the tab bar. A
+ * workout of their own can also be thrown away from it (`onDiscard`, which
+ * asks first).
  */
 export function LivePill({
   title,
   subtitle,
   since,
   onPress,
+  onDiscard,
+  discardLabel,
   bottom,
 }: {
   title: string;
   subtitle: string;
   since: string;
   onPress: () => void;
+  onDiscard?: () => void;
+  discardLabel?: string;
   /** Distance from the screen's bottom edge. */
   bottom: number;
 }) {
@@ -48,52 +54,71 @@ export function LivePill({
   const ink = theme.colors.accentContrast;
   return (
     <View pointerEvents="box-none" style={[styles.anchor, { bottom }]}>
-      <Pressable
-        onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={`${title}. ${subtitle}`}
-        style={({ pressed }) => [styles.pill, pressed && { opacity: 0.92 }]}
-      >
-        <View style={styles.dotBox}>
-          <Animated.View
-            style={[
-              styles.dot,
-              styles.ping,
-              {
-                backgroundColor: ink,
-                opacity: pulse.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.6, 0],
-                }),
-                transform: [
-                  {
-                    scale: pulse.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [1, 2.4],
-                    }),
-                  },
-                ],
-              },
-            ]}
-          />
-          <View style={[styles.dot, { backgroundColor: ink }]} />
-        </View>
-        <View style={styles.texts}>
-          <Text variant="caption" weight="bold" color={ink} uppercase>
-            {title}
-          </Text>
-          <Text
-            variant="caption"
-            color={ink}
-            numberOfLines={1}
-            style={styles.subtitle}
-          >
-            {subtitle}
-          </Text>
-        </View>
-        <ElapsedTimer since={since} color={ink} />
-        <ChevronRight size={17} color={ink} />
-      </Pressable>
+      <View style={styles.pill}>
+        <Pressable
+          onPress={onPress}
+          accessibilityRole="button"
+          accessibilityLabel={`${title}. ${subtitle}`}
+          style={({ pressed }) => [styles.open, pressed && { opacity: 0.85 }]}
+        >
+          <View style={styles.dotBox}>
+            <Animated.View
+              style={[
+                styles.dot,
+                styles.ping,
+                {
+                  backgroundColor: ink,
+                  opacity: pulse.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.6, 0],
+                  }),
+                  transform: [
+                    {
+                      scale: pulse.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [1, 2.4],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            />
+            <View style={[styles.dot, { backgroundColor: ink }]} />
+          </View>
+          <View style={styles.texts}>
+            <Text variant="caption" weight="bold" color={ink} uppercase>
+              {title}
+            </Text>
+            <Text
+              variant="caption"
+              color={ink}
+              numberOfLines={1}
+              style={styles.subtitle}
+            >
+              {subtitle}
+            </Text>
+          </View>
+          <ElapsedTimer since={since} color={ink} />
+          <ChevronRight size={17} color={ink} />
+        </Pressable>
+        {onDiscard && (
+          <>
+            <View style={[styles.divider, { backgroundColor: ink }]} />
+            <Pressable
+              onPress={onDiscard}
+              accessibilityRole="button"
+              accessibilityLabel={discardLabel}
+              hitSlop={6}
+              style={({ pressed }) => [
+                styles.discard,
+                pressed && { opacity: 0.6 },
+              ]}
+            >
+              <Trash2 size={18} color={ink} />
+            </Pressable>
+          </>
+        )}
+      </View>
     </View>
   );
 }
@@ -111,8 +136,6 @@ const useStyles = makeStyles((t) => ({
     height: LIVE_PILL_HEIGHT,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
     borderRadius: radius['3xl'],
     backgroundColor: t.colors.accent,
     shadowColor: '#000',
@@ -120,6 +143,21 @@ const useStyles = makeStyles((t) => ({
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 8 },
     elevation: 10,
+  },
+  open: {
+    flex: 1,
+    alignSelf: 'stretch',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 16,
+  },
+  divider: { width: 1, height: 26, opacity: 0.25 },
+  discard: {
+    alignSelf: 'stretch',
+    width: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dotBox: {
     width: 10,

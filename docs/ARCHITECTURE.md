@@ -16,9 +16,14 @@ src/
 │   ├── calendar/   agenda + month, a session's detail
 │   ├── routines/   own routines + the centers' (read-only)
 │   ├── editor/     the shared workout editor (plan or workout), its sheets and grid
-│   ├── workouts/   history, the workout view (live mode), finish flow, records, progress
+│   ├── workouts/   the workout view (live mode; read-only once finished), finish
+│   │               flow, records, progress, the workout calendar, and the
+│   │               "under way" notification (notification/: content, task, hook)
 │   ├── exercises/  catalog, filters, own exercises (form), detail, usages
-│   └── profile/    identity, plan, personal details, theme, language, logout
+│   ├── measurements/  body measurements · imports/  the Hevy import
+│   ├── profile/    the profile: identity, workout count, its tiles, the history
+│   └── settings/   Ajustes: details, password, deletion, plan, units, language,
+│                   theme, FAQ, Contáctanos, about
 ├── shared/
 │   ├── api/        axios client, token refresh, coded errors, services/*.service.ts
 │   ├── config/     env (API_URL, WS_URL, APP_ENV, web/landing links)
@@ -37,19 +42,25 @@ resolves them through Expo's tsconfig-paths support).
 ## Navigation
 
 ```
+index.ts                    the entry: the notification's background task, then
+                            expo-router/entry (the task must exist before anything runs)
 _layout.tsx                 fonts, splash, providers, AppEffects, Toaster
 ├── Stack.Protected (signed out)
 │   ├── login · register · activate/index
 ├── activate/[token]        always reachable — an emailed link may open signed in
 └── Stack.Protected (signed in)
-    └── (member)/_layout.tsx    stack + LivePill + session socket + finish flow
-        ├── (tabs)/_layout.tsx  MemberTabBar: Calendario* · Rutinas · Entrenos · Ejercicios · Perfil
+    └── (member)/_layout.tsx    stack + LivePill (with discard) + session socket +
+        │                       finish flow + the workout notification
+        ├── (tabs)/_layout.tsx  MemberTabBar: Calendario* · Rutinas · Perfil
         │   └── index           redirect: calendar if they have sessions, else routines
         ├── session             the session control (the running session's workout)
         ├── sessions/[sessionId]   a session's detail (read-only)
         ├── templates/[templateId] a plan in the editor
-        ├── workouts/[workoutId]   a workout (live while under way)
-        └── exercises/[exerciseId]/index · usages
+        ├── workouts/[workoutId]   a workout (live while under way; finished: read-only until Editar)
+        ├── workouts/calendar      the workouts by the month, the streak, the rest days
+        ├── exercises/index · [exerciseId]/index · usages
+        ├── measurements · import
+        └── settings/index · profile · account · subscription · faq · contact · about
 ```
 
 \* Calendario appears only for members with sessions (a center that runs on
@@ -117,13 +128,22 @@ The member and the trainer's board write the same session workout.
 - **Haptics** on ticks and records (the web's fanfare would be a sound in a
   gym). **Keep-awake** while a workout is under way.
 - **Links out:** privacy/terms and the web app open in an in-app browser
-  (`expo-web-browser`).
+  (`expo-web-browser`); Sobre Bloom Board's web, email and social links open
+  outside (`Linking`).
+- **Notifications:** while a workout is under way, one local notification
+  (`expo-notifications`) on a silent channel, replaced in place as the workout
+  moves on, with "Completar serie". With the app closed, a background task
+  (`expo-task-manager`, Android) handles the button. No pushes — see
+  `specs/member-app.md`, decisions 9 and 17.
 
 ## Build shape
 
 - Managed Expo, Continuous Native Generation: `app.config.ts` is the only
-  native configuration. `APP_ENV` (from the EAS profile) picks name, bundle id
-  and API.
+  native configuration. `APP_ENV` (from the EAS profile) picks name, bundle id,
+  API and icon (the mark in blue, amber or green — `scripts/app-icons.mjs`).
+- The entry is `index.ts`, not `expo-router/entry`: it defines the workout
+  notification's background task first, because expo-task-manager runs the
+  bundle headless for it.
 - Hermes, the New Architecture (default in SDK 57), React Compiler.
 - `runtimeVersion: appVersion` — an over-the-air update only reaches binaries
   of the same app version. Not `fingerprint`: its hash differs between Windows

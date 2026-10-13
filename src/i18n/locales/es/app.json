@@ -27,7 +27,15 @@
   },
   "profile": {
     "logoutTitle": "¿Cerrar sesión?",
-    "logoutDescription": "Tendrás que volver a entrar con tu email y tu contraseña."
+    "logoutDescription": "Tendrás que volver a entrar con tu email y tu contraseña.",
+    "workoutsCount_one": "{{count}} entrenamiento",
+    "workoutsCount_other": "{{count}} entrenamientos",
+    "exercises": "Ejercicios",
+    "measurements": "Medidas",
+    "calendar": "Calendario",
+    "workouts": "Entrenamientos",
+    "workoutsEmpty": "Aún no has entrenado. Empieza desde tus rutinas o con un entrenamiento vacío.",
+    "toRoutines": "Ir a Rutinas"
   },
   "editor": {
     "nextField": "Siguiente",
@@ -38,7 +46,6 @@
   },
   "routines": {
     "readOnly": "Preparada por tu centro · solo lectura",
-    "readOnlyBy": "Preparada por {{company}} · solo lectura",
     "name": "Nombre de la rutina",
     "workoutName": "Nombre del entrenamiento",
     "descriptionPlaceholder": "Descripción (opcional)",
@@ -46,6 +53,132 @@
     "deleteTitle": "¿Eliminar la rutina?",
     "deleteDescription": "Se eliminará «{{name}}» con sus entrenamientos. Lo que ya has entrenado se queda en tu historial.",
     "removeWorkoutTitle": "¿Quitar el entrenamiento?",
-    "removeWorkoutDescription": "Se quitará «{{name}}» de esta rutina. Lo que ya has entrenado se queda en tu historial."
+    "removeWorkoutDescription": "Se quitará «{{name}}» de esta rutina. Lo que ya has entrenado se queda en tu historial.",
+    "emptyWorkout": "Empezar entrenamiento vacío",
+    "continueWorkout": "Continuar entrenamiento",
+    "startWorkout": "Empezar entrenamiento",
+    "openPlan": "Abre el plan",
+    "noExercises": "Sin ejercicios todavía"
+  },
+  "workoutCard": {
+    "duration": "Duración",
+    "exercises": "Ejercicios",
+    "sets": "Series",
+    "inProgress": "En curso"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "account": {
+      "title": "Cuenta",
+      "profile": "Perfil",
+      "account": "Cuenta",
+      "subscription": "Suscripción"
+    },
+    "preferences": {
+      "title": "Preferencias",
+      "language": "Idioma",
+      "systemHint": "Claro u oscuro, como lo tenga el móvil"
+    },
+    "help": {
+      "title": "Ayuda",
+      "faq": "Preguntas frecuentes",
+      "contact": "Contáctanos",
+      "about": "Sobre Bloom Board"
+    }
+  },
+  "settingsProfile": {
+    "aliasHint": "Lo que verás en tu perfil en lugar de tu nombre y, si entrenas en un centro, en sus pantallas."
+  },
+  "password": {
+    "section": "Contraseña",
+    "change": "Cambiar contraseña",
+    "create": "Crear una contraseña",
+    "googleOnlyHint": "Entras con Google. Con una contraseña también podrás entrar con tu email.",
+    "current": "Contraseña actual",
+    "withGoogle": "Tu cuenta entra con Google: confirma que eres tú.",
+    "new": "Nueva contraseña",
+    "rule": "Al menos {{count}} caracteres.",
+    "tooShort": "Necesita al menos {{count}} caracteres.",
+    "repeat": "Repite la nueva contraseña",
+    "mismatch": "No coincide con la nueva contraseña.",
+    "save": "Guardar",
+    "changed": "Contraseña cambiada",
+    "created": "Contraseña creada: ya puedes entrar también con tu email",
+    "wrong": "La contraseña actual no es correcta.",
+    "googleRequired": "Confirma con Google para continuar.",
+    "error": "No se ha podido cambiar la contraseña. Inténtalo de nuevo."
+  },
+  "subscription": {
+    "comped": "Bloom Board te regala este plan.",
+    "comingSoon": "Pro llegará pronto. Cuando puedas contratarlo, aquí podrás mejorar o cancelar tu plan.",
+    "manage": "Aquí puedes mejorar o cancelar tu plan."
+  },
+  "faq": {
+    "empty": "Todavía no hay preguntas frecuentes.",
+    "more": "¿No encuentras lo que buscas?"
+  },
+  "contact": {
+    "intro": "Lo leemos todo. Cuéntanos qué mejorarías o qué no funciona como debería.",
+    "suggestion": "Enviar una sugerencia",
+    "suggestionHint": "Ideas y cosas que echas de menos",
+    "suggestionLabel": "Tu sugerencia",
+    "suggestionPlaceholder": "Me gustaría poder…",
+    "bug": "Informar de un error",
+    "bugHint": "Algo que falla o no hace lo que esperabas",
+    "bugLabel": "Qué ha pasado",
+    "bugHelp": "Dinos qué estabas haciendo y qué esperabas que pasara.",
+    "bugPlaceholder": "Al guardar una serie…",
+    "send": "Enviar",
+    "sent": "Enviado",
+    "sentSuggestion": "Gracias por la idea.",
+    "sentBug": "Gracias: lo revisaremos lo antes posible.",
+    "attached": "Se envía junto con la versión de la app ({{version}}), el sistema y el idioma.",
+    "orEmail": "O escríbenos"
+  },
+  "about": {
+    "tagline": "Tu entrenamiento, contigo en el gimnasio",
+    "web": "Web",
+    "email": "Email",
+    "privacy": "Política de privacidad",
+    "follow": "Síguenos",
+    "version": "Versión {{version}}",
+    "versionBuild": "Versión {{version}} ({{build}})"
+  },
+  "calendar": {
+    "title": "Calendario",
+    "streak": "Racha",
+    "weeks_one": "{{count}} semana",
+    "weeks_other": "{{count}} semanas",
+    "streakHint": "Semanas seguidas con al menos un entrenamiento",
+    "streakNone": "Entrena esta semana para empezar una",
+    "rest": "Descanso",
+    "days_one": "{{count}} día",
+    "days_other": "{{count}} días",
+    "trainedToday": "Has entrenado hoy",
+    "restHint": "Desde tu último entrenamiento",
+    "noWorkoutsYet": "Aún no has entrenado",
+    "noWorkoutsDay": "Este día no entrenaste.",
+    "workouts_one": "{{count}} entrenamiento",
+    "workouts_other": "{{count}} entrenamientos",
+    "today": "Hoy"
+  },
+  "workout": {
+    "done": "Hecho",
+    "editing": "Editando el entrenamiento",
+    "editDetails": "Nombre, hora y nota"
+  },
+  "measurementsRange": {
+    "3M": "3 meses",
+    "1Y": "Último año",
+    "ALL": "Todo",
+    "empty": "No hay medidas en este periodo."
+  },
+  "workoutNotification": {
+    "channel": "Entrenamiento en curso",
+    "channelDescription": "El ejercicio y la serie que tienes delante mientras entrenas.",
+    "completeSet": "Completar serie",
+    "set": "Serie {{number}} de {{count}}",
+    "exercise": "Ejercicio {{number}} de {{count}}",
+    "allDone": "Todo hecho: abre el entrenamiento para terminarlo."
   }
 }

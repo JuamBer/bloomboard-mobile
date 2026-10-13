@@ -20,20 +20,24 @@ described three kinds of member, and all three live on their phone:
 The app gives them everything the web portal (`/me`) does, as a native app for
 Android and iOS:
 
+Since 2.5.0 (decision 16) it has three tabs:
+
 | Tab | What |
 |---|---|
 | **Calendario** (only with sessions) | agenda and month of their sessions across centers; a session's detail and plan; the running one opens the session control |
-| **Rutinas** | their own routines and plans (create, rename, reorder, delete, edit in the editor, start); each company's routines, read-only |
-| **Entrenos** | every workout — at a center or on their own — start one (empty or from a plan), log it live, finish it, edit it after |
-| **Ejercicios** | catalog, their own and their companies' exercises; filters; create / edit / copy their own; detail with their stats and progress; where an exercise is used |
-| **Perfil** | identity, plan and usage (Free limits, Pro "Próximamente"), **Tus datos** (body measurements; importing from Hevy), where they train, personal details, theme, language, sign out, **delete account** (password-confirmed; `DELETE /me` removes the account and all its data — `bloomboard-backend/specs/member-portal.md` decision 9; required by Google Play; the web portal has the same since 2.1.0, with the same `member:profile.delete*` strings) |
+| **Rutinas** | where training starts: an empty workout at the top, then their own routines and plans (create, rename, reorder, delete, edit in the editor) and each company's (read-only), every workout a card with its exercises and **Empezar entrenamiento** |
+| **Perfil** | photo, name (or nickname) and how many workouts they have done; **Ejercicios** (catalog, their own and their companies'; filters; create / edit / copy; stats and usages), **Medidas** (last 3 months, last year or all), **Calendario** (their workouts by the month, the streak of weeks and the rest days); then every workout they have done, newest first. The gear opens **Ajustes**: Cuenta (Perfil — details and where they train; Cuenta — password and **delete account**, password- or Google-confirmed, `DELETE /me`, required by Google Play; Suscripción — plan, limits and usage, Pro "Próximamente"), Preferencias (units, language, light/dark, the Hevy import), Ayuda (FAQ, Contáctanos, Sobre Bloom Board) and signing out |
+
+A workout — live, or finished and opened from the profile or the calendar — is its own
+screen; a finished one opens read-only until **Editar**.
 
 Plus, on every screen while a session is on: the live pill leading to the
 session control. Sign-up, sign-in and activation (a member a center created
 claims their account by email) are the web's flows.
 
 Not in the app: anything staff (they are refused at sign-in), the TV, help
-center articles, push notifications (see decision 9).
+center articles, push notifications (see decision 9; the one local
+notification — the workout under way — is decision 17).
 
 ```
 ┌──────────────────────┐   ┌──────────────────────┐   ┌──────────────────────┐
@@ -47,7 +51,7 @@ center articles, push notifications (see decision 9).
 │ ┌──────────────────┐ │   │ [+ Añadir serie]     │   │ [+ Añadir serie]     │
 │ │● Sesión en curso›│ │   │                      │   │                      │
 │ └──────────────────┘ │   │                      │   │                      │
-│ 📅  📋  〰  🏋  👤     │   │                      │   │                      │
+│   📅      📋      👤   │   │                      │   │                      │
 └──────────────────────┘   └──────────────────────┘   └──────────────────────┘
   calendar + live pill       session control            a workout, live
 ```
@@ -168,6 +172,10 @@ detail.
 
 ## Design decision 9: no push notifications in the first release
 
+*Still true for pushes. Since 2.5.0 the app posts one local notification of its
+own — the workout under way, decision 17 — which needs no server and no push
+credentials.*
+
 Reminders ("your session starts in an hour"), "your coach changed your plan"
 and records shared by a trainer are the obvious next features. They need a
 backend piece that does not exist (device tokens per member, a sender, and the
@@ -199,7 +207,7 @@ How the app reaches phones (set up 2026-10-06/07; the step-by-step is
 | Upload to Play | **EAS Submit** after each build, with a Google service account whose key lives in EAS (2026-10-11); `releaseStatus: completed` — production releases go straight to review | Uploading the `.aab` by hand: what builds 2.1.0 (5) and, before the key existed, 2.2.0 (6)/(7) needed. The cost of the automatic way: EAS Submit cannot attach release notes, so they are added in Play Console while the release is in review. |
 
 Google requires two things of an app with sign-up that the product did not have:
-**account deletion inside the app** (*Perfil › Eliminar cuenta*, backed by
+**account deletion inside the app** (*Perfil › Eliminar cuenta*, since 2.5.0 *Perfil › Ajustes › Cuenta › Eliminar cuenta*, backed by
 `DELETE /me` — backend decision 9 in `specs/member-portal.md`) and a public
 **deletion URL** (`bloomboard.pro/privacy/#eliminar-cuenta`). Both shipped in
 2.1.0 on the app, the web portal and the landing before the first review.
@@ -286,15 +294,68 @@ The web's 2.7.0 round, ported as-is (`bloomboard-frontend/specs/metrics-and-unit
 JavaScript only — no native module. It is still a store build, because the version moved and
 updates are keyed to it (`runtimeVersion: appVersion`).
 
+## Design decision 16: three tabs — training starts in Rutinas, the profile is the record (2.5.0, backend 2.9.0)
+
+The user's redesign brief (2026-10-13): simpler, cleaner, easier — modelled on how gym
+loggers like Hevy are laid out.
+
+| Choice | Why |
+|---|---|
+| **Entrenos and Ejercicios are no longer tabs.** Workouts live in the profile (an endless list) and its calendar; exercises behind a profile tile (`/exercises`, a pushed screen) and in the editor's add/replace picker | Five tabs were five places to look. What a member does every day is start a workout and look back at them. |
+| **Starting is on Rutinas**: *Empezar entrenamiento vacío* on top (*Continuar entrenamiento* while one of their own is under way), and *Empezar entrenamiento* under every workout card — their own and their coach's | Starting was two taps away in a sheet on another tab. A coach's routine loses its "Preparada por X · solo lectura" line: the missing ⋯ already says it, and the plan screen still says so. |
+| **Workout cards are big**: name, description, the plan's exercises (two lines), the Start button; no chevron | The card *is* the button to open the plan; the arrow added nothing. |
+| **The profile is the record**: name or nickname, the number of workouts (`GET /me/workouts/summary`), three tiles (Ejercicios, Medidas, Calendario), then the history — date and time, name, description, duration, exercises done, sets done (`WorkoutCard`) | What a member wants from "me" is what they have done. |
+| **Calendario (workouts)**: a month grid with every trained day filled in the accent, the chosen day's workouts under it, and on top the **streak** (weeks in a row with at least one, Monday–Sunday, counted on the server in the phone's time zone) and the **rest days** since the last one (counted on the phone) | Backend `specs/workouts.md` → Training summary. Only finished workouts count; the week under way never breaks the streak. Not to be confused with the **Calendario tab** (sessions). |
+| **Ajustes** behind the profile's gear, grouped Cuenta / Preferencias / Ayuda; a choice of units, language or theme opens an option sheet | Everything that is not training out of the way. The unit choice stays the one metric/imperial switch (the user's call, 2026-10-13: per-dimension units would need backend and web work). |
+| **Cuenta › Cambiar contraseña** (`POST /me/password`): current password, or — for a Google-only account — *Crear una contraseña* confirmed with Google | Backend `specs/member-portal.md` decision 10. |
+| **Suscripción** shows the plan, limits and usage; Pro "Próximamente", nothing to cancel | Members cannot pay yet (the user's call, 2026-10-13). A paid plan in an Android app must go through Google Play Billing — its own project. |
+| **Ayuda**: the FAQ the team writes in the admin portal, *Contáctanos* (a suggestion or a problem, sent with the app version, system and language, read in the admin's Buzón), *Sobre Bloom Board* (web, email, privacy policy, Instagram / Facebook / LinkedIn, version) | Backend `specs/member-help.md`. The FAQ is data so it changes without a store build. Brand marks are drawn in lucide's style (`SocialIcons.tsx`): lucide 1.x dropped them. |
+| **A finished workout opens read-only**; *Editar* turns the editor on (the same cards, the plan as placeholders), *Hecho* turns it off, pinned at the top once the header scrolls away; the ⋯ keeps *Nombre, hora y nota*, *Reanudar* and *Eliminar* | Scrolling through a past workout should never nudge a value. |
+| **Medidas**: the evolution chart and the list of days narrowed to the last 3 months (default), the last year or all time | Asked for in the brief. The latest-values cards stay all-time. |
+
+**Account deletion moved** to *Perfil › Ajustes › Cuenta › Eliminar cuenta*: the privacy policy
+(landing `src/legal/privacy.ts`, §10), the Play listing's notes and the web's help article
+`client-accounts` name the new path. The policy also lists the new data: *Mensajes que nos
+envías*. On Play's *Data safety*, feedback is "Other user-generated content" — already
+declared; add "Developer communications" to its purposes (`store/google-play/listing.md`).
+
+**Needs backend 2.9.0 live first.** On an older one the workout count and the calendar's
+streak are empty (404), the FAQ, *Contáctanos* and the password change fail with a toast, and
+the calendar month ignores `from`/`to` (it shows the latest 100 workouts' days — still right
+for a recent month).
+
+## Design decision 17: the workout under way in the shade, an icon per build (2.5.0)
+
+The user's second brief of 2026-10-13.
+
+| Choice | Why |
+|---|---|
+| **A notification while a workout is under way** (theirs or a session's): the exercise that is up, "Serie 2 de 4 · 50 kg · 8 reps" (what was logged, else the plan, else last time, in the member's units), the workout's name; **Completar serie** ticks that set | The phone sits locked on the bench; the next set should be one glance — and one tap — away. Same "current" as the workout screen (`features/workouts/notification/content.ts`). |
+| **expo-notifications, local only**, one notification per workout replaced in place, `sticky` (Android ongoing), on a **silent LOW channel** ("Entrenamiento en curso") so updates never buzz; shown in the shade with the app open too, never as a banner | The user's call (2026-10-13) over a native module of our own: standard, low risk. **Android shows no photo**: expo-notifications only draws an image for a remote push. iOS gets the exercise's photo as an attachment (written, not yet run: iOS is not shipped). |
+| **Completar serie** fills the set's empty fields as a tick in the table does (`withPlaceholderValues`) and saves the exercise (`PATCH …/exercises/:entryId`); the server completes the exercise with its last set, so the notification moves on | One code path with the sets table, so a set ticked from the shade reads exactly like one ticked on screen. A set already ticked is left alone, so the tap is safe twice. |
+| **App open**: the member layout's listener handles the button and the tap (opens the workout). **App in the background or closed**: a background task (`task.ts`, Android) — expo-task-manager starts the bundle headless; the task restores the session, language and units, ticks, and redraws | Why the entry is **`index.ts`** (task first, then `expo-router/entry`): the task must be defined before anything runs. |
+| **No button inside a super-set** (the text still shows) | A super-set's sets are saved as one sequence (`PUT …/sequence`); ticking one member from the shade would need the whole sequence rebuilt. |
+| **Permission asked when a workout starts**, once (Android 13+); denied, the app simply shows none. Signing out clears it; finishing or discarding takes it away | The prompt means something at that moment. |
+| **The icon is the `a` mark alone**, coloured per build like the web's favicon — production blue, beta amber, development green (`scripts/app-icons.mjs`, picked by `APP_ENV` in `app.config.ts`); the splash keeps the full lockup; the status-bar icon is the mark in white | "BLOOM" over the mark was illegible at launcher size. Beta shares production's package (Play internal testing), so a tester's phone shows amber until the production build replaces it. |
+| **The floating pill can discard** the member's own workout (a trash beside it, confirmed); **Discard** moved from beside Finish to the foot of the workout | Throwing a workout away should be possible from anywhere, and should never sit next to the button you press to finish. |
+| **The set type and the tick are as tall as the value fields** (40, `FIELD_HEIGHT`) | One line of equal controls per set. |
+
+Native modules added: `expo-notifications`, `expo-task-manager`, `expo-file-system` — a
+new native build (it is in 2.5.0's store build anyway).
+
 ## File map
 
 | Area | Where |
 |---|---|
-| Routes | `src/app/` — `(member)/(tabs)/*` the five tabs, `(member)/session`, `measurements`, `import`, `sessions/[sessionId]`, `templates/[templateId]`, `workouts/[workoutId]`, `exercises/[exerciseId]/*`; `login`, `register`, `activate/*` |
+| Routes | `src/app/` — `(member)/(tabs)/*` the tabs (calendar, routines, profile), `(member)/session`, `measurements`, `import`, `exercises/*`, `settings/*`, `sessions/[sessionId]`, `templates/[templateId]`, `workouts/[workoutId]`, `workouts/calendar`; `login`, `register`, `activate/*` |
 | Auth | `src/features/auth/` — `auth.store.ts`, `AppEffects.tsx`, screens |
 | Session control, pill, socket, plan | `src/features/member/` |
 | Editor (shared by plans, workouts, session) | `src/features/editor/` — `lib/` copied from the web; `widgets/` native |
-| Workouts, finish flow, records, progress, the Work/Rest player | `src/features/workouts/` (`widgets/WorkRestPlayer.tsx`, `lib/work-rest-timeline.ts`) |
+| Workouts, finish flow, records, progress, the Work/Rest player, the workout calendar | `src/features/workouts/` (`WorkoutCalendarScreen.tsx`, `widgets/WorkoutCard.tsx`, `widgets/WorkRestPlayer.tsx`, `lib/training.ts`, `lib/work-rest-timeline.ts`) |
+| The workout notification | `src/features/workouts/notification/` (`content.ts` pure + tested, `notification.ts`, `useWorkoutNotification.ts`, `task.ts`); `index.ts` (entry) |
+| App icons | `scripts/app-icons.mjs` → `assets/images/icon*.png`, `android-icon-*.png`, `notification-icon.png`, `store/google-play/graphics/icon-512.png` |
+| Profile | `src/features/profile/ProfileScreen.tsx` |
+| Ajustes (account, preferences, help) | `src/features/settings/` (`widgets/SettingsList.tsx`, `links.ts`) |
 | Work/Rest cue sounds | `assets/sounds/`, generated by `scripts/work-rest-sounds.mjs` |
 | Exercises | `src/features/exercises/` |
 | Calendar | `src/features/calendar/` |
@@ -342,6 +403,11 @@ More in `docs/ARCHITECTURE.md`.
 
 ## Known issues
 
+- **App 2.5.0 against a backend older than 2.9.0:** the profile's workout count
+  and the calendar's streak stay empty, and the FAQ, Contáctanos and the
+  password change answer 404 (toasted); the calendar month ignores `from`/`to`
+  (it shows the latest 100 workouts' days). Ship backend 2.9.0 first.
+
 - **App 2.4.0 against a backend older than 2.7.0:** the old backend drops the unknown
   `unitSystem` (whitelist), so Unidades snaps back to Métrico; and composite units in the new
   form (`KILOMETERS/HOURS`) are refused when a set is saved. Ship backend 2.7.0 first.
@@ -373,8 +439,8 @@ Automated (CI): `format:check`, `lint:check`, `npm test` (logging rules, metric
 columns, calendar grid), `typecheck` (with typed routes), `check:i18n`,
 `bundle:check` (Hermes, Android + iOS).
 
-By hand, against a local 2.0.0 backend with a CLIENT that has a center, a
-session now and one tomorrow with a plan:
+By hand, against a local backend of the same round (2.9.0 for 2.5.0) with a
+CLIENT that has a center, a session now and one tomorrow with a plan:
 
 1. Sign in; a staff account is refused. Sign out and back in: no password asked
    on relaunch.
@@ -384,19 +450,27 @@ session now and one tomorrow with a plan:
    to a TV. Scroll down: Finish appears in the bar. Finish → summary →
    "¿Qué tal ha ido?" → the finished workout. The trainer's board shows the
    ticks within seconds (socket) and the member off the TV.
-4. Entrenos: start an empty workout, add an exercise (metrics sheet), log
-   60 × 8, tick — the exercise completes and folds; Finish → summary shows the
-   volume (960 kg for two such sets).
-5. Rutinas: create a routine, a plan in it; plan 80 × 5; reload — kept;
-   "Entrenar" starts a workout from it. Free limits: a 2nd routine opens the
-   upgrade sheet.
-6. Ejercicios: search, filter, open one (stats, progress), create an own
-   exercise, copy a company's one.
-7. Perfil: change theme (follows to the web), language, personal details.
-8. Dark and light, Spanish and English; Android and iOS.
+4. Rutinas: "Empezar entrenamiento vacío", add an exercise (metrics sheet), log
+   60 × 8, tick — the exercise completes; the floating bar leads back to it and
+   its trash discards it (confirmed). Finish → summary shows the volume (960 kg
+   for two such sets); the finished workout opens read-only, Editar … Hecho.
+5. Rutinas: create a routine, a plan in it; plan 80 × 5; reload — kept; its
+   card's "Empezar entrenamiento" starts a workout from it. Free limits: a 2nd
+   routine opens the upgrade sheet.
+6. Perfil: the count, the history (scroll for more); Ejercicios (search,
+   filter, open one, create an own exercise, copy a company's); Medidas (3
+   months / year / all); Calendario (trained days, the streak, the rest days).
+7. Ajustes: details, password (wrong one refused), plan, units, language,
+   theme (follows to the web), the FAQ, Contáctanos (arrives in the admin's
+   Buzón), Sobre Bloom Board's links.
+8. On a phone only: during a workout, lock it — the notification shows the
+   exercise and the set; "Completar serie" ticks it and the notification moves
+   on, also with the app swiped away (Metro running for a dev build).
+9. Dark and light, Spanish and English; Android and iOS.
 
 Steps 2–5 were also driven in a browser build with Playwright at 390 × 844,
-light and dark, with no console or HTTP errors. On 2026-10-06 the same flows
+light and dark, with no console or HTTP errors — and on 2026-10-13 steps 4–7 of
+2.5.0 (the browser build has no notification shade: step 8 needs the phone). On 2026-10-06 the same flows
 ran on a Pixel 7 (development build against the local backend) with a demo
 member, and the store build 2.1.0 (5) was installed from Play's internal
 testing track against production.

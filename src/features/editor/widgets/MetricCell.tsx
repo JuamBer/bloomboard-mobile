@@ -735,10 +735,14 @@ export function ReadOnlyValue({
   );
 }
 
+/** A set's value field's height — the type badge and the tick beside it
+ *  match it, so a row reads as one line of controls. */
+export const FIELD_HEIGHT = 40;
+
 const useStyles = makeStyles((t) => ({
   // A row, so the input's width comes from flex alone (see `input`).
   box: {
-    height: 40,
+    height: FIELD_HEIGHT,
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
