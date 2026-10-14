@@ -63,8 +63,15 @@ export interface UpdateWorkoutPayload {
  * /me.
  */
 export const workoutsService = {
-  getById: async (id: string): Promise<Workout> => {
-    const { data } = await apiClient.get<Workout>(`/workouts/${id}`);
+  /** `silent`: a read nobody asked for on screen (the notification's) —
+   *  a failure is not toasted. */
+  getById: async (
+    id: string,
+    { silent = false }: { silent?: boolean } = {},
+  ): Promise<Workout> => {
+    const { data } = await apiClient.get<Workout>(`/workouts/${id}`, {
+      silentErrors: silent,
+    });
     return data;
   },
 

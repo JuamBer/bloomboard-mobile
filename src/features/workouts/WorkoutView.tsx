@@ -47,6 +47,7 @@ import { ElapsedTimer } from '@shared/ui/misc';
 import { QueryState } from '@shared/ui/states';
 import { Text } from '@shared/ui/Text';
 import { formatMinutes, formatTime, formatWorkoutDate } from './lib/dates';
+import { forgetWorkout } from './hooks';
 import { useFinishFlow } from './lib/finish-flow';
 import { EditWorkoutSheet } from './widgets/EditWorkoutSheet';
 
@@ -239,8 +240,8 @@ export function WorkoutView({
   const remove = useMutation({
     mutationFn: () => workoutsService.remove(workoutId),
     onSuccess: () => {
-      invalidateHosts();
-      queryClient.removeQueries({ queryKey: key });
+      forgetWorkout(queryClient, workoutId);
+      void queryClient.invalidateQueries({ queryKey: ['me', 'session'] });
       onDeleted?.();
     },
   });

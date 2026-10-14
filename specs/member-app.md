@@ -370,6 +370,17 @@ More in `docs/ARCHITECTURE.md`.
 
 ## Gotchas
 
+- **Don't remove a query something still watches.** `removeQueries` on a key
+  with an active observer makes that observer fetch it again — after a delete,
+  a 404 the request's toast shows ("Workout … not found" on discarding, seen
+  on the phone: the workout notification watches the active workout; the web
+  build has no notification, so it never showed there). After deleting a
+  workout, `forgetWorkout` (features/workouts/hooks.ts) clears the active
+  workout and lets the cached copy expire.
+- **A sheet is sized by the space left, never in pixels.** A full sheet of a
+  fixed height overflowed upwards when the keyboard opened (the exercise
+  picker's title and search field went off the top): `Sheet` fills the
+  keyboard-avoiding area with flex instead.
 - **Expo Go cannot run it** (`react-native-keyboard-controller`). Use a
   development build.
 - **Members are default-denied** on the backend. A new call needs its route open

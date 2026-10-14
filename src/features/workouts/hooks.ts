@@ -3,12 +3,14 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
+  type QueryClient,
 } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { workoutQueryKey } from '@features/editor/lib/editor-source';
 import { errorBody } from '@shared/api/errors';
 import { workoutsService } from '@shared/api/services/workouts.service';
+import type { ActiveWorkout } from '@shared/types/api.types';
 import { toast } from '@shared/ui/toast/toast.store';
 import { deviceTimeZone } from './lib/training';
 
@@ -26,16 +28,31 @@ export function useActiveWorkout() {
   });
 }
 
+/**
+ * After a workout is deleted, nothing may ask for it again — the server would
+ * answer 404 and the request's toast would say so. The pill and the
+ * notification follow the active workout, so that goes first; then the lists.
+ * Its own cached copy is left to expire: removing a query something still
+ * watches (the notification, the closing screen) makes it fetch again.
+ */
+export function forgetWorkout(queryClient: QueryClient, workoutId: string) {
+  queryClient.setQueryData<ActiveWorkout | null>(
+    ACTIVE_WORKOUT_KEY,
+    (active) => (active?.id === workoutId ? null : active),
+  );
+  void queryClient.cancelQueries({ queryKey: workoutQueryKey(workoutId) });
+  void queryClient.invalidateQueries({ queryKey: ['me', 'workouts'] });
+}
+
 /** Throws away one of the member's own workouts under way (DELETE
  *  /workouts/:id) and refreshes everything that showed it: the pill, the
- *  history, the summary. */
+ *  notification, the history, the summary. */
 export function useDiscardWorkout(onDiscarded?: () => void) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (workoutId: string) => workoutsService.remove(workoutId),
     onSuccess: (_void, workoutId) => {
-      queryClient.removeQueries({ queryKey: workoutQueryKey(workoutId) });
-      void queryClient.invalidateQueries({ queryKey: ['me', 'workouts'] });
+      forgetWorkout(queryClient, workoutId);
       onDiscarded?.();
     },
   });

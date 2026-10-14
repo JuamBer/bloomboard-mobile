@@ -156,7 +156,9 @@ export async function clearWorkoutNotification(workoutId: string) {
 export async function completeSetFromNotification(
   data: WorkoutNotificationData,
 ): Promise<Workout> {
-  const workout = await workoutsService.getById(data.workoutId);
+  const workout = await workoutsService.getById(data.workoutId, {
+    silent: true,
+  });
   const entry = workout.blocks
     .flatMap((b) => b.exercises)
     .find((e) => e.id === data.entryId);
@@ -169,7 +171,7 @@ export async function completeSetFromNotification(
     entry.id,
     payload,
   );
-  return workoutsService.getById(workout.id);
+  return workoutsService.getById(workout.id, { silent: true });
 }
 
 export const isWorkoutNotification = (

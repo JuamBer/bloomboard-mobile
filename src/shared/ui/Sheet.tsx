@@ -87,6 +87,7 @@ export function Sheet({
 
   if (!mounted) return null;
 
+  // How far it slides in from: its height, at most the screen's.
   const maxHeight = height - insets.top - 12;
   const translateY = progress.interpolate({
     inputRange: [0, 1],
@@ -123,17 +124,21 @@ export function Sheet({
           accessibilityLabel={t('common:close')}
         />
       </Animated.View>
+      {/* The sheet is sized by the space left, not by the screen: with the
+          keyboard up that space shrinks, and a sheet of fixed height would
+          overflow upwards — its title and search field out of sight. A full
+          sheet fills the space; any other takes what its content needs, up
+          to it. */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.anchor}
+        style={[styles.anchor, { paddingTop: insets.top + 12 }]}
         pointerEvents="box-none"
       >
         <Animated.View
           style={[
             styles.sheet,
+            full ? styles.flex : styles.flexShrink,
             {
-              maxHeight,
-              height: full ? maxHeight : undefined,
               paddingBottom: footer ? 0 : Math.max(insets.bottom, 12),
               transform: [{ translateY }],
             },

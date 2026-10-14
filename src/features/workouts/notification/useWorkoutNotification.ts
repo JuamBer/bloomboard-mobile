@@ -40,7 +40,8 @@ export function useWorkoutNotification() {
   // The workout itself, shared with its screen's copy (same key).
   const { data: workout } = useQuery({
     queryKey: workoutQueryKey(workoutId ?? ''),
-    queryFn: () => workoutsService.getById(workoutId!),
+    // In the background: a workout deleted elsewhere is no news to toast.
+    queryFn: () => workoutsService.getById(workoutId!, { silent: true }),
     enabled: notificationsSupported && !!workoutId,
     refetchInterval: 30_000,
   });
