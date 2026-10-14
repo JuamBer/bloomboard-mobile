@@ -203,11 +203,13 @@ Environments and accounts: `docs/ENVIRONMENTS.md`. The Play listing, its
 history and its state: `store/google-play/README.md`.
 
 **State (2026-10-11):** 2.1.0 (5) passed Google's first review and is the
-production app; `releaseStatus` in `eas.json` is now `"completed"` (a push to
-`main` sends a full release for review, one to `beta` rolls out to testers at
-once). The Play service account key is in EAS since 2026-10-11, so a push
-builds **and** uploads with no manual step; release notes are not attached
-(EAS Submit cannot) and go in by hand in Play Console. An EAS build on the free
+production app. The Play service account key is in EAS since 2026-10-11, so
+a push builds **and** uploads with no manual step. `releaseStatus` in
+`eas.json`: internal testing `"completed"` (a push to `beta` rolls out to
+testers at once); **production `"draft"`** since 2026-10-14 — a push to `main`
+leaves a draft in Play Console → Producción, where the release notes (EAS
+Submit cannot attach them; drafted in `store/google-play/README.md`) are pasted
+and the release is sent for review by hand. An EAS build on the free
 plan waits 2–3 hours in a queue.
 
 **2.4.0 adds units and the metrics cleanup** (2026-10-12, `specs/member-app.md`

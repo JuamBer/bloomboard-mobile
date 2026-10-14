@@ -41,10 +41,13 @@ page (the CLI's `build:view --json` gives a log URL, served brotli-compressed �
 
 Until an app's first production release is published by hand, Google only
 accepts **draft** releases through the API, so both submit profiles in
-`eas.json` said `"releaseStatus": "draft"` until 2.1.0 was approved; they say
-`"completed"` since 2.2.0, so pushes go out on their own. A draft is still
-useful once by hand — `eas submit` with a temporary `"draft"` lets you paste the
-release notes (which EAS Submit cannot attach) before sending it for review.
+`eas.json` said `"releaseStatus": "draft"` until 2.1.0 was approved, then
+`"completed"` from 2.2.0. **Since 2026-10-14 production is `"draft"` again, by
+choice:** a push to `main` builds and uploads, and the release waits in Play
+Console → Producción as a draft until you paste its notes (EAS Submit cannot
+attach them — they are in `store/google-play/README.md`) and send it for review
+yourself. Internal testing stays `"completed"`: no review, testers get it at
+once.
 
 **Current state (2026-10-11):** the app is live (2.1.0 approved), both submit
 profiles are `"completed"`, and the Play service account key is in EAS — a push

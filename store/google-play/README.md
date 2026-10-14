@@ -21,7 +21,7 @@ Texts, forms and graphics to paste: [`listing.md`](listing.md),
 | 3. App in Play Console | ✅ `pro.bloomboard.app`, store listing (es-ES + en-US), app content, data safety, 6 screenshots |
 | 4. First build, by hand | ✅ Production build **2.1.0 (5)** uploaded to internal testing; installed and checked on a Pixel 7 |
 | 5. Service account for EAS Submit | ✅ `eas-submit@bloomworkouts.iam.gserviceaccount.com` (Google Cloud project `bloomworkouts`), key stored in EAS on 2026-10-11 — pushes to `beta`/`main` build **and** upload |
-| 6. Production | ✅ **2.1.0 (5) approved** (submitted 2026-10-07, approved by 2026-10-11), Spain + United States, managed publishing **off**. `releaseStatus` is `"completed"` in `eas.json` since 2.2.0 |
+| 6. Production | ✅ **2.1.0 (5) approved** (submitted 2026-10-07, approved by 2026-10-11), Spain + United States, managed publishing **off**. `releaseStatus` was `"completed"` in `eas.json` from 2.2.0; **production is `"draft"` since 2026-10-14** (notes pasted and the release sent by hand), internal testing stays `"completed"` |
 
 `beta` and `main` were pushed on 2026-10-06 (at the screenshots commit): their
 workflows queued EAS builds 3 (beta) and 4 (production), which built fine but
@@ -327,7 +327,9 @@ review without them — add them in Play Console while it is in review if wanted
    releases through the API — hence `"releaseStatus": "draft"` in both submit
    profiles. **After approval**, set both to `"completed"`: from then on a push
    to `main` sends a full release for review, and a push to `beta` rolls out to
-   testers at once.
+   testers at once. (Since 2026-10-14 production is back on `"draft"` on
+   purpose: each production release waits for its notes and a manual send —
+   see "Day to day".)
 
 ## Day to day
 
