@@ -17,6 +17,11 @@ import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { newRecordsToast } from '@features/workouts/lib/record-toast';
+import {
+  setIndexFor,
+  useWorkRestTimes,
+  withWorkedTime,
+} from '@features/workouts/lib/work-rest-log';
 import { WorkoutReferencesSheet } from '@features/workouts/widgets/WorkoutReferencesSheet';
 import { useUnitSystem } from '@features/units/useUnitSystem';
 import { systemUnit } from '@shared/lib/unit-system';
@@ -49,6 +54,7 @@ import { exerciseSeconds, formatDuration } from '../lib/workout-time';
 import {
   toEditableSet,
   toSetPayload,
+  withRowKeys,
   type EditableWorkoutSet,
 } from '../types/workout-set.types';
 import {
@@ -262,6 +268,7 @@ export function ExerciseEntryCard({
           writeCache(updated);
         }),
     disabled: isReadOnly,
+    flushOnDisable: true,
   });
 
   // A tick is saved at once, after the render that holds it.
@@ -271,6 +278,37 @@ export function ExerciseEntryCard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tickSaves]);
 
+  // What the Work/Rest player trained lands here, as ticks with their times
+  // (workouts/lib/work-rest-log.ts), and is saved at once like a tick.
+  useWorkRestTimes([entry.id], isWorkout && !isReadOnly, (times) => {
+    const keys = [
+      ...metrics.filter((m) => !m.isPlanOnly).map((m) => m.key),
+      ...compositeMetrics.map((m) => m.key),
+    ];
+    const unitOf = (key: string) => {
+      for (const s of sets) {
+        const unit = s.metrics[key]?.unit ?? s.targetMetrics?.[key]?.unit;
+        if (unit) return canonicalUnit(unit) ?? undefined;
+      }
+      return metrics.find((m) => m.key === key)?.defaultUnit ?? undefined;
+    };
+    setSets((prev) => {
+      const next = [...prev];
+      for (const time of times) {
+        const index = setIndexFor(next, time);
+        if (index < 0) continue;
+        next[index] = withWorkedTime(next[index], time.seconds, {
+          keys,
+          previousSets: entry.previousSets,
+          index,
+          unitOf,
+        });
+      }
+      return next;
+    });
+    setTickSaves((n) => n + 1);
+  });
+
   // The server's copy changed (the head tick, the board, another device) and
   // nothing here is waiting to be saved: take it in.
   const serverSignature = JSON.stringify(savedPayload());
@@ -278,7 +316,7 @@ export function ExerciseEntryCard({
   if (isWorkout && serverSignature !== seenSignature) {
     setSeenSignature(serverSignature);
     if (JSON.stringify(currentPayload()) === savedSignature()) {
-      setSets(entry.sets.map(toEditableSet));
+      setSets(withRowKeys(sets, entry.sets.map(toEditableSet)));
       setNotes(entry.notes ?? '');
       setCustomName(entry.customName ?? '');
       setMetrics(entry.metrics);
@@ -376,8 +414,12 @@ export function ExerciseEntryCard({
     },
   });
 
-  // Swaps the exercise and keeps everything else — notes, sets, metrics,
-  // order — built from this card's draft, so unsaved edits survive the swap.
+  // Swaps the exercise and keeps the sets, metrics and order — built from
+  // this card's draft, so unsaved edits survive the swap. Not its name: a
+  // custom name was the old exercise's ("Sentadilla" over a leg press read as
+  // a rename, with the new name under it). Nor the plan's note, which was
+  // about the old one: a plan's own notes go, and in a workout the server
+  // drops the plan's note it carried; the trainee's own note stays.
   const replaceExercise = useMutation({
     mutationFn: (exercise: Exercise) =>
       editor.api.updateExercise(
@@ -385,13 +427,13 @@ export function ExerciseEntryCard({
         blockId,
         entry.id,
         buildPayload(
-          notes,
+          isWorkout ? notes : '',
           metrics,
           compositeMetrics,
           sets,
           entry.superSetGroupId,
           metricOrder,
-          customName,
+          '',
           exercise.id,
         ),
       ),
@@ -401,7 +443,7 @@ export function ExerciseEntryCard({
       setMetrics(updated.metrics);
       setCompositeMetrics(updated.compositeMetrics ?? []);
       setMetricOrder(updated.metricOrder ?? []);
-      setSets(updated.sets.map(toEditableSet));
+      setSets(withRowKeys(sets, updated.sets.map(toEditableSet)));
       markSaved(
         buildPayload(
           updated.notes ?? '',
@@ -423,7 +465,23 @@ export function ExerciseEntryCard({
   return (
     <View ref={registerView} style={[styles.row, isCurrent && styles.current]}>
       <View style={styles.header}>
-        <SessionStatusToggle entryIds={[entry.id]} hasSets={hasMetrics} />
+        <SessionStatusToggle
+          entryIds={[entry.id]}
+          hasSets={hasMetrics}
+          onTickAll={(done) => {
+            setSets((prev) =>
+              prev.map((set) => ({
+                ...set,
+                completed: done,
+                subSets: set.subSets?.map((sub) => ({
+                  ...sub,
+                  completed: done,
+                })),
+              })),
+            );
+            setTickSaves((n) => n + 1);
+          }}
+        />
         <ExerciseThumb exercise={entry.exercise} dimmed={resolved} />
         <View style={styles.identity}>
           <ExerciseNameLink
@@ -467,7 +525,9 @@ export function ExerciseEntryCard({
       </View>
 
       <View style={styles.body}>
-        {(!isReadOnly || notes.trim() || entry.planNotes?.trim()) && (
+        {/* Read-only (a finished workout, a locked plan): only a note someone
+            wrote — not the plan's placeholder, which said what to do. */}
+        {(!isReadOnly || !!notes.trim()) && (
           <EntryNotesField
             value={notes}
             onChange={setNotes}
@@ -550,19 +610,21 @@ export function ExerciseEntryCard({
             icon: ListOrdered,
             onPress: onOpenSort,
           },
-          customName
-            ? {
-                key: 'resetName',
-                label: t('templates:exerciseEntryCard.resetName'),
-                icon: RotateCcw,
-                onPress: () => setCustomName(''),
-              }
-            : {
-                key: 'rename',
-                label: t('templates:exerciseEntryCard.rename'),
-                icon: Pencil,
-                onPress: () => setRenameOpen(true),
-              },
+          // A name is the plan's to give: a workout logs the exercise done.
+          !isWorkout &&
+            (customName
+              ? {
+                  key: 'resetName',
+                  label: t('templates:exerciseEntryCard.resetName'),
+                  icon: RotateCcw,
+                  onPress: () => setCustomName(''),
+                }
+              : {
+                  key: 'rename',
+                  label: t('templates:exerciseEntryCard.rename'),
+                  icon: Pencil,
+                  onPress: () => setRenameOpen(true),
+                }),
           {
             key: 'delete',
             label: t('common:delete'),

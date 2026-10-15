@@ -38,6 +38,44 @@ for review. Running `eas submit` by hand from a PC needs `APP_ENV=beta` or
 `production` in the environment — without it `app.config.ts` resolves the dev
 package `pro.bloomboard.app.dev`.
 
+**Then 2.6.0: the review round** (2026-10-15) — routines and optional folders (a *rutina* is
+what you train, a *carpeta* groups them), Free = 4 routines and 10 own exercises, folders unlimited;
+save a workout as a routine; share a workout as an image (light, dark or transparent) or as text;
+a training guide (set types, metrics, super-sets, blocks) in Ajustes and behind the editor's
+headers; Work/Rest skips and logs its times; a calmer editor (no header card, swipe to delete a set,
+fixed-width fields, square RPE); fixes for the calendar session crash and lost focus while logging.
+**Native modules** (react-native-view-shot, expo-media-library, expo-sharing, expo-clipboard): a new
+store build; **backend 2.10.0 live first**. Saving an image asks for nothing on Android 13+ and for
+storage on older phones; the app declares **no photo-reading permission** (`app.config.ts`
+blocks the ones the media module brings), so Play's photo and video permissions form does not
+apply. *Data safety*: nothing new is collected — images and text stay on the phone until the member
+shares them. **Retake the Rutinas screenshot** (folders) if the listing shows it, and **paste the
+updated full descriptions** (`listing.md`: folders, sharing, the guide). Pro shows *En
+desarrollo* with no price (it showed 4,99 €). **R8 is on** from this build (Play's DEX remark on
+2.5.0, `docs/RELEASING.md` → *R8*): once uploaded, check that the pre-launch report no longer flags
+obfuscation, optimization and shrinking, and that its devices opened the app. In a center's session
+every exercise has a tick of its own, and Work/Rest blocks run with the TV and the trainer's board
+(start, pause, skip from either side) — **backend 2.10.0 live first** covers it too.
+
+Release notes for 2.6.0:
+
+```
+<es-ES>
+· Rutinas y carpetas: crea rutinas sueltas u ordénalas en carpetas sin límite.
+· Guarda un entrenamiento como rutina y compártelo como imagen o texto. ¡Etiquétanos en @bloomboard.pro!
+· Nueva guía de entrenamiento: tipos de serie, métricas, superseries y bloques.
+· Más fácil apuntar: desliza una serie para borrarla, y el reloj de Trabajo/Descanso apunta tus tiempos.
+· En tu centro: completa un ejercicio de un toque; el Trabajo/Descanso va a la vez en tu móvil, la TV y tu entrenador.
+</es-ES>
+<en-US>
+· Routines and folders: create loose routines or sort them into folders, with no limit on folders.
+· Save a workout as a routine and share it as an image or text. Tag us at @bloomboard.pro!
+· New training guide: set types, metrics, super-sets and blocks.
+· Easier logging: swipe a set to delete it, and the Work/Rest clock logs your times.
+· At your center: complete an exercise in one tap; Work/Rest runs together on your phone, the TV and your trainer.
+</en-US>
+```
+
 **Then 2.5.0: the redesign** (2026-10-13) — three tabs (Rutinas, Perfil, and Calendario with
 sessions); start a workout from any routine card or empty; the profile holds the history, the
 exercises, the measurements (3 months / year / all) and a workout calendar with the streak;

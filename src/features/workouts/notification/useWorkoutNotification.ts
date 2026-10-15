@@ -5,8 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { workoutQueryKey } from '@features/editor/lib/editor-source';
 import { useUnitSystem } from '@features/units/useUnitSystem';
-import { workoutsService } from '@shared/api/services/workouts.service';
-import { useActiveWorkout } from '../hooks';
+import { useActiveWorkout, workoutQuery } from '../hooks';
 import { currentStep, notificationText } from './content';
 import {
   COMPLETE_SET_ACTION,
@@ -39,9 +38,8 @@ export function useWorkoutNotification() {
 
   // The workout itself, shared with its screen's copy (same key).
   const { data: workout } = useQuery({
-    queryKey: workoutQueryKey(workoutId ?? ''),
     // In the background: a workout deleted elsewhere is no news to toast.
-    queryFn: () => workoutsService.getById(workoutId!, { silent: true }),
+    ...workoutQuery(queryClient, workoutId ?? '', { silent: true }),
     enabled: notificationsSupported && !!workoutId,
     refetchInterval: 30_000,
   });

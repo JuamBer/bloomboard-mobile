@@ -29,6 +29,9 @@ One of four Bloom Board repos:
 - **expo-secure-store** — tokens in the Keychain / Keystore
 - **expo-notifications** + **expo-task-manager** — the workout under way in the
   shade, and its "Completar serie" with the app closed
+- **react-native-view-shot**, **expo-media-library**, **expo-sharing**,
+  **expo-clipboard** — sharing a workout as an image (saved to the gallery or
+  handed to another app) or as text
 - **React Compiler**, TypeScript strict, Jest (`jest-expo`)
 
 ## Quick start
@@ -38,7 +41,7 @@ npm install
 npm start          # Metro; press a (Android), i (iOS), or scan with a dev build
 ```
 
-> **Prerequisites:** Node ≥ 22. A backend of the same round — **2.9.0** for
+> **Prerequisites:** Node ≥ 22. A backend of the same round — **2.10.0** for
 > `develop` today (2.0.0 is the floor) — local on `:3000`, or point at beta
 > with `.env` (see
 > [`.env.example`](.env.example)). Android Studio for the emulator, Xcode for

@@ -135,6 +135,12 @@ The member and the trainer's board write the same session workout.
   moves on, with "Completar serie". With the app closed, a background task
   (`expo-task-manager`, Android) handles the button. No pushes — see
   `specs/member-app.md`, decisions 9 and 17.
+- **Sharing:** a workout's image is a view drawn at a fixed size and captured
+  at 1080 × 1350 (`react-native-view-shot`), saved to the gallery
+  (`expo-media-library/legacy`, no photo-reading permission: `app.config.ts`
+  blocks the ones the module brings) or handed to the system's share sheet
+  (`expo-sharing`); the text goes to the clipboard (`expo-clipboard`).
+  Decision 18.
 
 ## Build shape
 

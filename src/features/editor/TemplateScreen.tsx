@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Lock, Pencil, Play } from 'lucide-react-native';
+import { Check, Pencil, Play, Type } from 'lucide-react-native';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -7,13 +7,11 @@ import { useMemberProfile } from '@features/member/hooks';
 import { isOwnWorkout } from '@features/member/ownership';
 import { useStartWorkout } from '@features/workouts/hooks';
 import { workoutTemplatesService } from '@shared/api/services/workout-templates.service';
-import { radius } from '@shared/theme/theme';
-import { makeStyles, useTheme } from '@shared/theme/ThemeProvider';
+import { makeStyles } from '@shared/theme/ThemeProvider';
 import type { WorkoutTemplate } from '@shared/types/api.types';
 import { Button, IconButton } from '@shared/ui/Button';
 import { StackHeader } from '@shared/ui/layout';
 import { QueryState } from '@shared/ui/states';
-import { Text } from '@shared/ui/Text';
 import {
   EditorSourceProvider,
   templateEditorSource,
@@ -24,26 +22,34 @@ import { NameSheet } from './widgets/EditorSheets';
 import { EditorScroll, type EditorScrollHandle } from './widgets/EditorScroll';
 
 /**
- * A plan — a workout template — in the shared editor. Editable only when the
- * member built it (and it isn't final); a center's plan reads, and can be
- * trained: "Entrenar" starts a workout of one's own from it.
+ * A routine (a workout template; the app's naming, decision 18) in the shared
+ * editor. It opens to read — a routine is looked at far more often than
+ * changed, and a scroll should never nudge a value — and one's own (not
+ * final) has Editar, which turns the editor on until Hecho, as a finished
+ * workout does. A new routine opens already editing. A center's only reads,
+ * and any can be trained: "Entrenar" starts a workout of one's own from it.
+ * The bar names it; while editing, its name and description are behind the
+ * "Aa" button.
  */
 export function TemplateScreen({
   templateId,
   entryId,
+  startEditing = false,
 }: {
   templateId: string;
   /** Scrolled to once drawn ("Dónde lo usas" → this exercise). */
   entryId?: string;
+  /** Just created: open with the editor on. */
+  startEditing?: boolean;
 }) {
   const { t } = useTranslation(['templates', 'workouts', 'common', 'app']);
   const styles = useStyles();
-  const theme = useTheme();
   const queryClient = useQueryClient();
   const { data: profile } = useMemberProfile();
   const source = useMemo(() => templateEditorSource(templateId), [templateId]);
   const scrollRef = useRef<EditorScrollHandle>(null);
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(startEditing);
+  const [naming, setNaming] = useState(false);
   const start = useStartWorkout();
 
   const {
@@ -72,21 +78,40 @@ export function TemplateScreen({
       workoutTemplatesService.update(templateId, dto),
     onSuccess: (updated: WorkoutTemplate) => {
       queryClient.setQueryData(templateQueryKey(templateId), updated);
-      // Routines list their plans by name.
+      // Folders and the loose list show routines by name.
       void queryClient.invalidateQueries({ queryKey: ['me', 'routines'] });
-      setEditing(false);
+      void queryClient.invalidateQueries({ queryKey: ['me', 'templates'] });
+      setNaming(false);
     },
   });
 
   const own = !!template && isOwnWorkout(template, profile?.id);
-  const isReadOnly = !template || !own || template.status === 'FINAL';
+  const canEdit = !!template && own && template.status !== 'FINAL';
+  const isReadOnly = !canEdit || !editing;
 
   return (
     <View style={styles.root}>
       <StackHeader
         title={template?.name}
         right={
-          template && (
+          template &&
+          (canEdit && editing ? (
+            <>
+              <IconButton
+                icon={Type}
+                variant="soft"
+                size={36}
+                accessibilityLabel={t('app:routines.nameAndDescription')}
+                onPress={() => setNaming(true)}
+              />
+              <Button
+                label={t('app:workout.done')}
+                icon={Check}
+                size="sm"
+                onPress={() => setEditing(false)}
+              />
+            </>
+          ) : (
             <>
               <Button
                 label={t('workouts:start.train')}
@@ -95,7 +120,7 @@ export function TemplateScreen({
                 loading={start.isPending}
                 onPress={() => start.mutate({ workoutTemplateId: templateId })}
               />
-              {!isReadOnly && (
+              {canEdit && (
                 <IconButton
                   icon={Pencil}
                   variant="soft"
@@ -105,7 +130,7 @@ export function TemplateScreen({
                 />
               )}
             </>
-          )
+          ))
         }
       />
       {!template ? (
@@ -118,24 +143,6 @@ export function TemplateScreen({
         </View>
       ) : (
         <EditorScroll ref={scrollRef} onRefresh={refetch}>
-          <View style={styles.head}>
-            <Text variant="title">{template.name}</Text>
-            {template.description ? (
-              <Text variant="bodySmall" muted={0.55}>
-                {template.description}
-              </Text>
-            ) : null}
-            {isReadOnly && (
-              <View style={styles.readOnly}>
-                <Lock size={12} color={theme.text(0.45)} />
-                <Text variant="caption" muted={0.5}>
-                  {own
-                    ? t('templates:status.lockedNotice')
-                    : t('app:routines.readOnly')}
-                </Text>
-              </View>
-            )}
-          </View>
           <EditorSourceProvider value={source}>
             <EditorBody
               doc={template}
@@ -146,10 +153,10 @@ export function TemplateScreen({
         </EditorScroll>
       )}
       <NameSheet
-        open={editing}
-        onClose={() => setEditing(false)}
-        title={t('templates:editModal.title')}
-        label={t('templates:createModal.nameLabel')}
+        open={naming}
+        onClose={() => setNaming(false)}
+        title={t('app:routines.editRoutine')}
+        label={t('app:routines.routineName')}
         initialName={template?.name ?? ''}
         initialDescription={template?.description ?? ''}
         descriptionPlaceholder={t(
@@ -165,14 +172,4 @@ export function TemplateScreen({
 const useStyles = makeStyles((t) => ({
   root: { flex: 1, backgroundColor: t.colors.background },
   state: { padding: 16 },
-  head: {
-    gap: 8,
-    padding: 16,
-    marginBottom: 20,
-    borderRadius: radius['2xl'],
-    borderWidth: 1,
-    borderColor: t.line(0.06),
-    backgroundColor: t.fill(0.03),
-  },
-  readOnly: { flexDirection: 'row', alignItems: 'center', gap: 6 },
 }));

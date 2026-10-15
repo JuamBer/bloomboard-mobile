@@ -21,6 +21,7 @@ import { useLimitGuard, useMemberProfile } from '@features/member/hooks';
 import { UpgradeSheet } from '@features/member/widgets/MemberPlan';
 import { ExerciseProgress } from '@features/workouts/widgets/ExerciseProgress';
 import { meService } from '@shared/api/services/me.service';
+import { workoutsService } from '@shared/api/services/workouts.service';
 import { EXERCISE_MEDIA_BG, exerciseMedia } from '@shared/lib/exercise-media';
 import { isMemberOwned } from '@shared/lib/ownership';
 import { radius } from '@shared/theme/theme';
@@ -50,7 +51,8 @@ type Tab = 'stats' | 'info';
  * and deleted; anyone else's (the app's or a center's) can only be copied into
  * their own, which is how it becomes usable in their workouts. Under the
  * header, two tabs: the member's stats on it (first — the page is about
- * them), and how to do it.
+ * them), and how to do it. Never done, it opens on how to do it: empty
+ * stats are not the first thing to show (app 2.6.0).
  */
 export function ExerciseScreen({ exerciseId }: { exerciseId: string }) {
   const { t } = useTranslation(['member', 'exercises', 'common']);
@@ -60,7 +62,8 @@ export function ExerciseScreen({ exerciseId }: { exerciseId: string }) {
   const { data: profile } = useMemberProfile();
   const origins = useExerciseOrigins();
   const { guard, blocked, dismiss } = useLimitGuard();
-  const [tab, setTab] = useState<Tab>('stats');
+  // Null until chosen: then it follows whether there is anything to show.
+  const [chosenTab, setTab] = useState<Tab | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -69,6 +72,13 @@ export function ExerciseScreen({ exerciseId }: { exerciseId: string }) {
     queryKey: ['me', 'exercise', exerciseId],
     queryFn: () => meService.getExercise(exerciseId),
   });
+  // The stats' own query (same key): has it ever been done?
+  const { data: progress } = useQuery({
+    queryKey: ['me', 'progress', 'exercise', exerciseId, null],
+    queryFn: () => workoutsService.mine.exercise(exerciseId),
+  });
+  const tab: Tab =
+    chosenTab ?? (progress && progress.workouts === 0 ? 'info' : 'stats');
   const relatedIds = data?.relatedExerciseIds ?? [];
   const { data: related } = useQuery({
     queryKey: ['me', 'exercises', 'related', relatedIds],

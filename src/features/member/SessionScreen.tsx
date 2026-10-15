@@ -22,6 +22,7 @@ import { CenteredSpinner } from '@shared/ui/Spinner';
 import { EmptyState } from '@shared/ui/states';
 import { Text } from '@shared/ui/Text';
 import { MEMBER_ACTIVE_SESSION_KEY, useActiveSession } from './hooks';
+import { SessionRunContext, useSessionRunController } from './session-run';
 
 /**
  * The member's own session control: how long they have been in, which TV
@@ -31,6 +32,12 @@ import { MEMBER_ACTIVE_SESSION_KEY, useActiveSession } from './hooks';
  * changes arrive with the next poll (4 s) or the socket's ping. Here from the
  * moment the member is on the board until they leave it — their own Finish,
  * the trainer's, or the automatic one after the session.
+ *
+ * A Work/Rest block here runs the room's clock (features/member/
+ * session-run.ts): started from the phone or the board, the TV, the board
+ * and the phone play one run, and each can pause or skip it. And every
+ * exercise has a tick of its own beside its sets', which completes all of
+ * them without filling in a value (the board's Completar, from the phone).
  */
 export function SessionScreen() {
   const { t } = useTranslation(['member']);
@@ -87,23 +94,45 @@ export function SessionScreen() {
   }
 
   return (
+    <SessionWorkout active={active} workoutId={workout.id} onBack={back} />
+  );
+}
+
+/** The session's workout, with its Work/Rest run in context for the blocks. */
+function SessionWorkout({
+  active,
+  workoutId,
+  onBack: back,
+}: {
+  active: MemberActiveSession;
+  workoutId: string;
+  onBack: () => void;
+}) {
+  const styles = useStyles();
+  const router = useRouter();
+  const run = useSessionRunController(active);
+  return (
     <View style={styles.root}>
-      <WorkoutView
-        // A new workout (the trainer swapped the plan) starts its own view.
-        key={workout.id}
-        workoutId={workout.id}
-        top={(finish) => (
-          <SessionBar active={active} onBack={back} finish={finish} />
-        )}
-        aside={<TvPicker active={active} />}
-        // Finishing ends the session: what is left is the workout itself.
-        onFinished={() =>
-          router.replace({
-            pathname: '/workouts/[workoutId]',
-            params: { workoutId: workout.id },
-          })
-        }
-      />
+      <SessionRunContext.Provider value={run}>
+        <WorkoutView
+          // A new workout (the trainer swapped the plan) starts its own view.
+          key={workoutId}
+          workoutId={workoutId}
+          // The bar names the session; the workout says its own name.
+          showName
+          top={(finish) => (
+            <SessionBar active={active} onBack={back} finish={finish} />
+          )}
+          aside={<TvPicker active={active} />}
+          // Finishing ends the session: what is left is the workout itself.
+          onFinished={() =>
+            router.replace({
+              pathname: '/workouts/[workoutId]',
+              params: { workoutId },
+            })
+          }
+        />
+      </SessionRunContext.Provider>
     </View>
   );
 }

@@ -2,7 +2,15 @@ import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { useKeepAwake } from 'expo-keep-awake';
-import { Check, Pause, Play, X } from 'lucide-react-native';
+import {
+  Check,
+  Pause,
+  Play,
+  SkipBack,
+  SkipForward,
+  Tv,
+  X,
+} from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -23,6 +31,13 @@ import {
 import type { EditorBlock } from '@shared/types/api.types';
 import { IconButton } from '@shared/ui/Button';
 import { Text } from '@shared/ui/Text';
+import {
+  runElapsedMs,
+  skipTarget,
+  workedSeconds,
+  type ClockRun,
+} from '../lib/work-rest-controls';
+import { useWorkRestLog, type WorkRestTime } from '../lib/work-rest-log';
 import {
   buildWorkRestSlots,
   countdownSeconds,
@@ -52,14 +67,29 @@ type Cue = keyof typeof SOUNDS;
  * when the trainer presses start — the 3-2-1, the work clock over the
  * exercise, the rest clock with the next one, the slot rail and the sounds —
  * full screen on the phone. The same timeline as the wall (work-rest-timeline,
- * ported), on a clock of the member's own; unlike the wall it can pause.
- * The web has the same player (bloomboard-frontend WorkRestPlayer).
+ * ported), on a clock of the member's own; unlike the wall it can pause and
+ * skip back or forward an interval (app 2.6.0).
+ *
+ * What was trained is logged when it closes: each work interval's time on
+ * its set's TIME, the set ticked — the planned time when it ran to its end,
+ * less when "Siguiente" cut it short (lib/work-rest-controls.ts). The cards
+ * take the times into their drafts (lib/work-rest-log.ts). The web has the
+ * same player (bloomboard-frontend WorkRestPlayer), without skipping or
+ * logging.
+ *
+ * In a session (`sync`) it plays the session's run instead — the one the
+ * board and the TV play: its clock is the server's, and pause and the skips
+ * write it, so the trainer and the TV follow, and what they do arrives here.
+ * Closing only hides it (the room's run goes on), and it logs nothing: the
+ * run marks the block done when it retires (features/member/session-run.ts).
  */
 export function WorkRestPlayer({
   block,
+  sync,
   onClose,
 }: {
   block: EditorBlock;
+  sync?: RunSync;
   onClose: () => void;
 }) {
   return (
@@ -71,20 +101,32 @@ export function WorkRestPlayer({
       onRequestClose={onClose}
     >
       <SchemeOverride scheme="dark">
-        <PlayerBody block={block} onClose={onClose} />
+        <PlayerBody block={block} sync={sync} onClose={onClose} />
       </SchemeOverride>
     </Modal>
   );
 }
 
+/** A session's run, as the player plays and drives it. */
+export interface RunSync {
+  startedAt: string;
+  pausedAt: string | null;
+  onPause: (paused: boolean) => void;
+  onSeek: (elapsedMs: number) => void;
+  /** The clock passed the end and its flourish. */
+  onOver: () => void;
+}
+
 function PlayerBody({
   block,
+  sync,
   onClose,
 }: {
   block: EditorBlock;
+  sync?: RunSync;
   onClose: () => void;
 }) {
-  const { t } = useTranslation(['workouts', 'common']);
+  const { t } = useTranslation(['workouts', 'common', 'app']);
   const styles = useStyles();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -103,17 +145,30 @@ function PlayerBody({
   );
 
   // The run's origin, moved forward by every pause so the clock resumes where
-  // it stopped.
+  // it stopped, and moved by a skip to land on another interval.
   const [origin, setOrigin] = useState(() => Date.now());
   const [pausedAt, setPausedAt] = useState<number | null>(null);
   const [now, setNow] = useState(() => Date.now());
+  // The stretches the clock ran between skips, for what each work took.
+  const [runs, setRuns] = useState<ClockRun[]>([]);
+  const [runFrom, setRunFrom] = useState(0);
+  // A session's run keeps ticking through a pause: a resume or a skip from
+  // the board moves its origin, and a stale "now" would flash the wrong
+  // interval (and its cue) for a frame.
+  const ticking = !!sync || pausedAt === null;
   useEffect(() => {
-    if (pausedAt !== null) return;
+    if (!ticking) return;
     const id = setInterval(() => setNow(Date.now()), TICK_MS);
     return () => clearInterval(id);
-  }, [pausedAt]);
-  const elapsedMs = Math.max(0, (pausedAt ?? now) - origin);
-  const togglePause = () => {
+  }, [ticking]);
+  const elapsedMs = sync
+    ? (runElapsedMs(
+        { workRestStartedAt: sync.startedAt, workRestPausedAt: sync.pausedAt },
+        now,
+      ) ?? 0)
+    : Math.max(0, (pausedAt ?? now) - origin);
+  const paused = sync ? sync.pausedAt !== null : pausedAt !== null;
+  const toggleOwnPause = () => {
     if (pausedAt === null) {
       setPausedAt(Date.now());
     } else {
@@ -121,6 +176,45 @@ function PlayerBody({
       setNow(Date.now());
       setPausedAt(null);
     }
+  };
+  const skipOwn = (direction: 'back' | 'forward') => {
+    const at = Date.now();
+    const current = Math.max(0, (pausedAt ?? at) - origin);
+    const target = skipTarget(current, slots, direction);
+    setRuns((r) => [...r, [runFrom, current]]);
+    setRunFrom(target);
+    setOrigin((pausedAt ?? at) - target);
+    setNow(at);
+  };
+  // A session's run is the server's: pause and skips write it.
+  const togglePause = sync ? () => sync.onPause(!paused) : toggleOwnPause;
+  const skip = sync
+    ? (direction: 'back' | 'forward') =>
+        sync.onSeek(skipTarget(elapsedMs, slots, direction))
+    : skipOwn;
+
+  // Closing, by hand or at the end: what was trained goes to its sets. A
+  // session's run is the room's: closing only hides it, and it logs nothing.
+  const close = () => {
+    if (sync) {
+      onClose();
+      return;
+    }
+    const trained = workedSeconds(slots, [...runs, [runFrom, elapsedMs]]);
+    useWorkRestLog.getState().push(
+      trained.flatMap(({ slot, seconds }): WorkRestTime[] => {
+        const setId = slot.id.slice(slot.exerciseEntryId.length + 1);
+        const entry = block.exercises.find(
+          (e) => e.id === slot.exerciseEntryId,
+        );
+        if (!entry) return [];
+        const setIndex = [...entry.sets]
+          .sort((a, b) => a.order - b.order)
+          .findIndex((s) => s.id === setId);
+        return [{ entryId: entry.id, setId, setIndex, seconds }];
+      }),
+    );
+    onClose();
   };
 
   const state = workRestStateAt(elapsedMs, slots);
@@ -165,8 +259,15 @@ function PlayerBody({
 
   const over = isRunOver(elapsedMs, slots);
   useEffect(() => {
-    if (over) onClose();
-  }, [over, onClose]);
+    // A session's run closes when the server retires it (it leaves the
+    // session's payload); asking is what makes it.
+    if (over) {
+      if (sync) sync.onOver();
+      else close();
+    }
+    // Once, when the run is over: `close` is a new function every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [over]);
 
   return (
     <View
@@ -180,28 +281,29 @@ function PlayerBody({
           icon={X}
           size={40}
           accessibilityLabel={t('common:close')}
-          onPress={onClose}
+          onPress={close}
         />
-        <Text
-          variant="label"
-          weight="bold"
-          uppercase
-          center
-          numberOfLines={1}
-          style={styles.headerTitle}
-        >
-          {block.name ?? t('workouts:workRest.title')}
-        </Text>
-        <IconButton
-          icon={pausedAt === null ? Pause : Play}
-          size={40}
-          accessibilityLabel={
-            pausedAt === null
-              ? t('workouts:workRest.pause')
-              : t('workouts:workRest.resume')
-          }
-          onPress={togglePause}
-        />
+        <View style={styles.headerTitle}>
+          <Text
+            variant="label"
+            weight="bold"
+            uppercase
+            center
+            numberOfLines={1}
+          >
+            {block.name ?? t('workouts:workRest.title')}
+          </Text>
+          {/* The run is the room's: the board and the TV play it too. */}
+          {sync && (
+            <View style={styles.synced}>
+              <Tv size={12} color={theme.text(0.6)} />
+              <Text variant="micro" muted={0.6} numberOfLines={1}>
+                {t('app:workRest.synced')}
+              </Text>
+            </View>
+          )}
+        </View>
+        <View style={styles.headerSpacer} />
       </View>
 
       {/* Everything under the header: a pause covers this, never the close
@@ -302,7 +404,7 @@ function PlayerBody({
           </Text>
         )}
 
-        {pausedAt !== null && (
+        {paused && (
           <Pressable
             style={[StyleSheet.absoluteFill, styles.paused]}
             onPress={togglePause}
@@ -318,6 +420,36 @@ function PlayerBody({
           </Pressable>
         )}
       </View>
+
+      {/* Outside the body, so a pause never covers them: skipping while
+          paused lands on the interval and stays paused there. */}
+      {phase !== 'DONE' && (
+        <View style={styles.controls}>
+          <IconButton
+            icon={SkipBack}
+            size={52}
+            accessibilityLabel={t('app:workRest.previous')}
+            onPress={() => skip('back')}
+          />
+          <IconButton
+            icon={paused ? Play : Pause}
+            variant="primary"
+            size={64}
+            accessibilityLabel={
+              paused
+                ? t('workouts:workRest.resume')
+                : t('workouts:workRest.pause')
+            }
+            onPress={togglePause}
+          />
+          <IconButton
+            icon={SkipForward}
+            size={52}
+            accessibilityLabel={t('app:workRest.next')}
+            onPress={() => skip('forward')}
+          />
+        </View>
+      )}
     </View>
   );
 }
@@ -586,7 +718,16 @@ const useStyles = makeStyles((t) => ({
     paddingHorizontal: 8,
     paddingVertical: 6,
   },
-  headerTitle: { flex: 1 },
+  headerTitle: { flex: 1, alignItems: 'center', gap: 2 },
+  headerSpacer: { width: 40 },
+  synced: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  controls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 28,
+    paddingVertical: 10,
+  },
   rail: {
     flexDirection: 'row',
     flexWrap: 'wrap',

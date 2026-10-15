@@ -39,13 +39,14 @@ export function codedErrorMessage(
 ): { title: string; description: string } | null {
   switch (data?.code) {
     // A member at their own plan's limit. The app usually catches it first
-    // and opens the upgrade sheet; this covers a stale plan.
+    // and opens the upgrade sheet; this covers a stale plan. In the app's
+    // words: a workout template is a routine (app:limits).
     case 'MEMBER_LIMIT_REACHED':
       return {
         title: t('member:limits.reachedTitle'),
         description: t('member:limits.reached', {
           max: data.max,
-          noun: t(`member:limits.noun.${data.limit}`, { count: data.max }),
+          noun: t(`app:limits.noun.${data.limit}`, { count: data.max }),
         }),
       };
     case 'EXERCISE_IN_USE':

@@ -71,7 +71,12 @@ Studio; `ANDROID_HOME` is not set globally).
 
 ## A new development build (native changes only)
 
-> **Needed since 2026-10-13:** app 2.5.0 added `expo-notifications`,
+> **Needed since 2026-10-15:** app 2.6.0 added `react-native-view-shot`,
+> `expo-media-library`, `expo-sharing` and `expo-clipboard` (sharing a
+> workout). A development build from before that fails on the share page
+> (*Cannot find native module …*) — rebuild it as below.
+>
+> Earlier, 2026-10-13: app 2.5.0 added `expo-notifications`,
 > `expo-task-manager` and `expo-file-system` (the workout under way in the
 > notification shade). A development build from before that crashes on launch
 > with *Cannot find native module 'ExpoPushTokenManager'* — rebuild it as

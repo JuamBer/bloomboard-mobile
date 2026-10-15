@@ -951,6 +951,16 @@ export interface MemberSessionDetail extends Omit<
     status: SessionUserStatus;
     checkedInAt: string | null;
     checkedOutAt: string | null;
+    /** Their Work/Rest run — the one the board and the TV play, driven from
+     *  either side (backend 2.10.0; absent on an older API). Elapsed is
+     *  `(pausedAt ?? now) - startedAt`: a pause stops it, a resume or a skip
+     *  moves `startedAt`. Null while idle. */
+    workRestStartedAt?: string | null;
+    workRestBlockId?: string | null;
+    workRestEndsAt?: string | null;
+    workRestPausedAt?: string | null;
+    /** When it was really started — stable through pauses and skips. */
+    workRestBeganAt?: string | null;
     /** The plan, for a session not trained (yet). */
     workoutTemplate: WorkoutTemplate | null;
     /** What the member trains — or trained — in it. */
@@ -962,6 +972,13 @@ export interface MemberSessionDetail extends Omit<
 export interface MemberRoutine extends Routine {
   assignedBy: { id: string; commercialName: string } | null;
 }
+
+/** GET /me/templates — one of the member's own templates in no routine (the
+ *  app's folders are optional; backend 2.10.0). */
+export type MemberTemplateCard = Omit<
+  WorkoutTemplateListItem,
+  'goals' | '_count'
+> & { assignedByCompanyId: string | null };
 
 /** An exercise as a member reads it: the catalog's, their own (userId), or
  *  one of their companies' (companyId) — readable, usable only once copied. */

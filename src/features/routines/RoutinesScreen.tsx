@@ -1,6 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import {
+  ChevronDown,
+  ChevronRight,
+  Folder,
+  FolderInput,
+  FolderPlus,
   ListOrdered,
   MoreVertical,
   Pencil,
@@ -8,7 +13,7 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react-native';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { NameSheet } from '@features/editor/widgets/EditorSheets';
@@ -18,55 +23,67 @@ import { useActiveWorkout, useStartWorkout } from '@features/workouts/hooks';
 import { meService } from '@shared/api/services/me.service';
 import { radius } from '@shared/theme/theme';
 import { makeStyles, useTheme } from '@shared/theme/ThemeProvider';
-import type { MemberRoutine, RoutineWorkout } from '@shared/types/api.types';
+import type {
+  ContentStatus,
+  MemberRoutine,
+  MemberTemplateCard,
+} from '@shared/types/api.types';
 import { ActionSheet, type SheetAction } from '@shared/ui/ActionSheet';
 import { Button, IconButton } from '@shared/ui/Button';
 import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
+import { Checkbox } from '@shared/ui/controls';
 import { PageHeader, Screen } from '@shared/ui/layout';
 import { ReorderSheet } from '@shared/ui/ReorderSheet';
 import { QueryState } from '@shared/ui/states';
 import { Text } from '@shared/ui/Text';
 
-const ROUTINES_KEY = ['me', 'routines'] as const;
+const FOLDERS_KEY = ['me', 'routines'] as const;
+const LOOSE_KEY = ['me', 'templates'] as const;
 
-/** The plan's exercises in order, by the name the plan gives them. */
-const exerciseNames = (entry: RoutineWorkout) =>
-  [...entry.workoutTemplate.blocks]
-    .sort((a, b) => a.index - b.index)
-    .flatMap((b) => b.exercises)
-    .map((e) => e.customName || e.exercise.name);
-
-interface RoutineGroup {
-  key: string;
-  title: string;
-  routines: MemberRoutine[];
-  editable: boolean;
+/** A routine as a card shows it, wherever it sits. */
+interface RoutineItem {
+  templateId: string;
+  name: string;
+  description: string | null;
+  status: ContentStatus;
 }
 
+const fromEntry = (
+  entry: NonNullable<MemberRoutine['workouts']>[number],
+): RoutineItem => ({
+  templateId: entry.workoutTemplateId,
+  name: entry.workoutTemplate.name,
+  description: entry.workoutTemplate.description,
+  status: entry.workoutTemplate.status,
+});
+
+const fromLoose = (t: MemberTemplateCard): RoutineItem => ({
+  templateId: t.id,
+  name: t.name,
+  description: t.description,
+  status: t.status,
+});
+
 type SheetState =
-  | { kind: 'create-routine' }
-  | { kind: 'edit-routine'; routine: MemberRoutine }
-  | { kind: 'create-workout'; routineId: string }
+  | { kind: 'new-routine' }
+  | { kind: 'new-folder' }
+  | { kind: 'rename-folder'; folder: MemberRoutine }
   | null;
 
 /**
- * Where training starts: an empty workout at the top, then every routine the
- * member has with its workouts in the order they rotate through them — their
- * own first (editable on their plan), then one group per company that
- * prepared some (read-only, which shows only as a missing ⋯). Each workout is
- * a card with its exercises and a Start button; a tap on the card opens its
- * plan, and a routine's settings are in its ⋯.
+ * Where training starts (specs/member-app.md, decision 18). The app's words
+ * are not the API's: a **routine** here is a workout template — what you
+ * train —, a **folder** is a Routine — an optional way to group them. The
+ * member's own routines come first, loose ones and then each folder, then
+ * each company's folders, read-only (no ⋯). A card is a routine's name and
+ * description and its Start; a tap opens it.
+ *
+ * Folders are free and unlimited, so nothing about them is counted or shown
+ * as a limit; routines are (the plan's `workouts`, 4 on Free).
  */
 export function RoutinesScreen() {
-  const { t } = useTranslation([
-    'member',
-    'clients',
-    'routines',
-    'common',
-    'app',
-  ]);
+  const { t } = useTranslation(['app', 'common']);
   const styles = useStyles();
-  const theme = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { guard, blocked, dismiss } = useLimitGuard();
@@ -77,195 +94,268 @@ export function RoutinesScreen() {
   const startingId = start.isPending
     ? (start.variables?.workoutTemplateId ?? 'empty')
     : null;
+
   const [sheet, setSheet] = useState<SheetState>(null);
   const [menu, setMenu] = useState<{
     title: string;
     actions: SheetAction[];
   } | null>(null);
-  const [sortRoutine, setSortRoutine] = useState<MemberRoutine | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<MemberRoutine | null>(
-    null,
-  );
-  const [confirmRemove, setConfirmRemove] = useState<{
-    routineId: string;
-    entry: RoutineWorkout;
+  const [moving, setMoving] = useState<{
+    item: RoutineItem;
+    folderId: string | null;
   } | null>(null);
+  const [sortFolder, setSortFolder] = useState<MemberRoutine | null>(null);
+  const [deleteRoutine, setDeleteRoutine] = useState<RoutineItem | null>(null);
+  const [deleteFolder, setDeleteFolder] = useState<MemberRoutine | null>(null);
+  const [alsoRoutines, setAlsoRoutines] = useState(false);
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
-  const {
-    data: routines,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery({
-    queryKey: ROUTINES_KEY,
+  const folders = useQuery({
+    queryKey: FOLDERS_KEY,
     queryFn: meService.getRoutines,
   });
+  const loose = useQuery({
+    queryKey: LOOSE_KEY,
+    queryFn: meService.getLooseTemplates,
+  });
+  const refetch = () => Promise.all([folders.refetch(), loose.refetch()]);
 
-  const groups = useMemo<RoutineGroup[]>(() => {
-    const all = routines ?? [];
-    const byCompany = new Map<string, RoutineGroup>();
-    for (const routine of all) {
-      if (!routine.assignedBy) continue;
-      const group = byCompany.get(routine.assignedBy.id) ?? {
-        key: routine.assignedBy.id,
-        title: t('member:routines.byCompany', {
-          company: routine.assignedBy.commercialName,
-        }),
-        routines: [],
-        editable: false,
-      };
-      group.routines.push(routine);
-      byCompany.set(routine.assignedBy.id, group);
-    }
-    return [
-      {
-        key: 'own',
-        title: t('member:routines.own'),
-        routines: all.filter((r) => !r.assignedBy),
-        editable: true,
-      },
-      ...[...byCompany.values()].sort((a, b) => a.title.localeCompare(b.title)),
-    ];
-  }, [routines, t]);
+  const own = (folders.data ?? []).filter((r) => !r.assignedBy);
+  const byCompany = new Map<
+    string,
+    { title: string; items: MemberRoutine[] }
+  >();
+  for (const routine of folders.data ?? []) {
+    if (!routine.assignedBy) continue;
+    const group = byCompany.get(routine.assignedBy.id) ?? {
+      title: t('app:routines.byCompany', {
+        company: routine.assignedBy.commercialName,
+      }),
+      items: [],
+    };
+    group.items.push(routine);
+    byCompany.set(routine.assignedBy.id, group);
+  }
+  const companies = [...byCompany.entries()].sort((a, b) =>
+    a[1].title.localeCompare(b[1].title),
+  );
+  const looseItems = (loose.data ?? []).map(fromLoose);
+  const ready = !!folders.data;
+  const nothingOwn = ready && own.length === 0 && looseItems.length === 0;
 
-  const writeRoutine = (updated: MemberRoutine) =>
-    queryClient.setQueryData<MemberRoutine[]>(ROUTINES_KEY, (prev) =>
-      (prev ?? []).map((r) => (r.id === updated.id ? updated : r)),
-    );
-  // A member's creates and deletes move their plan usage.
+  // Creates, moves and deletes change both lists and the plan's usage.
   const invalidate = () => {
-    void queryClient.invalidateQueries({ queryKey: ROUTINES_KEY });
+    void queryClient.invalidateQueries({ queryKey: FOLDERS_KEY });
+    void queryClient.invalidateQueries({ queryKey: LOOSE_KEY });
     void queryClient.invalidateQueries({ queryKey: ['me', 'plan'] });
   };
-  const openTemplate = (templateId: string) =>
+  // A routine opens to read; a new one opens with its editor on.
+  const openTemplate = (templateId: string, edit = false) =>
     router.push({
       pathname: '/templates/[templateId]',
-      params: { templateId },
+      params: edit ? { templateId, edit: '1' } : { templateId },
     });
 
+  // One way to create a routine: loose; ⋯ › Mover a carpeta files it.
   const createRoutine = useMutation({
     mutationFn: (dto: { name: string; description?: string }) =>
-      meService.createRoutine(dto),
+      meService.createTemplate(dto),
     onSuccess: (created) => {
-      queryClient.setQueryData<MemberRoutine[]>(ROUTINES_KEY, (prev) => [
-        ...(prev ?? []),
-        created as MemberRoutine,
-      ]);
+      invalidate();
+      setSheet(null);
+      openTemplate(created.id, true);
+    },
+  });
+  const createFolder = useMutation({
+    mutationFn: (name: string) => meService.createRoutine({ name }),
+    onSuccess: () => {
       invalidate();
       setSheet(null);
     },
   });
-  const updateRoutine = useMutation({
-    mutationFn: (vars: {
-      id: string;
-      dto: { name: string; description?: string };
-    }) => meService.updateRoutine(vars.id, vars.dto),
-    onSuccess: (updated) => {
-      writeRoutine(updated as MemberRoutine);
+  const renameFolder = useMutation({
+    mutationFn: (vars: { folder: MemberRoutine; name: string }) =>
+      meService.updateRoutine(vars.folder.id, {
+        name: vars.name,
+        description: vars.folder.description ?? undefined,
+      }),
+    onSuccess: () => {
+      invalidate();
       setSheet(null);
     },
   });
-  const removeRoutine = useMutation({
-    mutationFn: (id: string) => meService.removeRoutine(id),
+  const removeFolder = useMutation({
+    mutationFn: (vars: { id: string; keepWorkouts: boolean }) =>
+      meService.removeRoutine(vars.id, { keepWorkouts: vars.keepWorkouts }),
     onSuccess: invalidate,
   });
-  const createWorkout = useMutation({
-    mutationFn: (vars: {
-      routineId: string;
-      dto: { name: string; description?: string };
-    }) => meService.addBlankWorkout(vars.routineId, vars.dto),
-    onSuccess: (updated) => {
-      writeRoutine(updated as MemberRoutine);
-      invalidate();
-      setSheet(null);
-      const last = (updated.workouts ?? []).at(-1);
-      if (last) openTemplate(last.workoutTemplateId);
-    },
+  const removeRoutine = useMutation({
+    mutationFn: (templateId: string) => meService.removeTemplate(templateId),
+    onSuccess: invalidate,
   });
-  const reorderWorkouts = useMutation({
-    mutationFn: (vars: { routineId: string; ids: string[] }) =>
-      meService.reorderWorkouts(vars.routineId, vars.ids),
-    onSuccess: (updated) => writeRoutine(updated as MemberRoutine),
+  const move = useMutation({
+    mutationFn: (vars: { templateId: string; folderId: string | null }) =>
+      meService.moveTemplate(vars.templateId, vars.folderId),
+    onSuccess: invalidate,
   });
-  const removeWorkout = useMutation({
-    mutationFn: (vars: { routineId: string; entryId: string }) =>
-      meService.removeWorkout(vars.routineId, vars.entryId),
-    onSuccess: (updated) => {
-      writeRoutine(updated as MemberRoutine);
-      invalidate();
-    },
+  const reorder = useMutation({
+    mutationFn: (vars: { folderId: string; ids: string[] }) =>
+      meService.reorderWorkouts(vars.folderId, vars.ids),
+    onSuccess: invalidate,
   });
 
-  const routineActions = (routine: MemberRoutine): SheetAction[] => [
+  const newRoutine = () =>
+    guard('workouts', () => setSheet({ kind: 'new-routine' }));
+
+  const routineActions = (
+    item: RoutineItem,
+    folder: MemberRoutine | null,
+  ): SheetAction[] => [
     {
-      key: 'edit',
-      label: t('common:edit'),
-      icon: Pencil,
-      onPress: () => setSheet({ kind: 'edit-routine', routine }),
+      key: 'move',
+      label: t('app:routines.moveToFolder'),
+      icon: FolderInput,
+      onPress: () => setMoving({ item, folderId: folder?.id ?? null }),
     },
-    ...((routine.workouts?.length ?? 0) > 1
+    ...(folder && (folder.workouts?.length ?? 0) > 1
       ? [
           {
             key: 'sort',
-            label: t('app:routines.sortWorkouts'),
+            label: t('app:routines.sortRoutines'),
             icon: ListOrdered,
-            onPress: () => setSortRoutine(routine),
+            onPress: () => setSortFolder(folder),
+          },
+        ]
+      : []),
+    ...(item.status === 'FINAL'
+      ? []
+      : [
+          {
+            key: 'delete',
+            label: t('common:delete'),
+            icon: Trash2,
+            destructive: true,
+            separated: true,
+            onPress: () => setDeleteRoutine(item),
+          },
+        ]),
+  ];
+
+  const folderActions = (folder: MemberRoutine): SheetAction[] => [
+    {
+      key: 'rename',
+      label: t('app:routines.renameFolder'),
+      icon: Pencil,
+      onPress: () => setSheet({ kind: 'rename-folder', folder }),
+    },
+    ...((folder.workouts?.length ?? 0) > 1
+      ? [
+          {
+            key: 'sort',
+            label: t('app:routines.sortRoutines'),
+            icon: ListOrdered,
+            onPress: () => setSortFolder(folder),
           },
         ]
       : []),
     {
       key: 'delete',
-      label: t('common:delete'),
+      label: t('app:routines.deleteFolder'),
       icon: Trash2,
       destructive: true,
       separated: true,
-      onPress: () => setConfirmDelete(routine),
+      onPress: () => {
+        setAlsoRoutines(false);
+        setDeleteFolder(folder);
+      },
     },
   ];
 
-  const workoutActions = (
-    routine: MemberRoutine,
-    entry: RoutineWorkout,
-  ): SheetAction[] => [
-    ...((routine.workouts?.length ?? 0) > 1
-      ? [
-          {
-            key: 'sort',
-            label: t('app:routines.sortWorkouts'),
-            icon: ListOrdered,
-            onPress: () => setSortRoutine(routine),
-          },
-        ]
-      : []),
-    ...(entry.workoutTemplate.status === 'FINAL'
-      ? []
-      : [
-          {
-            key: 'remove',
-            label: t('common:delete'),
-            icon: Trash2,
-            destructive: true,
-            onPress: () => setConfirmRemove({ routineId: routine.id, entry }),
-          },
-        ]),
-  ];
+  const toggle = (id: string) =>
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const card = (
+    item: RoutineItem,
+    folder: MemberRoutine | null,
+    editable: boolean,
+  ) => (
+    <RoutineCard
+      key={item.templateId}
+      item={item}
+      starting={startingId === item.templateId}
+      startDisabled={start.isPending}
+      onOpen={() => openTemplate(item.templateId)}
+      onStart={() => start.mutate({ workoutTemplateId: item.templateId })}
+      onMenu={
+        editable
+          ? () =>
+              setMenu({
+                title: item.name,
+                actions: routineActions(item, folder),
+              })
+          : undefined
+      }
+    />
+  );
+
+  const folderBlock = (folder: MemberRoutine, editable: boolean) => {
+    const entries = folder.workouts ?? [];
+    const open = !collapsed.has(folder.id);
+    return (
+      <View key={folder.id} style={styles.folder}>
+        <View style={styles.folderHead}>
+          <Pressable
+            onPress={() => toggle(folder.id)}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: open }}
+            style={({ pressed }) => [
+              styles.folderToggle,
+              pressed && { opacity: 0.7 },
+            ]}
+          >
+            <FolderGlyph open={open} />
+            <Text variant="subheading" numberOfLines={1} style={styles.flex}>
+              {folder.name}
+            </Text>
+            <Text variant="caption" muted={0.45}>
+              {t('app:routines.count', { count: entries.length })}
+            </Text>
+          </Pressable>
+          {editable && (
+            <IconButton
+              icon={MoreVertical}
+              size={34}
+              accessibilityLabel={t('common:options')}
+              onPress={() =>
+                setMenu({ title: folder.name, actions: folderActions(folder) })
+              }
+            />
+          )}
+        </View>
+        {open && (
+          <View style={styles.folderBody}>
+            {entries.length === 0 && (
+              <Text variant="caption" muted={0.45}>
+                {t('app:routines.emptyFolder')}
+              </Text>
+            )}
+            {entries.map((entry) => card(fromEntry(entry), folder, editable))}
+          </View>
+        )}
+      </View>
+    );
+  };
 
   return (
     <Screen onRefresh={refetch}>
       <PageHeader
-        title={t('member:routines.title')}
-        subtitle={t('member:routines.subtitle')}
-        aside={
-          <IconButton
-            icon={Plus}
-            variant="primary"
-            size={42}
-            accessibilityLabel={t('member:routines.new')}
-            onPress={() =>
-              guard('routines', () => setSheet({ kind: 'create-routine' }))
-            }
-          />
-        }
+        title={t('app:routines.title')}
+        subtitle={t('app:routines.subtitle')}
       />
       {ownActive ? (
         <Button
@@ -291,172 +381,56 @@ export function RoutinesScreen() {
           onPress={() => start.mutate({})}
         />
       )}
-      <QueryState isLoading={isLoading} isError={isError} onRetry={refetch} />
-      {routines &&
-        groups.map((group) =>
-          !group.editable && group.routines.length === 0 ? null : (
-            <View key={group.key} style={styles.group}>
-              <Text variant="micro" muted={0.45} uppercase>
-                {group.title}
+      <View style={styles.creates}>
+        <Button
+          label={t('app:routines.newRoutine')}
+          icon={Plus}
+          variant="soft"
+          flex
+          onPress={newRoutine}
+        />
+        <Button
+          label={t('app:routines.newFolder')}
+          icon={FolderPlus}
+          variant="secondary"
+          flex
+          onPress={() =>
+            guard('routines', () => setSheet({ kind: 'new-folder' }))
+          }
+        />
+      </View>
+
+      <QueryState
+        isLoading={folders.isLoading}
+        isError={folders.isError}
+        onRetry={refetch}
+      />
+
+      {ready && (
+        <View style={styles.group}>
+          <Text variant="micro" muted={0.45} uppercase>
+            {t('app:routines.mine')}
+          </Text>
+          {nothingOwn && (
+            <View style={styles.empty}>
+              <Text variant="bodySmall" muted={0.55}>
+                {t('app:routines.empty')}
               </Text>
-              {group.routines.length === 0 ? (
-                <View style={styles.emptyOwn}>
-                  <Text variant="bodySmall" muted={0.5}>
-                    {t('member:routines.ownEmpty')}
-                  </Text>
-                  <Button
-                    label={t('member:routines.new')}
-                    icon={Plus}
-                    variant="soft"
-                    size="sm"
-                    onPress={() =>
-                      guard('routines', () =>
-                        setSheet({ kind: 'create-routine' }),
-                      )
-                    }
-                  />
-                </View>
-              ) : (
-                group.routines.map((routine) => {
-                  const locked = !group.editable || routine.status === 'FINAL';
-                  const entries = routine.workouts ?? [];
-                  return (
-                    <View key={routine.id} style={styles.routine}>
-                      <View style={styles.routineHead}>
-                        <View style={styles.flex}>
-                          <Text variant="heading" numberOfLines={2}>
-                            {routine.name}
-                          </Text>
-                          {routine.description ? (
-                            <Text variant="bodySmall" muted={0.5}>
-                              {routine.description}
-                            </Text>
-                          ) : null}
-                        </View>
-                        {!locked && (
-                          <IconButton
-                            icon={MoreVertical}
-                            size={34}
-                            accessibilityLabel={t('common:options')}
-                            onPress={() =>
-                              setMenu({
-                                title: routine.name,
-                                actions: routineActions(routine),
-                              })
-                            }
-                          />
-                        )}
-                      </View>
-                      {entries.map((entry) => {
-                        const actions = locked
-                          ? []
-                          : workoutActions(routine, entry);
-                        const names = exerciseNames(entry);
-                        return (
-                          <View key={entry.id} style={styles.workout}>
-                            <Pressable
-                              onPress={() =>
-                                openTemplate(entry.workoutTemplateId)
-                              }
-                              accessibilityRole="button"
-                              accessibilityHint={t('app:routines.openPlan')}
-                              style={({ pressed }) => [
-                                styles.workoutPress,
-                                pressed && { opacity: 0.7 },
-                              ]}
-                            >
-                              <View style={styles.workoutHead}>
-                                <Text
-                                  variant="subheading"
-                                  numberOfLines={2}
-                                  style={styles.flex}
-                                >
-                                  {entry.workoutTemplate.name}
-                                </Text>
-                                {actions.length > 0 && (
-                                  <IconButton
-                                    icon={MoreVertical}
-                                    size={32}
-                                    accessibilityLabel={t('common:options')}
-                                    style={styles.cornerMenu}
-                                    onPress={() =>
-                                      setMenu({
-                                        title: entry.workoutTemplate.name,
-                                        actions,
-                                      })
-                                    }
-                                  />
-                                )}
-                              </View>
-                              {entry.workoutTemplate.description ? (
-                                <Text
-                                  variant="bodySmall"
-                                  muted={0.55}
-                                  numberOfLines={2}
-                                >
-                                  {entry.workoutTemplate.description}
-                                </Text>
-                              ) : null}
-                              <Text
-                                variant="caption"
-                                muted={0.45}
-                                numberOfLines={2}
-                              >
-                                {names.length > 0
-                                  ? names.join(' · ')
-                                  : t('app:routines.noExercises')}
-                              </Text>
-                            </Pressable>
-                            <Button
-                              label={t('app:routines.startWorkout')}
-                              icon={Play}
-                              variant="soft"
-                              fullWidth
-                              loading={startingId === entry.workoutTemplateId}
-                              disabled={start.isPending}
-                              onPress={() =>
-                                start.mutate({
-                                  workoutTemplateId: entry.workoutTemplateId,
-                                })
-                              }
-                            />
-                          </View>
-                        );
-                      })}
-                      {entries.length === 0 && locked && (
-                        <Text variant="caption" muted={0.4}>
-                          {t('clients:routinesSection.noTemplatesInRoutine')}
-                        </Text>
-                      )}
-                      {!locked && (
-                        <Pressable
-                          onPress={() =>
-                            guard('workouts', () =>
-                              setSheet({
-                                kind: 'create-workout',
-                                routineId: routine.id,
-                              }),
-                            )
-                          }
-                          accessibilityRole="button"
-                          style={({ pressed }) => [
-                            styles.addWorkout,
-                            pressed && { opacity: 0.7 },
-                          ]}
-                        >
-                          <Plus size={15} color={theme.colors.accentInk} />
-                          <Text variant="bodySmall" weight="bold" accent>
-                            {t('member:routines.newWorkout')}
-                          </Text>
-                        </Pressable>
-                      )}
-                    </View>
-                  );
-                })
-              )}
             </View>
-          ),
-        )}
+          )}
+          {looseItems.map((item) => card(item, null, true))}
+          {own.map((folder) => folderBlock(folder, true))}
+        </View>
+      )}
+
+      {companies.map(([id, group]) => (
+        <View key={id} style={styles.group}>
+          <Text variant="micro" muted={0.45} uppercase>
+            {group.title}
+          </Text>
+          {group.items.map((folder) => folderBlock(folder, false))}
+        </View>
+      ))}
 
       <ActionSheet
         open={!!menu}
@@ -465,94 +439,150 @@ export function RoutinesScreen() {
         actions={menu?.actions ?? []}
       />
 
-      <NameSheet
-        open={
-          sheet?.kind === 'create-routine' || sheet?.kind === 'edit-routine'
-        }
-        onClose={() => setSheet(null)}
-        title={
-          sheet?.kind === 'edit-routine'
-            ? t('member:routines.edit')
-            : t('member:routines.new')
-        }
-        label={t('app:routines.name')}
-        placeholder={t('clients:routinesSection.routineNamePlaceholder')}
-        initialName={sheet?.kind === 'edit-routine' ? sheet.routine.name : ''}
-        initialDescription={
-          sheet?.kind === 'edit-routine'
-            ? (sheet.routine.description ?? '')
-            : ''
-        }
-        descriptionPlaceholder={t('app:routines.descriptionPlaceholder')}
-        loading={createRoutine.isPending || updateRoutine.isPending}
-        onConfirm={(name, description) => {
-          const dto = { name, description: description || undefined };
-          if (sheet?.kind === 'edit-routine')
-            updateRoutine.mutate({ id: sheet.routine.id, dto });
-          else createRoutine.mutate(dto);
-        }}
+      {/* Where a routine goes: no folder, or one of theirs. */}
+      <ActionSheet
+        open={!!moving}
+        onClose={() => setMoving(null)}
+        title={t('app:routines.moveToFolder')}
+        actions={[
+          {
+            key: '__none',
+            label: t('app:routines.noFolder'),
+            selected: moving?.folderId === null,
+            onPress: () =>
+              moving &&
+              moving.folderId !== null &&
+              move.mutate({
+                templateId: moving.item.templateId,
+                folderId: null,
+              }),
+          },
+          ...own
+            .filter((f) => f.status !== 'FINAL')
+            .map((folder) => ({
+              key: folder.id,
+              label: folder.name,
+              icon: Folder,
+              selected: moving?.folderId === folder.id,
+              onPress: () =>
+                moving &&
+                moving.folderId !== folder.id &&
+                move.mutate({
+                  templateId: moving.item.templateId,
+                  folderId: folder.id,
+                }),
+            })),
+        ]}
       />
+
       <NameSheet
-        open={sheet?.kind === 'create-workout'}
+        open={sheet?.kind === 'new-routine'}
         onClose={() => setSheet(null)}
-        title={t('member:routines.newWorkout')}
-        label={t('app:routines.workoutName')}
-        placeholder={t('clients:routinesSection.templateNamePlaceholder')}
+        title={t('app:routines.newRoutine')}
+        label={t('app:routines.routineName')}
+        placeholder={t('app:routines.routinePlaceholder')}
         initialDescription=""
         descriptionPlaceholder={t('app:routines.descriptionPlaceholder')}
-        loading={createWorkout.isPending}
+        confirmLabel={t('common:create')}
+        loading={createRoutine.isPending}
         onConfirm={(name, description) =>
-          sheet?.kind === 'create-workout' &&
-          createWorkout.mutate({
-            routineId: sheet.routineId,
-            dto: { name, description: description || undefined },
+          createRoutine.mutate({
+            name,
+            description: description || undefined,
           })
         }
       />
+      <NameSheet
+        open={sheet?.kind === 'new-folder' || sheet?.kind === 'rename-folder'}
+        onClose={() => setSheet(null)}
+        title={
+          sheet?.kind === 'rename-folder'
+            ? t('app:routines.renameFolder')
+            : t('app:routines.newFolder')
+        }
+        label={t('app:routines.folderName')}
+        placeholder={t('app:routines.folderPlaceholder')}
+        initialName={sheet?.kind === 'rename-folder' ? sheet.folder.name : ''}
+        confirmLabel={
+          sheet?.kind === 'rename-folder' ? undefined : t('common:create')
+        }
+        loading={createFolder.isPending || renameFolder.isPending}
+        onConfirm={(name) => {
+          if (sheet?.kind === 'rename-folder')
+            renameFolder.mutate({ folder: sheet.folder, name });
+          else createFolder.mutate(name);
+        }}
+      />
 
       <ReorderSheet
-        open={!!sortRoutine}
-        onClose={() => setSortRoutine(null)}
-        title={t('app:routines.sortWorkouts')}
-        items={(sortRoutine?.workouts ?? []).map((w) => ({
+        open={!!sortFolder}
+        onClose={() => setSortFolder(null)}
+        title={t('app:routines.sortRoutines')}
+        items={(sortFolder?.workouts ?? []).map((w) => ({
           id: w.id,
           label: w.workoutTemplate.name,
         }))}
         onSave={(ids) =>
-          sortRoutine &&
-          reorderWorkouts.mutate({ routineId: sortRoutine.id, ids })
+          sortFolder && reorder.mutate({ folderId: sortFolder.id, ids })
         }
       />
 
       <ConfirmDialog
-        open={!!confirmDelete}
-        onClose={() => setConfirmDelete(null)}
-        title={t('app:routines.deleteTitle')}
-        description={t('app:routines.deleteDescription', {
-          name: confirmDelete?.name,
+        open={!!deleteRoutine}
+        onClose={() => setDeleteRoutine(null)}
+        title={t('app:routines.deleteRoutineTitle')}
+        description={t('app:routines.deleteRoutineDescription', {
+          name: deleteRoutine?.name,
         })}
         confirmLabel={t('common:delete')}
         loading={removeRoutine.isPending}
         onConfirm={() => {
-          if (confirmDelete) removeRoutine.mutate(confirmDelete.id);
-          setConfirmDelete(null);
+          if (deleteRoutine) removeRoutine.mutate(deleteRoutine.templateId);
+          setDeleteRoutine(null);
         }}
       />
       <ConfirmDialog
-        open={!!confirmRemove}
-        onClose={() => setConfirmRemove(null)}
-        title={t('app:routines.removeWorkoutTitle')}
-        description={t('app:routines.removeWorkoutDescription', {
-          name: confirmRemove?.entry.workoutTemplate.name,
-        })}
+        open={!!deleteFolder}
+        onClose={() => setDeleteFolder(null)}
+        title={t('app:routines.deleteFolderTitle')}
+        description={
+          deleteFolder && (deleteFolder.workouts?.length ?? 0) > 0 ? (
+            <View style={styles.dialogBody}>
+              <Text variant="bodySmall" muted={0.6}>
+                {alsoRoutines
+                  ? t('app:routines.deleteFolderWithRoutines', {
+                      name: deleteFolder.name,
+                      count: deleteFolder.workouts?.length ?? 0,
+                    })
+                  : t('app:routines.deleteFolderKeep', {
+                      name: deleteFolder.name,
+                    })}
+              </Text>
+              <Checkbox
+                checked={alsoRoutines}
+                onChange={setAlsoRoutines}
+                label={
+                  <Text variant="bodySmall" style={styles.flex}>
+                    {t('app:routines.deleteFolderAlso', {
+                      count: deleteFolder.workouts?.length ?? 0,
+                    })}
+                  </Text>
+                }
+              />
+            </View>
+          ) : (
+            t('app:routines.deleteFolderEmpty', { name: deleteFolder?.name })
+          )
+        }
         confirmLabel={t('common:delete')}
+        loading={removeFolder.isPending}
         onConfirm={() => {
-          if (confirmRemove)
-            removeWorkout.mutate({
-              routineId: confirmRemove.routineId,
-              entryId: confirmRemove.entry.id,
+          if (deleteFolder)
+            removeFolder.mutate({
+              id: deleteFolder.id,
+              keepWorkouts: !alsoRoutines,
             });
-          setConfirmRemove(null);
+          setDeleteFolder(null);
         }}
       />
       <UpgradeSheet limit={blocked} onClose={dismiss} />
@@ -560,26 +590,104 @@ export function RoutinesScreen() {
   );
 }
 
+/** A folder's mark, open or closed, with the chevron that says which. */
+function FolderGlyph({ open }: { open: boolean }) {
+  const theme = useTheme();
+  const Chevron = open ? ChevronDown : ChevronRight;
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+      <Chevron size={16} color={theme.text(0.45)} />
+      <Folder size={17} color={theme.colors.accentInk} />
+    </View>
+  );
+}
+
+/** A routine: its name and description, Start, and — one's own — its ⋯. A
+ *  tap anywhere else opens it. */
+function RoutineCard({
+  item,
+  starting,
+  startDisabled,
+  onOpen,
+  onStart,
+  onMenu,
+}: {
+  item: RoutineItem;
+  starting: boolean;
+  startDisabled: boolean;
+  onOpen: () => void;
+  onStart: () => void;
+  onMenu?: () => void;
+}) {
+  const { t } = useTranslation(['app', 'common']);
+  const styles = useStyles();
+  return (
+    <View style={styles.card}>
+      <Pressable
+        onPress={onOpen}
+        accessibilityRole="button"
+        accessibilityHint={t('app:routines.openRoutine')}
+        style={({ pressed }) => [
+          styles.cardPress,
+          onMenu && styles.roomForMenu,
+          pressed && { opacity: 0.7 },
+        ]}
+      >
+        <Text variant="subheading" numberOfLines={2}>
+          {item.name}
+        </Text>
+        {item.description ? (
+          <Text variant="bodySmall" muted={0.55} numberOfLines={2}>
+            {item.description}
+          </Text>
+        ) : null}
+      </Pressable>
+      {/* Beside the card's pressable area, never inside it: a button in a
+          button is invalid on the web, and two targets fight on a phone. */}
+      {onMenu && (
+        <IconButton
+          icon={MoreVertical}
+          size={32}
+          accessibilityLabel={t('common:options')}
+          style={styles.cornerMenu}
+          onPress={onMenu}
+        />
+      )}
+      <Button
+        label={t('app:routines.startWorkout')}
+        icon={Play}
+        variant="soft"
+        fullWidth
+        loading={starting}
+        disabled={startDisabled}
+        onPress={onStart}
+      />
+    </View>
+  );
+}
+
 const useStyles = makeStyles((t) => ({
+  creates: { flexDirection: 'row', gap: 8 },
   group: { gap: 12 },
-  emptyOwn: {
-    gap: 12,
-    alignItems: 'flex-start',
+  empty: {
     padding: 16,
     borderRadius: radius['2xl'],
     borderWidth: 1,
     borderStyle: 'dashed',
     borderColor: t.line(0.15),
   },
-  routine: { gap: 10 },
-  routineHead: {
+  folder: { gap: 10 },
+  folderHead: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  folderToggle: {
+    flex: 1,
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: 8,
-    paddingHorizontal: 2,
+    minHeight: 40,
   },
+  folderBody: { gap: 10 },
   flex: { flex: 1, minWidth: 0 },
-  workout: {
+  card: {
     gap: 12,
     padding: 14,
     borderRadius: radius['2xl'],
@@ -587,18 +695,8 @@ const useStyles = makeStyles((t) => ({
     borderColor: t.line(0.08),
     backgroundColor: t.colors.surface,
   },
-  workoutPress: { gap: 4 },
-  workoutHead: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  cornerMenu: { marginTop: -6, marginRight: -8, marginBottom: -8 },
-  addWorkout: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    minHeight: 48,
-    borderRadius: radius['2xl'],
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: t.ink(0.3),
-  },
+  cardPress: { gap: 4 },
+  roomForMenu: { paddingRight: 28 },
+  cornerMenu: { position: 'absolute', top: 8, right: 6 },
+  dialogBody: { gap: 12 },
 }));

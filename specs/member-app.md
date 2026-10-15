@@ -25,8 +25,8 @@ Since 2.5.0 (decision 16) it has three tabs:
 | Tab | What |
 |---|---|
 | **Calendario** (only with sessions) | agenda and month of their sessions across centers; a session's detail and plan; the running one opens the session control |
-| **Rutinas** | where training starts: an empty workout at the top, then their own routines and plans (create, rename, reorder, delete, edit in the editor) and each company's (read-only), every workout a card with its exercises and **Empezar entrenamiento** |
-| **Perfil** | photo, name (or nickname) and how many workouts they have done; **Ejercicios** (catalog, their own and their companies'; filters; create / edit / copy; stats and usages), **Medidas** (last 3 months, last year or all), **Calendario** (their workouts by the month, the streak of weeks and the rest days); then every workout they have done, newest first. The gear opens **Ajustes**: Cuenta (Perfil — details and where they train; Cuenta — password and **delete account**, password- or Google-confirmed, `DELETE /me`, required by Google Play; Suscripción — plan, limits and usage, Pro "Próximamente"), Preferencias (units, language, light/dark, the Hevy import), Ayuda (FAQ, Contáctanos, Sobre Bloom Board) and signing out |
+| **Rutinas** | where training starts: an empty workout at the top, *Nueva rutina* and *Nueva carpeta*, then their own routines — loose ones, then each folder — and each company's (read-only); every routine a card with its name, description and **Empezar entrenamiento**. Since 2.6.0 the app's words are not the API's: a *rutina* is a workout template, a *carpeta* a Routine (decision 18) |
+| **Perfil** | photo, name (or nickname) and how many workouts they have done; **Ejercicios** (catalog, their own and their companies'; filters; create / edit / copy; stats and usages), **Medidas** (last 3 months, last year or all), **Calendario** (their workouts by the month, the streak of weeks and the rest days); then every workout they have done, newest first, each with a ⋯ (*Guardar como rutina*, *Compartir*, *Eliminar*). The gear opens **Ajustes**: Cuenta (Perfil — details and where they train; Cuenta — password and **delete account**, password- or Google-confirmed, `DELETE /me`, required by Google Play; Suscripción — plan, limits and usage, Pro "Próximamente"), Preferencias (units, language, light/dark, the Hevy import), Ayuda (*Guía de entrenamiento*, FAQ, Contáctanos, Sobre Bloom Board) and signing out |
 
 A workout — live, or finished and opened from the profile or the calendar — is its own
 screen; a finished one opens read-only until **Editar**.
@@ -109,7 +109,8 @@ phone:
 
 | Web | App | Why |
 |---|---|---|
-| Sets table, columns sized to the screen | A grid with fixed side columns (type, tick, delete) and metric columns with a minimum width; scrolls sideways only when an exercise has more metrics than the phone is wide | Three metrics fit a 390-pt phone; six do not, and wrapping a set onto two lines breaks the reading of a table. |
+| Sets table, columns sized to the screen | A grid with fixed side columns (type, tick) and metric columns of a **fixed width the table works out from its own room** (`lib/grid-layout.ts`: equal shares, never under a column's minimum; RPE keeps its narrow square); scrolls sideways only when the minimums do not fit (since 2.6.0) | Three metrics fit a 390-pt phone; six do not, and wrapping a set onto two lines breaks the reading of a table. Until 2.6.0 the columns were `flex: 1` inside the sideways scroll, which gives its content no width to share: each column took its text's width, so typing "102,5" widened one field and shoved the others. |
+| Delete buttons on rows | **Swipe a set to the left** to show Delete (2.6.0); swiping back, focusing a field, opening another row or tapping the row closes it. The set type's sheet also has *Eliminar serie* | A column of trash cans took width every row needed for an action taken now and then. The sheet is the way when the table scrolls sideways (the scroll wins that gesture). |
 | Tab between fields | A field chain: the keyboard's next key, an iOS accessory bar ("Siguiente" / "Listo" — the number pad has no return key) and a full digit budget (3 for kg, 2 for reps) all move to the next field | A set is logged one-handed between sets; tapping each cell is the slow path. |
 | Popovers, dropdowns | Bottom sheets (`Sheet`, `ActionSheet`) | Reachable with a thumb, as the web already does below `md` (`ActionMenu`). |
 | Drag to reorder (blocks, exercises, a routine's plans, a super-set's sequence) | A reorder sheet: each row moves up or down, saved with "Guardar orden" | A drag inside a scrolling list fights the scroll gesture, and long lists need auto-scroll while dragging — fragile for a rare action. |
@@ -217,8 +218,10 @@ Google requires two things of an app with sign-up that the product did not have:
 In a workout, a Work/Rest block shows **Empezar**: a full-screen modal that runs
 the block as the TV does — 3-2-1, the work clock over the demo, the rest clock
 with the next exercise, the slot rail, a "Siguiente · …" line during work, and
-the cues. Pause, close; nothing is logged. The web has the same player
-(`bloomboard-frontend/specs/work-rest-mode.md`, *The member's player*).
+the cues. Pause, close. Since 2.6.0 it also **skips** back or forward an
+interval and **logs what was trained** when it closes (decision 18). The web has
+the same player without those two (`bloomboard-frontend/specs/work-rest-mode.md`,
+*The member's player*).
 
 | Choice | Why |
 |---|---|
@@ -343,11 +346,108 @@ The user's second brief of 2026-10-13.
 Native modules added: `expo-notifications`, `expo-task-manager`, `expo-file-system` — a
 new native build (it is in 2.5.0's store build anyway).
 
+## Design decision 18: the app review round — folders, sharing, a guide, a calmer editor (2.6.0, backend 2.10.0)
+
+The user's "Mobile App Review" brief (2026-10-15), after watching members use 2.5.0.
+
+**Folders and routines.** Members tapped "+" on Rutinas, met the plan's upgrade sheet (one routine on Free) and stopped; "Mi rutina", made for them at sign-up, read as something they had to fill.
+
+| Choice | Why |
+|---|---|
+| **The app's words: a *rutina* (routine) is a workout template, a *carpeta* (folder) is a Routine** — in the `app` namespace only; the API, the web and the staff keep theirs | What people call "my routine" is the session they train, not a container. The web portal is unchanged this round (the user's call): it does not list routines outside folders yet (backend `specs/member-portal.md` decision 11). |
+| **Folders optional**: routines live loose or in one folder; one *Nueva rutina* (it makes a loose one) and *Nueva carpeta* at the top, ⋯ *Mover a carpeta* to file a routine | `GET/POST /me/templates`, `PATCH …/routine` (backend 2.10.0). A second "new routine" inside each folder was one way too many (the user, same day). |
+| **Free = 4 routines, 10 own exercises, folders unlimited and never shown** (Suscripción and the upgrade sheet list only routines and exercises, `app:limits`) | The limit is on what is trained. |
+| **Deleting a folder asks**: its routines move out by default; a checkbox deletes them too (`DELETE /me/routines/:id?keepWorkouts=true`) | The user's call; a folder is a way of sorting, so losing routines should be a choice. |
+| **No first routine at sign-up**; an existing "Mi rutina" stays a folder like any other. Register and Google sign-in no longer send `language` (it only named that routine) | The user's call; no migration. |
+| **Pro is "En desarrollo"**: Suscripción, the plan card and the upgrade sheet show Pro with that badge and one line, *Estamos desarrollando el plan Pro. Cuando esté listo, lo verás aquí.* — no price, no list of what it unlocks, no button (`member:plan.inDevelopment` / `developing`); the limit's text ends the same way, and the API's limit error is worded with `app:limits` too | The price is not decided (the user, 2026-10-15): the 4,99 € the API still sends is a placeholder. The web portal does the same (frontend 2.10.0), the landing too (1.6.0). An app older than 2.6.0 keeps showing 4,99 € until it updates. |
+| **A routine card is its name, description and Start** — no exercise list | Shorter cards; the routine opens on a tap. |
+
+**Workouts.** The profile's workout cards (and the workout's own ⋯) gain *Guardar como rutina* (`POST /me/workouts/:id/template`: what was done becomes the targets; a company's exercises are left out and the toast says so), *Compartir* and *Eliminar* (`widgets/WorkoutActions.tsx`).
+
+**Sharing** (`features/workouts/share/`): a carousel of images — the numbers (duration, volume, sets, exercises, records), the exercises, one big number, the records when there are any — on a light, dark or **transparent** background (a sticker over a photo: white ink with a shadow, a checkerboard behind the preview that is never saved), saved at 1080 × 1350 (`react-native-view-shot`). *Descargar* saves to the gallery (`expo-media-library/legacy` `saveToLibraryAsync`), *Compartir* opens the system's share sheet (`expo-sharing`), *Copiar texto* copies the workout as plain text for a chat or an AI (`expo-clipboard`; `share-data.ts` writes both, pure and tested), and a line asks to tag **@bloomboard.pro**. Direct Instagram / AI targets are a later round.
+
+| Choice | Why |
+|---|---|
+| **No photo-reading permission**: the module's own manifest brings `READ_MEDIA_*` / `READ_MEDIA_VISUAL_USER_SELECTED` / `ACCESS_MEDIA_LOCATION`; `android.blockedPermissions` removes them, and its config plugin is not used | The app only adds an image. Android 13+ needs no permission to insert into MediaStore; before that the module's `WRITE_EXTERNAL_STORAGE` (maxSdk 32) is asked for at the moment of saving. Play asks apps holding photo permissions to justify them. iOS: `NSPhotoLibraryAddUsageDescription` only. |
+| **The image's colours are the brand palette's** (`PALETTES.BLOOM`), not the theme's | It is a picture of the brand, whatever the viewer's light/dark setting. |
+
+**The guide** (Ajustes › Ayuda › *Guía de entrenamiento*, `features/settings/GuideScreen.tsx`): set types, metrics (how a plan states a target and a workout logs one, then each catalog metric), super-sets, the two kinds of block. The app's own text (`app:guide`), not the FAQ's — it explains the app's controls, so it ships with them. The editor links into it: a metric column's header opens the metric's sheet (`MetricInfoSheet`, RPE with its scale), and every set type has a "?" in its sheet.
+
+**The editor, calmer.**
+
+| Choice | Why |
+|---|---|
+| **A routine opens to read**; one's own has *Editar*, which turns the editor on until *Hecho* (its name and description behind an "Aa" button meanwhile). A routine just created opens editing. *Hecho* saves what is still pending (`useDebouncedSave`'s `flushOnDisable`, the finished workout's *Hecho* too) | Scrolling through a routine should never nudge a value — the same rule as a finished workout. Turning the editor off used to stop the autosave at once, dropping the last 1.5 s of typing. |
+| **No header card**: a routine's and a workout's name is the bar's title; a workout's details (when, where, the plan, the clock, the progress, Finish) sit under it with no frame. The session control keeps the name above them (its bar names the service) | The card repeated the name and spent a screen's top on it. |
+| A block with only a name is **centred** against its buttons; a **Work/Rest block shows only its clock** beside the name | The empty badges row pushed the name up; the "WORK/REST" label was noise next to the icon. |
+| **The block sheet is a name and a type** — no colour, no description, no presets, no hint under the choice, no "30 s / 15 s" notice. A block made on the web keeps its colour and description, sent back untouched | Fewer decisions on a phone; the guide explains the types. |
+| **RPE is a square** (40 × 40) in a narrow column of its own; a super-set's A1/B1 labels and the mode pickers are as tall as the fields (a field box no longer uses `flex: 1`, which collapsed a box holding only a label) | One line of equal controls per set. |
+| **A done set drops its fields' frames**; a frame comes back while a field has the focus or once the set is unticked | A done set reads as a line of results. |
+| **No renaming an exercise in a workout** (only in a routine) | A workout logs the exercise done. |
+| **A finished workout read back** shows no ticks, no green, and only the notes someone wrote — not the plan's placeholders (`showsSetComment`, `ExerciseEntryCard`); *Editar* brings them all back | A record, not a form. This diverges from the web, which still shows the plan's notes there. |
+| **Replacing an exercise** clears its custom name, and its plan note (a routine's `notes`; in a workout the server clears `planNotes`, backend 2.10.0) | "Sentadilla" stayed over a leg press, with the new name under it. |
+
+**The Work/Rest player** skips to the previous interval (or restarts this one past 2 s) and to the next, and on closing **logs each work interval's time** on its set's `TIME` and ticks it: the planned time when it ran to its end, less when *Siguiente* cut it short; an interval done twice counts its longer run (`lib/work-rest-controls.ts`). The player does not write the workout: it leaves the times in a store (`lib/work-rest-log.ts`) and each card takes its own into its draft and saves at once, as a tick does — the cards are the only writers of their sets, and a write behind them would be overwritten by the next save of a card with an edit pending.
+
+**Exercise page**: never done, it opens on *Indicaciones*; the stats' chart and record history cover 3 months (default, unless nothing falls in them), a year or all — the bests stay all-time (`shared/lib/time-range.ts`, shared with Medidas).
+
+**Bugs fixed.**
+
+| Bug | Cause | Fix |
+|---|---|---|
+| Entering a session from the calendar closed the app (a center member) | The session detail rendered its plan in the editor from the backend's **TV-shaped** copy (no exercise metrics, no metric options, composites without numerator/denominator); a composite metric threw in the unit conversion | The detail loads the plan's full tree (`GET /workout-templates/:id`, readable for a session the member is in) |
+| Many quick changes in a workout: values flicked back, the keyboard's focus jumped to the notes | (1) **The server recreates every set row on each save**, so set ids changed under the field being typed in; rows were keyed by id, so the row remounted and focus fell on the nearest field — the notes. (2) **A poll sent before a save and answered after it** overwrote the cache with the old copy, which a card with nothing pending took in | (1) Rows are keyed by a stable `key` carried across server copies (`withRowKeys`); never sent. (2) Every editor write is tracked per document (`lib/write-tracker.ts`) and the workout's one query (`workoutQuery`) keeps the cached copy when a read overlapped a write |
+
+**Play's pre-launch report on 2.5.0**, answered in this round:
+
+| Remark | Answer |
+|---|---|
+| **DEX: obfuscation, optimization and shrinking under 25%** (required from February 2027) — the one that "requires attention" | R8 on for release builds (`expo-build-properties` `enableMinifyInReleaseBuilds`) with its optimizations (`withR8Optimizations` in `app.config.ts`), plus a keep rule for what only reflection reaches. A local release build scored ~82% on all three (2.5.0: ~1%). How to check one: `docs/RELEASING.md` → *R8*. Play re-measures on the 2.6.0 upload. |
+| Photo and video permissions | None held: `android.blockedPermissions` (see *Sharing* above). |
+| Edge-to-edge: deprecated APIs, display cutouts | Informational. The calls are inside React Native, `react-native-keyboard-controller` and `react-native-screens`; they go away with those libraries' updates. The app already draws edge-to-edge. |
+| Orientation locked on large screens | Kept: `orientation: 'portrait'`. The app is for a phone in the gym; Play's notice is a recommendation. |
+| Listing on third-party stores | A Play Console preference, not code. |
+
+New native modules: `react-native-view-shot`, `expo-media-library`, `expo-sharing`, `expo-clipboard` — a store build and a version bump (2.6.0). Needs **backend 2.10.0** live first.
+
+## Design decision 19: a session's workout — the exercise tick, and the room's Work/Rest clock (2.6.0, backend 2.10.0)
+
+The user's ask the same day: in a session (`/session`), tick an exercise whole, and make the Work/Rest block one thing for the trainer's board, the TV and the phone — started, paused or skipped from any of them.
+
+**The exercise tick.** In a session's workout every exercise (a super-set as one) has a tick at its head beside its sets' (`TemplateSessionView.exerciseTicks`; elsewhere only an exercise with no sets has one).
+
+| Choice | Why |
+|---|---|
+| **It ticks every set and fills in nothing** | It is the board's *Completar* from the phone. A set's own tick copies its hints (the plan, last time) as values; done this way the member would log numbers they never lifted. |
+| **The card ticks its own draft** (`onTickAll`) and saves at once like a tick; the server derives the exercise's status from its sets | The cards are the only writers of their sets: a server-side mark behind a card with a pending edit would be undone by its next save, and `flush()` gives no promise to wait on. |
+| **Then the view moves on** (`TemplateSessionView.follow`): once the save lands, it scrolls to the exercise that is up | "Go to the next exercise", as a mark from here already did. |
+| Unticked, every set goes back to open (values kept); a **skipped** one reopens through the server's mark | A skip is the board's, and its sets were never ticked. |
+
+**The room's Work/Rest clock** (`features/member/session-run.ts`). The run on the member's attendance (`SessionUser.workRest*`, backend `specs/work-rest-mode.md`) is the one the board and the TV play; the session control provides it to its blocks (`SessionRunContext`) and the blocks drive it.
+
+| Choice | Why |
+|---|---|
+| **In a session, Empezar starts the room's run** (`POST /me/sessions/:id/work-rest/start`) — only on the block that is up, as on the board | The TV and the trainer see what the member started. Before, the phone ran a clock of its own nobody else saw. |
+| **The player opens by itself when the trainer starts it**; closed, it stays closed for that run (`workRestBeganAt` names it through pauses and skips), and a strip under the block's heading — *En marcha*/*En pausa*, the time left, **Cancelar**, **Terminar**, **Abrir** — takes its place | The run is the room's: closing the player only hides it, the TV keeps going. The two escapes are the board's. |
+| **Its clock is the server's**: `(pausedAt ?? now) - startedAt`, ticking through a pause; pause and previous / next write the run (`seek` to the interval `skipTarget` picks) with an optimistic copy (`withRunPaused`, `withRunAt` in `lib/work-rest-controls.ts`) | Every change from the board or the TV arrives on the socket's ping and is played as is; a press here is on the screen at once. A clock stopped while paused would flash the wrong interval (and its cue) on resume. |
+| **It logs nothing** in a session: the run marks its block done when it retires (or on Terminar), as on the board | Several hands drive it, and skips made on the board never pass through the phone's clock — the "what each work interval took" of decision 18 cannot be known. Alone, the player still logs. |
+| The end: the clock passes it and the flourish → the player asks for the active session, whose read retires the run (`finalizeMemberRuns`) | A phone may be the only thing watching (no board, no TV). |
+| Header caption *Con la TV y tu entrenador* | Says the clock is shared, so a pause here is understood to stop the room's. |
+
+The web member portal's session control still runs its own clock (backend 2.10.0 serves it too; not wired this round).
+
 ## File map
 
 | Area | Where |
 |---|---|
-| Routes | `src/app/` — `(member)/(tabs)/*` the tabs (calendar, routines, profile), `(member)/session`, `measurements`, `import`, `exercises/*`, `settings/*`, `sessions/[sessionId]`, `templates/[templateId]`, `workouts/[workoutId]`, `workouts/calendar`; `login`, `register`, `activate/*` |
+| Routes | `src/app/` — `(member)/(tabs)/*` the tabs (calendar, routines, profile), `(member)/session`, `measurements`, `import`, `exercises/*`, `settings/*` (`settings/guide/*` since 2.6.0), `sessions/[sessionId]`, `templates/[templateId]`, `workouts/[workoutId]/` (`index`, `share`), `workouts/calendar`; `login`, `register`, `activate/*` |
+| Rutinas (routines and folders) | `src/features/routines/RoutinesScreen.tsx` |
+| A session's Work/Rest run | `src/features/member/session-run.ts` (context + controller), `features/editor/widgets/BlockCard.tsx` (`RunStrip`, start), `features/workouts/widgets/WorkRestPlayer.tsx` (`sync`), `features/workouts/lib/work-rest-controls.ts` (`runElapsedMs`, `withRunPaused`, `withRunAt`, tested) |
+| Sharing a workout | `src/features/workouts/share/` (`ShareWorkoutScreen.tsx`, `ShareCard.tsx`, `share-data.ts` pure + tested); `widgets/WorkoutActions.tsx` (save as routine, share, delete) |
+| The guide | `src/features/settings/GuideScreen.tsx`; strings `app:guide`; the editor's `widgets/MetricInfoSheet.tsx` and the set type sheet's "?" |
+| Editor reliability | `src/features/editor/lib/write-tracker.ts` (writes per document), `types/workout-set.types.ts` (`key`, `withRowKeys`), `features/workouts/hooks.ts` (`workoutQuery`) |
+| Sets table layout | `src/features/editor/lib/grid-layout.ts` (+test), `lib/grid-context.ts`, `widgets/SetGrid.tsx` (`SwipeRow`) |
+| Work/Rest skip and logging | `src/features/workouts/lib/work-rest-controls.ts`, `lib/work-rest-log.ts` (both tested) |
 | Auth | `src/features/auth/` — `auth.store.ts`, `AppEffects.tsx`, screens |
 | Session control, pill, socket, plan | `src/features/member/` |
 | Editor (shared by plans, workouts, session) | `src/features/editor/` — `lib/` copied from the web; `widgets/` native |
@@ -369,6 +469,24 @@ new native build (it is in 2.5.0's store build anyway).
 More in `docs/ARCHITECTURE.md`.
 
 ## Gotchas
+
+- **Set ids are not stable.** The backend recreates every set row of an exercise on each save
+  (`replaceSets`), so a set's id changes under the member's finger. Key rows by `rowKey(set)` and
+  take server copies through `withRowKeys`; never key a row by `set.id`.
+- **A read can be older than the screen.** A poll answered after a save carries the document as it
+  was before it. Read a workout through `workoutQuery` (every observer: TanStack runs whichever
+  one's function) and write through the editor source's API, which tracks writes.
+- **`flex: 0` on the web is a zero basis.** In a column, a box with `flex: 0` and a height lost its
+  height in the browser build (the RPE square). Use `flexGrow: 0, flexShrink: 0, flexBasis: 'auto'`.
+- **R8 removes what only reflection reaches, and only a release build shows it.** Expo starts the
+  JavaScript with the app closed (the workout notification's background task) through a class named
+  only in the manifest's metadata: R8 removed it and the release build crashed at start
+  (`ClassNotFoundException`, `HeadlessAppLoader`) while every development build worked. A native
+  module added later may need its own keep rule (`extraProguardRules` in `app.config.ts`); prove it
+  with a local release build (`docs/RELEASING.md` → *R8*).
+- **Don't let `expo-media-library` bring its permissions.** Its own manifest declares photo-reading
+  ones; `app.config.ts` blocks them (`android.blockedPermissions`). Adding its config plugin would
+  add `READ_MEDIA_IMAGES`/`VIDEO`/`AUDIO` back.
 
 - **Don't remove a query something still watches.** `removeQueries` on a key
   with an active observer makes that observer fetch it again — after a delete,
@@ -414,6 +532,15 @@ More in `docs/ARCHITECTURE.md`.
 
 ## Known issues
 
+- **App 2.6.0 against a backend older than 2.10.0:** Rutinas lists only folders (`GET /me/templates`
+  is a 404, silent), *Nueva rutina* outside a folder, *Mover a carpeta*, deleting a loose routine and
+  *Guardar como rutina* fail with a toast, a folder deleted "keeping its routines" deletes them too
+  (the flag is ignored), and the plan still limits folders to 1. Ship backend 2.10.0 first.
+- **App 2.6.0 in a session against a backend older than 2.10.0:** *Empezar* on a timed block answers 404 (toasted) and nothing runs — the routes are new; the exercise tick works (it is a set save). App 2.5.0 against backend 2.10.0 keeps its local player and does not see the trainer's run. Ship backend 2.10.0 first.
+- **The web member portal does not show routines outside folders** (backend `specs/member-portal.md`
+  decision 11): a member who makes one in the app sees it on the web only through a workout that used
+  it. The user chose app-only for this round.
+
 - **App 2.5.0 against a backend older than 2.9.0:** the profile's workout count
   and the calendar's streak stay empty, and the FAQ, Contáctanos and the
   password change answer 404 (toasted); the calendar month ignores `from`/`to`
@@ -450,7 +577,7 @@ Automated (CI): `format:check`, `lint:check`, `npm test` (logging rules, metric
 columns, calendar grid), `typecheck` (with typed routes), `check:i18n`,
 `bundle:check` (Hermes, Android + iOS).
 
-By hand, against a local backend of the same round (2.9.0 for 2.5.0) with a
+By hand, against a local backend of the same round (2.10.0 for 2.6.0) with a
 CLIENT that has a center, a session now and one tomorrow with a plan:
 
 1. Sign in; a staff account is refused. Sign out and back in: no password asked
@@ -465,9 +592,17 @@ CLIENT that has a center, a session now and one tomorrow with a plan:
    60 × 8, tick — the exercise completes; the floating bar leads back to it and
    its trash discards it (confirmed). Finish → summary shows the volume (960 kg
    for two such sets); the finished workout opens read-only, Editar … Hecho.
-5. Rutinas: create a routine, a plan in it; plan 80 × 5; reload — kept; its
-   card's "Empezar entrenamiento" starts a workout from it. Free limits: a 2nd
-   routine opens the upgrade sheet.
+5. Rutinas: *Nueva rutina* (loose) and *Nueva carpeta*; plan 80 × 5; reload —
+   kept; move it into the folder and out; delete the folder keeping and then
+   deleting its routines; its card's "Empezar entrenamiento" starts a workout
+   from it. Free limits: a 5th routine opens the upgrade sheet, folders never.
+   A Work/Rest block: *Empezar*, skip once, close — its sets are ticked with
+   the times trained. Swipe a set left — Delete; type fast across several sets
+   while it saves — nothing flicks back, the focus stays.
+   Perfil: a workout's ⋯ — *Guardar como rutina* (opens the new routine),
+   *Compartir* (the three backgrounds, *Descargar* into the gallery,
+   *Compartir*, *Copiar texto*). Ajustes › Ayuda › Guía. Calendario (a center
+   member): a session's detail with its plan opens.
 6. Perfil: the count, the history (scroll for more); Ejercicios (search,
    filter, open one, create an own exercise, copy a company's); Medidas (3
    months / year / all); Calendario (trained days, the streak, the rest days).
@@ -478,6 +613,14 @@ CLIENT that has a center, a session now and one tomorrow with a plan:
    exercise and the set; "Completar serie" ticks it and the notification moves
    on, also with the app swiped away (Metro running for a dev build).
 9. Dark and light, Spanish and English; Android and iOS.
+
+On 2026-10-15 (2.6.0) a throwaway member was driven in the browser build against a :3001 backend
+2.10.0, dark and light: Rutinas with a loose routine and a folder, the routine and a live workout
+(fixed columns, square RPE, no trash column, a ticked set without frames, the metric and set type
+sheets), a finished workout read back (no ticks, no green, no plan notes) and its ⋯, the share page on
+all three backgrounds, the guide, an exercise's stats and one never done (opens on Indicaciones), and
+the Work/Rest player: skipped once and closed, the server held TIME 5 s and 2 s, both sets ticked.
+No console or HTTP errors. Saving to the gallery, the share sheet and the swipe gesture need a phone.
 
 Steps 2–5 were also driven in a browser build with Playwright at 390 × 844,
 light and dark, with no console or HTTP errors — and on 2026-10-13 steps 4–7 of

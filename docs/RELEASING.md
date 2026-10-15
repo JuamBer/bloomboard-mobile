@@ -70,6 +70,35 @@ and 7); a finished build is sent later with `eas submit --id <build id>`
   included: the first upload is version code 5, not 1. Harmless — Play only
   needs each upload's code to be higher than the last.
 
+## R8: shrinking and obfuscation (since 2.6.0)
+
+Play's pre-launch report flagged 2.5.0: from February 2027 an app's code must
+reach at least 25% obfuscation, optimization and shrinking, and 2.5.0 scored
+~1% (R8 off, React Native's default). Since 2.6.0 release builds run R8
+(`expo-build-properties` → `enableMinifyInReleaseBuilds`) with its
+optimizations on (`withR8Optimizations` in `app.config.ts`: the template's
+`proguard-android.txt` says `-dontoptimize`, so it is swapped for
+`proguard-android-optimize.txt`). A local release build scored ~82% on all
+three.
+
+- **Only a release build runs R8.** Metro and development builds prove
+  nothing about it. After touching the ProGuard settings or adding a native
+  module, build a release locally and open it on the emulator before pushing
+  `beta`: R8 once removed Expo's headless loader, which only the manifest
+  names, and the app crashed at start (`ClassNotFoundException` in
+  `adb logcat`) — `extraProguardRules` keeps it now.
+- **A local release build** is made like the development build
+  (`docs/DEVELOPMENT.md`: `C:/bbm`, JDK 22) with `./gradlew bundleRelease
+  assembleRelease`; it is signed with the debug key, fine for an emulator. To
+  reach a local API at `http://10.0.2.2:3000` it needs cleartext allowed — add
+  `android:usesCleartextTraffic="true"` to the generated manifest's
+  `<application>` after `expo prebuild`; never in `app.config.ts`, as a store
+  build must not have it.
+- **The scores** are in the bundle:
+  `unzip -p app-release.aab BUNDLE-METADATA/com.android.tools/r8.json`.
+- **The mapping** (to read an obfuscated crash trace) travels inside the
+  `.aab` too, and Play applies it to its crash reports: nothing to upload.
+
 ## Manual builds
 
 The **Build Mobile (EAS)** workflow (`build.yml`, *Run workflow*) builds any

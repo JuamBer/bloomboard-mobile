@@ -140,40 +140,13 @@
     "subtitle": "Lo que puedes crear por tu cuenta. Lo que te preparan tus centros no cuenta.",
     "usage": "{{used}} de {{max}}",
     "unlimited": "{{used}} · sin límite",
-    "perMonth": "{{price}}/mes",
-    "upgrade": "Pasar a {{plan}}",
-    "comingSoon": "Próximamente",
+    "inDevelopment": "En desarrollo",
+    "developing": "Estamos desarrollando el plan Pro. Cuando esté listo, lo verás aquí.",
     "see": "Ver mi plan"
   },
   "limits": {
     "reachedTitle": "Has llegado al límite de tu plan",
-    "reached": "Con tu plan puedes tener hasta {{max}} {{noun}}. Pásate a Pro para crear sin límite.",
-    "label": {
-      "routines": "Rutinas propias",
-      "workouts": "Entrenamientos propios",
-      "exercises": "Ejercicios propios"
-    },
-    "noun": {
-      "routines_one": "rutina propia",
-      "routines_other": "rutinas propias",
-      "workouts_one": "entrenamiento propio",
-      "workouts_other": "entrenamientos propios",
-      "exercises_one": "ejercicio propio",
-      "exercises_other": "ejercicios propios"
-    },
-    "unlimited": {
-      "routines": "Rutinas ilimitadas",
-      "workouts": "Entrenamientos ilimitados",
-      "exercises": "Ejercicios propios ilimitados"
-    },
-    "upTo": {
-      "routines_one": "Hasta {{count}} rutina",
-      "routines_other": "Hasta {{count}} rutinas",
-      "workouts_one": "Hasta {{count}} entrenamiento",
-      "workouts_other": "Hasta {{count}} entrenamientos",
-      "exercises_one": "Hasta {{count}} ejercicio propio",
-      "exercises_other": "Hasta {{count}} ejercicios propios"
-    }
+    "reached": "Con tu plan puedes tener hasta {{max}} {{noun}}. Estamos desarrollando el plan Pro."
   },
   "sessionControl": {
     "pill": "Sesión en curso",

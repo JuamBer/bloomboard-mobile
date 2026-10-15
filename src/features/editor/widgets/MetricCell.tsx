@@ -21,6 +21,7 @@ import {
   NUMPAD_ACCESSORY_ID,
   useFieldChain,
 } from '../lib/field-chain';
+import { useCloseSwipe } from '../lib/grid-context';
 import { isRpeColumn, rpeTone } from '../lib/rpe';
 
 export const METRIC_MODE_ORDER: MetricMode[] = [
@@ -74,6 +75,10 @@ export interface MetricCellProps {
   planValue?: MetricValue | null;
   /** The field's place in its table's chain ("next" and the digit cap). */
   position: number;
+  /** A workout's set ticked as done: the fields drop their frame (a done set
+   *  reads as a line of results), and get it back while one has the focus
+   *  or once the set is unticked. */
+  completed?: boolean;
 }
 
 /**
@@ -132,8 +137,10 @@ function ValueCell({
   unit,
   position,
   symbol,
+  completed,
 }: MetricCellProps & { symbol?: string }) {
   const styles = useStyles();
+  const [focused, setFocused] = useState(false);
   const isNumber = col.valueType === 'number';
   const mode: MetricMode = logging ? 'EXACT' : (value?.mode ?? 'EXACT');
 
@@ -148,7 +155,13 @@ function ValueCell({
   };
 
   return (
-    <View style={[styles.box, symbol ? styles.boxRow : null]}>
+    <View
+      style={[
+        styles.box,
+        symbol ? styles.boxRow : null,
+        completed && !focused && styles.boxDone,
+      ]}
+    >
       {symbol ? (
         <Text variant="bodySmall" muted={0.5}>
           {symbol}
@@ -161,6 +174,7 @@ function ValueCell({
         maxDigits={col.maxDigits}
         position={position}
         onValue={emit}
+        onFocusChange={setFocused}
         accessibilityLabel={col.label}
       />
     </View>
@@ -180,6 +194,7 @@ function DraftInput({
   maxDigits,
   position,
   onValue,
+  onFocusChange,
   accessibilityLabel,
   align = 'center',
 }: {
@@ -189,12 +204,14 @@ function DraftInput({
   maxDigits?: number;
   position: number;
   onValue: (value: number | string | null) => void;
+  onFocusChange?: (focused: boolean) => void;
   accessibilityLabel?: string;
   align?: 'center' | 'left' | 'right';
 }) {
   const styles = useStyles();
   const theme = useTheme();
   const chain = useFieldChain();
+  const closeSwipe = useCloseSwipe();
   const ref = useRef<TextInput | null>(null);
   const [draft, setDraft] = useState(shown(value));
   const [seen, setSeen] = useState(value);
@@ -233,7 +250,10 @@ function DraftInput({
       onFocus={() => {
         focusedField.chain = chain;
         focusedField.position = position;
+        closeSwipe();
+        onFocusChange?.(true);
       }}
+      onBlur={() => onFocusChange?.(false)}
       placeholder={placeholder}
       placeholderTextColor={theme.text(0.25)}
       selectionColor={theme.colors.accentInk}
@@ -360,7 +380,13 @@ function FormatCell({ col, value, onChange, position }: MetricCellProps) {
 
 // ─── Options (Zona cardio…) ──────────────────────────────────────────────────
 
-function OptionCell({ col, value, onChange, placeholder }: MetricCellProps) {
+function OptionCell({
+  col,
+  value,
+  onChange,
+  placeholder,
+  completed,
+}: MetricCellProps) {
   const styles = useStyles();
   const theme = useTheme();
   const { t } = useTranslation(['templates', 'app']);
@@ -376,7 +402,7 @@ function OptionCell({ col, value, onChange, placeholder }: MetricCellProps) {
         onPress={() => setOpen(true)}
         accessibilityRole="button"
         accessibilityLabel={col.label}
-        style={[styles.box, styles.boxRow]}
+        style={[styles.box, styles.boxRow, completed && styles.boxDone]}
       >
         {selected?.color ? (
           <View style={[styles.dot, { backgroundColor: selected.color }]} />
@@ -461,7 +487,13 @@ export function RpeChip({
  * effort colour; choosing opens the 0–10 scale as thumb-sized tiles in a
  * bottom sheet, with what the chosen value means and its reps in reserve.
  */
-function RpeCell({ col, value, onChange, placeholder }: MetricCellProps) {
+function RpeCell({
+  col,
+  value,
+  onChange,
+  placeholder,
+  completed,
+}: MetricCellProps) {
   const styles = useStyles();
   const theme = useTheme();
   const [open, setOpen] = useState(false);
@@ -473,8 +505,11 @@ function RpeCell({ col, value, onChange, placeholder }: MetricCellProps) {
         onPress={() => setOpen(true)}
         accessibilityRole="button"
         accessibilityLabel={col.label}
+        // A square, whatever the column's width: RPE is one or two digits.
         style={[
           styles.box,
+          styles.square,
+          completed && !tone && styles.boxDone,
           tone && {
             backgroundColor: `${tone.hue}26`,
             borderColor: `${tone.hue}66`,
@@ -740,10 +775,13 @@ export function ReadOnlyValue({
 export const FIELD_HEIGHT = 40;
 
 const useStyles = makeStyles((t) => ({
-  // A row, so the input's width comes from flex alone (see `input`).
+  // A row, so the input's width comes from flex alone (see `input`). Its
+  // height is its own: it sits in a column (MetricColumn), where `flex: 1`
+  // made the height a flex basis and a box holding only a short label (the
+  // mode picker) collapsed to it.
   box: {
     height: FIELD_HEIGHT,
-    flex: 1,
+    alignSelf: 'stretch',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 6,
@@ -754,6 +792,16 @@ const useStyles = makeStyles((t) => ({
     justifyContent: 'center',
   },
   boxRow: { gap: 4 },
+  // A done set's field: no frame, the value on the row's green.
+  boxDone: { borderColor: 'transparent', backgroundColor: 'transparent' },
+  square: {
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: 'auto',
+    width: FIELD_HEIGHT,
+    paddingHorizontal: 0,
+    alignSelf: 'center',
+  },
   modeBox: {
     justifyContent: 'center',
     backgroundColor: t.ink(0.1),

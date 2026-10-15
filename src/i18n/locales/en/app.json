@@ -39,26 +39,48 @@
   },
   "editor": {
     "nextField": "Next",
-    "sortSequence": "Reorder the sequence"
+    "sortSequence": "Reorder the sequence",
+    "deleteSet": "Delete set"
   },
   "metrics": {
     "selected": "Selected"
   },
   "routines": {
-    "readOnly": "Prepared by your center · read-only",
-    "name": "Routine name",
-    "workoutName": "Workout name",
     "descriptionPlaceholder": "Description (optional)",
-    "sortWorkouts": "Reorder workouts",
-    "deleteTitle": "Delete the routine?",
-    "deleteDescription": "\"{{name}}\" and its workouts will be deleted. What you have already trained stays in your history.",
-    "removeWorkoutTitle": "Remove the workout?",
-    "removeWorkoutDescription": "\"{{name}}\" will be removed from this routine. What you have already trained stays in your history.",
     "emptyWorkout": "Start empty workout",
     "continueWorkout": "Continue workout",
     "startWorkout": "Start workout",
-    "openPlan": "Opens the plan",
-    "noExercises": "No exercises yet"
+    "title": "Routines",
+    "subtitle": "What you train, loose or in folders",
+    "newRoutine": "New routine",
+    "newFolder": "New folder",
+    "mine": "My routines",
+    "byCompany": "From {{company}}",
+    "empty": "You don't have any routines yet. Create one with the exercises you do and start it when you train. Folders are optional: they keep routines in order.",
+    "emptyFolder": "Empty folder",
+    "count_one": "{{count}} routine",
+    "count_other": "{{count}} routines",
+    "routineName": "Routine name",
+    "routinePlaceholder": "e.g. Upper A",
+    "folderName": "Folder name",
+    "folderPlaceholder": "e.g. Legs, Phase 1…",
+    "editRoutine": "Edit routine",
+    "renameFolder": "Rename folder",
+    "moveToFolder": "Move to folder",
+    "noFolder": "No folder",
+    "sortRoutines": "Reorder routines",
+    "deleteFolder": "Delete folder",
+    "deleteRoutineTitle": "Delete the routine?",
+    "deleteRoutineDescription": "\"{{name}}\" will be deleted. What you have already trained stays in your history.",
+    "deleteFolderTitle": "Delete the folder?",
+    "deleteFolderKeep": "The folder \"{{name}}\" will be deleted. Its routines stay, outside the folder.",
+    "deleteFolderWithRoutines_one": "The folder \"{{name}}\" and its routine will be deleted. What you have already trained stays in your history.",
+    "deleteFolderWithRoutines_other": "The folder \"{{name}}\" and its {{count}} routines will be deleted. What you have already trained stays in your history.",
+    "deleteFolderAlso_one": "Also delete its routine",
+    "deleteFolderAlso_other": "Also delete its {{count}} routines",
+    "deleteFolderEmpty": "The folder \"{{name}}\" will be deleted.",
+    "openRoutine": "Opens the routine",
+    "nameAndDescription": "Name and description"
   },
   "workoutCard": {
     "duration": "Duration",
@@ -110,7 +132,7 @@
   },
   "subscription": {
     "comped": "Bloom Board gives you this plan.",
-    "comingSoon": "Pro is coming soon. Once you can get it, you'll upgrade or cancel your plan here.",
+    "comingSoon": "Once you can get Pro, you'll upgrade or cancel your plan here.",
     "manage": "Upgrade or cancel your plan here."
   },
   "faq": {
@@ -180,5 +202,235 @@
     "set": "Set {{number}} of {{count}}",
     "exercise": "Exercise {{number}} of {{count}}",
     "allDone": "All done: open the workout to finish it."
+  },
+  "limits": {
+    "label": {
+      "routines": "Folders",
+      "workouts": "Your routines",
+      "exercises": "Your exercises"
+    },
+    "noun": {
+      "routines_one": "folder",
+      "routines_other": "folders",
+      "workouts_one": "routine of your own",
+      "workouts_other": "routines of your own",
+      "exercises_one": "exercise of your own",
+      "exercises_other": "exercises of your own"
+    }
+  },
+  "metricInfo": {
+    "hint": "Explains what it is and how to fill it in",
+    "unit": "Logged in {{unit}}",
+    "guide": "Metrics guide",
+    "noDescription": "One of the set's measures — the one your routine asks you to log.",
+    "planOnly": "It is the plan's instruction: a workout shows what it asks for, but it is not logged."
+  },
+  "workRest": {
+    "previous": "Previous",
+    "next": "Next",
+    "running": "Running",
+    "open": "Open",
+    "cancel": "Cancel",
+    "finish": "Finish",
+    "synced": "With the TV and your trainer"
+  },
+  "exerciseStats": {
+    "emptyRange": "You haven't done this exercise in this period."
+  },
+  "saveAsRoutine": {
+    "action": "Save as routine",
+    "title": "Save as routine",
+    "description": "A new routine with these exercises and sets: what you did becomes the target for next time.",
+    "confirm": "Save",
+    "saved": "Routine \"{{name}}\" saved",
+    "skipped_one": "One of your center's exercises was left out: copy it to your exercises to use it in your routines.",
+    "skipped_other": "{{count}} of your center's exercises were left out: copy them to your exercises to use them in your routines."
+  },
+  "share": {
+    "action": "Share",
+    "title": "Share workout",
+    "light": "Light",
+    "dark": "Dark",
+    "transparent": "Transparent",
+    "download": "Download",
+    "shareImage": "Share",
+    "copyText": "Copy text",
+    "copied": "Workout copied as text",
+    "saved": "Image saved to your gallery",
+    "failed": "The image couldn't be prepared. Try again.",
+    "noPermission": "No permission to save to your gallery. You can grant it in your phone's settings.",
+    "phoneOnly": "This only works in the phone app.",
+    "tagTitle": "Share it and tag us at {{handle}}",
+    "tagHint": "That way more people discover Bloom Board. Thank you!",
+    "stats": {
+      "duration": "Duration",
+      "volume": "Volume",
+      "sets": "Sets",
+      "exercises": "Exercises"
+    },
+    "lifted": "lifted",
+    "setsCount_one": "{{count}} set",
+    "setsCount_other": "{{count}} sets",
+    "exercisesCount_one": "{{count}} exercise",
+    "exercisesCount_other": "{{count}} exercises",
+    "recordsCount_one": "{{count}} record",
+    "recordsCount_other": "{{count}} records",
+    "more_one": "and {{count}} more exercise",
+    "more_other": "and {{count}} more exercises",
+    "recordLine": "Record",
+    "textFooter": "Logged with Bloom Board — bloomboard.pro · {{handle}}"
+  },
+  "guide": {
+    "title": "Training guide",
+    "rowHint": "Set types, metrics, super-sets and blocks",
+    "intro": "What each thing you see while training means, explained for someone who doesn't live at the gym.",
+    "setTypes": {
+      "title": "Set types",
+      "summary": "Warm-up, to failure, drop set…",
+      "intro": "Each set has a letter on its left: its type. Tap it to change it. Most sets are Normal; the other types say how that set is done.",
+      "whatIs": "What {{type}} is",
+      "items": {
+        "WARMUP": {
+          "body": "Light sets to warm up before the real work. They don't count towards volume."
+        },
+        "APPROACH": {
+          "body": "Sets that take you up to the working weight, a little at a time. They don't count towards volume either."
+        },
+        "NORMAL": {
+          "body": "A regular working set: the weight and the reps the plan asks for."
+        },
+        "ALL_OUT": {
+          "body": "Everything you have: as many reps, or as long, as you can hold with good form."
+        },
+        "TO_FAILURE": {
+          "body": "Until you can't do one more good rep. Use it wisely, best on safe exercises."
+        },
+        "DROP": {
+          "body": "When the set ends you lower the weight and keep going without resting, once or more. Each drop is a sub-set inside the set."
+        },
+        "REST_PAUSE": {
+          "body": "Do the set, rest a few seconds (10–20) and carry on with the same weight. Each stretch is a sub-set."
+        },
+        "CLUSTER": {
+          "body": "One set split into small chunks with very short rests between them, to move more weight or more reps."
+        }
+      }
+    },
+    "metrics": {
+      "title": "Metrics",
+      "summary": "Weight, reps, RPE, time…",
+      "intro": "Metrics are each exercise's columns: what you log for every set. Tap a column's name to see what it is.",
+      "sections": {
+        "plan": {
+          "title": "In a routine",
+          "body": "A routine says what to do: an exact value (8), a range (8–12), a maximum (<10) or a minimum (>5). Choose it with ⋯ › Change modes."
+        },
+        "log": {
+          "title": "While training",
+          "body": "You log what you did, one exact value per set. What the routine asks for — or what you did last time — shows in grey in each field: tick the set without typing and it keeps those values."
+        }
+      },
+      "items": {
+        "WEIGHT": {
+          "name": "Weight",
+          "body": "The load you move: the bar and its plates, the dumbbell, or what the machine shows."
+        },
+        "REPS": {
+          "name": "Reps",
+          "body": "How many times you do the full movement in the set."
+        },
+        "RPE": {
+          "name": "RPE (rate of perceived exertion)",
+          "body": "How hard the set was, from 1 to 10. A 10 means you couldn't do one more; an 8, that about two were left.",
+          "tip": "It sets your effort without depending on the weight: on a bad day, the same RPE with fewer kilos."
+        },
+        "RIR": {
+          "name": "RIR (reps in reserve)",
+          "body": "How many more reps you could have done with good form. 0 is failure; 2, two to spare."
+        },
+        "TIME": {
+          "name": "Time",
+          "body": "How long the set lasts: a plank, a sprint, or the work of a Work/Rest block."
+        },
+        "REST": {
+          "name": "Rest",
+          "body": "What the routine asks you to rest after the set. It's an instruction: shown, not logged."
+        },
+        "DISTANCE": {
+          "name": "Distance",
+          "body": "How far you go: metres on a rower, kilometres on a run."
+        },
+        "TEMPO": {
+          "name": "Tempo",
+          "body": "The seconds of each phase of the movement: down, pause and up (3-1-1 is 3 down, 1 pause, 1 up). The routine sets it."
+        },
+        "CALORIES": {
+          "name": "Calories",
+          "body": "What the machine or the watch shows for that set."
+        },
+        "CARDIO_ZONE": {
+          "name": "Cardio zone",
+          "body": "The intensity by heart rate, from zone 1 (very easy) to 5 (maximum). The routine sets it."
+        },
+        "SPEED": {
+          "name": "Speed",
+          "body": "How fast you go: in km/h on a treadmill or a bike."
+        },
+        "PACE": {
+          "name": "Pace",
+          "body": "How long a kilometre (or a mile) takes you: 5:30 min/km."
+        },
+        "REVOLUTIONS_PER_TIME": {
+          "name": "Revolutions / time",
+          "body": "The cadence: pedal (or rowing) strokes per minute."
+        },
+        "CALORIES_PER_TIME": {
+          "name": "Calories / time",
+          "body": "The rate you burn at: calories per minute or hour, as some machines show it."
+        }
+      }
+    },
+    "supersets": {
+      "title": "Super-sets",
+      "summary": "Exercises alternated without rest",
+      "intro": "A super-set joins two or more exercises done back to back, alternating, with the rest at the end of the round.",
+      "sections": {
+        "what": {
+          "title": "What for",
+          "body": "It saves time and raises the intensity: while one muscle works, the other rests (bench press and row, for instance)."
+        },
+        "create": {
+          "title": "How to make one",
+          "body": "On an exercise, ⋯ › Create super-set, and pick the other exercises of the same block it goes with."
+        },
+        "sequence": {
+          "title": "The sequence",
+          "body": "The sets show in the order they are done. Each exercise has a letter and each set its number: A1, B1, A2, B2… You can change the order, and which exercise does each set."
+        },
+        "log": {
+          "title": "While training",
+          "body": "Log and tick each set of the sequence, as on a regular exercise. The super-set is done when all of them are."
+        }
+      }
+    },
+    "blocks": {
+      "title": "Blocks",
+      "summary": "Normal and Work/Rest",
+      "intro": "A block groups a routine's exercises under a name (Warm-up, Strength…). There are two kinds.",
+      "sections": {
+        "normal": {
+          "title": "Normal",
+          "body": "The usual table: you do each set at your own pace, log what you did and tick it."
+        },
+        "workRest": {
+          "title": "Work/Rest",
+          "body": "A timed circuit: every set has a work Time and a Rest (30 s and 15 s unless you say otherwise). The clock sets the pace, not you. You'll know it by the clock beside its name."
+        },
+        "player": {
+          "title": "The clock",
+          "body": "With Start, the screen counts 3-2-1 and runs the work and the rest with cues. You can pause, go back to the previous interval or skip to the next. When it closes, each set is ticked with the time you worked: the planned time if you reached the end, less if you skipped ahead."
+        }
+      }
+    }
   }
 }

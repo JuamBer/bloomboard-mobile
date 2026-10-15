@@ -13,7 +13,12 @@ import type {
   ExerciseBests,
   ExerciseSessionPoint,
 } from '@shared/types/api.types';
-import { Chip } from '@shared/ui/controls';
+import { Chip, Segmented } from '@shared/ui/controls';
+import {
+  TIME_RANGES,
+  withinRange,
+  type TimeRange,
+} from '@shared/lib/time-range';
 import { CenteredSpinner } from '@shared/ui/Spinner';
 import { Text } from '@shared/ui/Text';
 import { formatWorkoutDate } from '../lib/dates';
@@ -39,14 +44,19 @@ const trim = (n: number) =>
  * moved, the heaviest load at each rep count, and every record they set —
  * narrowed to one plan when asked ("how is my bench going in Push A").
  * Each best and record opens the workout it came from.
+ *
+ * The chart and the record history cover the last 3 months, the last year
+ * or all of it, as Medidas (app 2.6.0) — 3 months unless nothing falls in
+ * them. The bests and rep maxes stay all-time: they are standing records.
  */
 export function ExerciseProgress({ exerciseId }: { exerciseId: string }) {
-  const { t, i18n } = useTranslation(['workouts']);
+  const { t, i18n } = useTranslation(['workouts', 'app']);
   const styles = useStyles();
   const theme = useTheme();
   const unitSystem = useUnitSystem();
   const router = useRouter();
   const [templateId, setTemplateId] = useState<string>();
+  const [chosenRange, setRange] = useState<TimeRange | null>(null);
   const openWorkout = (workoutId: string) =>
     router.push({ pathname: '/workouts/[workoutId]', params: { workoutId } });
 
@@ -72,6 +82,11 @@ export function ExerciseProgress({ exerciseId }: { exerciseId: string }) {
   }
 
   const source = templateId ? (all ?? data) : data;
+  const range: TimeRange =
+    chosenRange ??
+    (data.series.some((p) => withinRange(p.performedAt, '3M')) ? '3M' : 'ALL');
+  const series = data.series.filter((p) => withinRange(p.performedAt, range));
+  const records = data.records.filter((r) => withinRange(r.performedAt, range));
   const plans = new Map<string, string>();
   for (const p of source.series)
     if (p.workoutTemplate)
@@ -226,13 +241,28 @@ export function ExerciseProgress({ exerciseId }: { exerciseId: string }) {
         </View>
       )}
 
+      <Segmented<TimeRange>
+        value={range}
+        onChange={setRange}
+        options={TIME_RANGES.map((value) => ({
+          value,
+          label: t(`app:measurementsRange.${value}`),
+        }))}
+      />
+
       <View style={[styles.section, styles.card]}>
         <Text variant="subheading">{t('workouts:progress.evolution')}</Text>
-        <ProgressChart
-          points={data.series}
-          measures={measures}
-          pointLabel={(p) => p.workoutName}
-        />
+        {series.length ? (
+          <ProgressChart
+            points={series}
+            measures={measures}
+            pointLabel={(p) => p.workoutName}
+          />
+        ) : (
+          <Text variant="bodySmall" muted={0.45}>
+            {t('app:exerciseStats.emptyRange')}
+          </Text>
+        )}
       </View>
 
       {data.bests.repMaxes.length > 0 && (
@@ -266,9 +296,9 @@ export function ExerciseProgress({ exerciseId }: { exerciseId: string }) {
 
       <View style={styles.section}>
         <Text variant="subheading">{t('workouts:progress.recordHistory')}</Text>
-        {data.records.length ? (
+        {records.length ? (
           <View style={styles.list}>
-            {data.records.map((r, i) => (
+            {records.map((r, i) => (
               <Pressable
                 key={i}
                 onPress={() => openWorkout(r.workoutId)}

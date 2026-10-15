@@ -39,26 +39,48 @@
   },
   "editor": {
     "nextField": "Siguiente",
-    "sortSequence": "Ordenar la secuencia"
+    "sortSequence": "Ordenar la secuencia",
+    "deleteSet": "Eliminar serie"
   },
   "metrics": {
     "selected": "Seleccionadas"
   },
   "routines": {
-    "readOnly": "Preparada por tu centro · solo lectura",
-    "name": "Nombre de la rutina",
-    "workoutName": "Nombre del entrenamiento",
     "descriptionPlaceholder": "Descripción (opcional)",
-    "sortWorkouts": "Ordenar entrenamientos",
-    "deleteTitle": "¿Eliminar la rutina?",
-    "deleteDescription": "Se eliminará «{{name}}» con sus entrenamientos. Lo que ya has entrenado se queda en tu historial.",
-    "removeWorkoutTitle": "¿Quitar el entrenamiento?",
-    "removeWorkoutDescription": "Se quitará «{{name}}» de esta rutina. Lo que ya has entrenado se queda en tu historial.",
     "emptyWorkout": "Empezar entrenamiento vacío",
     "continueWorkout": "Continuar entrenamiento",
     "startWorkout": "Empezar entrenamiento",
-    "openPlan": "Abre el plan",
-    "noExercises": "Sin ejercicios todavía"
+    "title": "Rutinas",
+    "subtitle": "Lo que entrenas, suelto o en carpetas",
+    "newRoutine": "Nueva rutina",
+    "newFolder": "Nueva carpeta",
+    "mine": "Mis rutinas",
+    "byCompany": "De {{company}}",
+    "empty": "Aún no tienes rutinas. Crea una con los ejercicios que haces y empiézala cuando vayas a entrenar. Las carpetas son opcionales: sirven para ordenarlas.",
+    "emptyFolder": "Carpeta vacía",
+    "count_one": "{{count}} rutina",
+    "count_other": "{{count}} rutinas",
+    "routineName": "Nombre de la rutina",
+    "routinePlaceholder": "Ej: Torso A",
+    "folderName": "Nombre de la carpeta",
+    "folderPlaceholder": "Ej: Pierna, Fase 1…",
+    "editRoutine": "Editar rutina",
+    "renameFolder": "Renombrar carpeta",
+    "moveToFolder": "Mover a carpeta",
+    "noFolder": "Sin carpeta",
+    "sortRoutines": "Ordenar rutinas",
+    "deleteFolder": "Eliminar carpeta",
+    "deleteRoutineTitle": "¿Eliminar la rutina?",
+    "deleteRoutineDescription": "Se eliminará «{{name}}». Lo que ya has entrenado se queda en tu historial.",
+    "deleteFolderTitle": "¿Eliminar la carpeta?",
+    "deleteFolderKeep": "Se eliminará la carpeta «{{name}}». Sus rutinas se quedan, fuera de la carpeta.",
+    "deleteFolderWithRoutines_one": "Se eliminarán la carpeta «{{name}}» y su rutina. Lo que ya has entrenado se queda en tu historial.",
+    "deleteFolderWithRoutines_other": "Se eliminarán la carpeta «{{name}}» y sus {{count}} rutinas. Lo que ya has entrenado se queda en tu historial.",
+    "deleteFolderAlso_one": "Eliminar también su rutina",
+    "deleteFolderAlso_other": "Eliminar también sus {{count}} rutinas",
+    "deleteFolderEmpty": "Se eliminará la carpeta «{{name}}».",
+    "openRoutine": "Abre la rutina",
+    "nameAndDescription": "Nombre y descripción"
   },
   "workoutCard": {
     "duration": "Duración",
@@ -110,7 +132,7 @@
   },
   "subscription": {
     "comped": "Bloom Board te regala este plan.",
-    "comingSoon": "Pro llegará pronto. Cuando puedas contratarlo, aquí podrás mejorar o cancelar tu plan.",
+    "comingSoon": "Cuando puedas contratar Pro, aquí podrás mejorar o cancelar tu plan.",
     "manage": "Aquí puedes mejorar o cancelar tu plan."
   },
   "faq": {
@@ -180,5 +202,235 @@
     "set": "Serie {{number}} de {{count}}",
     "exercise": "Ejercicio {{number}} de {{count}}",
     "allDone": "Todo hecho: abre el entrenamiento para terminarlo."
+  },
+  "limits": {
+    "label": {
+      "routines": "Carpetas",
+      "workouts": "Rutinas propias",
+      "exercises": "Ejercicios propios"
+    },
+    "noun": {
+      "routines_one": "carpeta",
+      "routines_other": "carpetas",
+      "workouts_one": "rutina propia",
+      "workouts_other": "rutinas propias",
+      "exercises_one": "ejercicio propio",
+      "exercises_other": "ejercicios propios"
+    }
+  },
+  "metricInfo": {
+    "hint": "Explica qué es y cómo se rellena",
+    "unit": "Se apunta en {{unit}}",
+    "guide": "Guía de métricas",
+    "noDescription": "Una medida de la serie, la que tu rutina pide apuntar.",
+    "planOnly": "Es una indicación del plan: en un entrenamiento se ve lo que pide, pero no se apunta."
+  },
+  "workRest": {
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "running": "En marcha",
+    "open": "Abrir",
+    "cancel": "Cancelar",
+    "finish": "Terminar",
+    "synced": "Con la TV y tu entrenador"
+  },
+  "exerciseStats": {
+    "emptyRange": "No has hecho este ejercicio en este periodo."
+  },
+  "saveAsRoutine": {
+    "action": "Guardar como rutina",
+    "title": "Guardar como rutina",
+    "description": "Una rutina nueva con estos ejercicios y series: lo que hiciste será el objetivo de la próxima vez.",
+    "confirm": "Guardar",
+    "saved": "Rutina «{{name}}» guardada",
+    "skipped_one": "Un ejercicio de tu centro no se ha incluido: cópialo a tus ejercicios para usarlo en tus rutinas.",
+    "skipped_other": "{{count}} ejercicios de tu centro no se han incluido: cópialos a tus ejercicios para usarlos en tus rutinas."
+  },
+  "share": {
+    "action": "Compartir",
+    "title": "Compartir entrenamiento",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "transparent": "Transparente",
+    "download": "Descargar",
+    "shareImage": "Compartir",
+    "copyText": "Copiar texto",
+    "copied": "Entrenamiento copiado como texto",
+    "saved": "Imagen guardada en tu galería",
+    "failed": "No se ha podido preparar la imagen. Vuelve a intentarlo.",
+    "noPermission": "Sin permiso para guardar en tu galería. Puedes darlo en los ajustes del móvil.",
+    "phoneOnly": "Esto solo funciona en la app del móvil.",
+    "tagTitle": "Compártelo y etiquétanos en {{handle}}",
+    "tagHint": "Así más gente descubre Bloom Board. ¡Gracias!",
+    "stats": {
+      "duration": "Duración",
+      "volume": "Volumen",
+      "sets": "Series",
+      "exercises": "Ejercicios"
+    },
+    "lifted": "levantados",
+    "setsCount_one": "{{count}} serie",
+    "setsCount_other": "{{count}} series",
+    "exercisesCount_one": "{{count}} ejercicio",
+    "exercisesCount_other": "{{count}} ejercicios",
+    "recordsCount_one": "{{count}} récord",
+    "recordsCount_other": "{{count}} récords",
+    "more_one": "y {{count}} ejercicio más",
+    "more_other": "y {{count}} ejercicios más",
+    "recordLine": "Récord",
+    "textFooter": "Registrado con Bloom Board — bloomboard.pro · {{handle}}"
+  },
+  "guide": {
+    "title": "Guía de entrenamiento",
+    "rowHint": "Tipos de serie, métricas, superseries y bloques",
+    "intro": "Lo que significa cada cosa que ves al entrenar, explicado para quien no vive en el gimnasio.",
+    "setTypes": {
+      "title": "Tipos de serie",
+      "summary": "Calentamiento, al fallo, drop set…",
+      "intro": "Cada serie lleva una letra a su izquierda: su tipo. Tócala para cambiarlo. Casi todas son Normales; los demás tipos dicen cómo se hace esa serie.",
+      "whatIs": "Qué es {{type}}",
+      "items": {
+        "WARMUP": {
+          "body": "Series ligeras para entrar en calor antes del trabajo de verdad. No cuentan para el volumen."
+        },
+        "APPROACH": {
+          "body": "Series que te acercan al peso de trabajo, subiendo poco a poco. Tampoco cuentan para el volumen."
+        },
+        "NORMAL": {
+          "body": "Una serie de trabajo de las de siempre: el peso y las repeticiones que tocan."
+        },
+        "ALL_OUT": {
+          "body": "Lo que puedas, sin guardarte nada: tantas repeticiones o tanto tiempo como aguantes con buena técnica."
+        },
+        "TO_FAILURE": {
+          "body": "Hasta que no puedas hacer ni una repetición más bien hecha. Úsala con cabeza, mejor en ejercicios seguros."
+        },
+        "DROP": {
+          "body": "Al terminar la serie bajas el peso y sigues sin descansar, una o varias veces. Cada bajada es una subserie dentro de la serie."
+        },
+        "REST_PAUSE": {
+          "body": "Haces la serie, descansas unos segundos (10–20) y sigues con el mismo peso. Cada tramo es una subserie."
+        },
+        "CLUSTER": {
+          "body": "Una serie partida en bloques pequeños con descansos muy cortos entre ellos, para mover más peso o más repeticiones."
+        }
+      }
+    },
+    "metrics": {
+      "title": "Métricas",
+      "summary": "Peso, repeticiones, RPE, tiempo…",
+      "intro": "Las métricas son las columnas de cada ejercicio: lo que se apunta de cada serie. Toca el nombre de una columna para ver qué es.",
+      "sections": {
+        "plan": {
+          "title": "En una rutina",
+          "body": "Una rutina dice lo que toca: un valor exacto (8), un rango (8–12), un máximo (<10) o un mínimo (>5). Se elige con ⋯ › Cambiar modos."
+        },
+        "log": {
+          "title": "Al entrenar",
+          "body": "Apuntas lo que hiciste, un valor exacto por serie. Lo que pide la rutina — o lo que hiciste la última vez — aparece en gris dentro de cada casilla: si marcas la serie sin escribir nada, se queda con esos valores."
+        }
+      },
+      "items": {
+        "WEIGHT": {
+          "name": "Peso",
+          "body": "La carga que mueves: la barra con sus discos, la mancuerna o lo que marque la máquina."
+        },
+        "REPS": {
+          "name": "Repeticiones",
+          "body": "Cuántas veces haces el movimiento completo en la serie."
+        },
+        "RPE": {
+          "name": "RPE (esfuerzo percibido)",
+          "body": "Lo duro que fue la serie, del 1 al 10. Un 10 es que no podías hacer ni una más; un 8, que te quedaban unas dos.",
+          "tip": "Sirve para regular el esfuerzo sin depender del peso: un día malo, mismo RPE con menos kilos."
+        },
+        "RIR": {
+          "name": "RIR (repeticiones en reserva)",
+          "body": "Cuántas repeticiones más podrías haber hecho con buena técnica. 0 es al fallo; 2, que te sobraban dos."
+        },
+        "TIME": {
+          "name": "Tiempo",
+          "body": "Cuánto dura la serie: una plancha, un sprint o el trabajo de un bloque de Trabajo/Descanso."
+        },
+        "REST": {
+          "name": "Descanso",
+          "body": "Lo que la rutina te pide descansar después de la serie. Es una indicación: se ve, pero no se apunta."
+        },
+        "DISTANCE": {
+          "name": "Distancia",
+          "body": "Lo que recorres: metros de un remo, kilómetros de una carrera."
+        },
+        "TEMPO": {
+          "name": "Tempo",
+          "body": "Los segundos de cada fase del movimiento: bajar, pausa y subir (3-1-1 es bajar en 3, parar 1, subir en 1). Lo indica la rutina."
+        },
+        "CALORIES": {
+          "name": "Calorías",
+          "body": "Las que marca la máquina o el reloj en esa serie."
+        },
+        "CARDIO_ZONE": {
+          "name": "Zona cardio",
+          "body": "La intensidad por pulsaciones, de la zona 1 (muy suave) a la 5 (máxima). La indica la rutina."
+        },
+        "SPEED": {
+          "name": "Velocidad",
+          "body": "A qué velocidad vas: en km/h en una cinta o una bici."
+        },
+        "PACE": {
+          "name": "Ritmo",
+          "body": "Lo que tardas en recorrer un kilómetro (o una milla): 5:30 min/km."
+        },
+        "REVOLUTIONS_PER_TIME": {
+          "name": "Revoluciones / tiempo",
+          "body": "La cadencia: vueltas de pedal (o de remo) por minuto."
+        },
+        "CALORIES_PER_TIME": {
+          "name": "Calorías / tiempo",
+          "body": "El ritmo al que gastas: calorías por minuto u hora, como lo muestran algunas máquinas."
+        }
+      }
+    },
+    "supersets": {
+      "title": "Superseries",
+      "summary": "Ejercicios que se alternan sin descanso",
+      "intro": "Una superserie junta dos o más ejercicios que se hacen seguidos, alternando, y se descansa al terminar la vuelta.",
+      "sections": {
+        "what": {
+          "title": "Para qué",
+          "body": "Ahorra tiempo y sube la intensidad: mientras un músculo trabaja, el otro descansa (press de banca y remo, por ejemplo)."
+        },
+        "create": {
+          "title": "Cómo se crea",
+          "body": "En un ejercicio, ⋯ › Crear superserie, y elige con qué otros ejercicios del mismo bloque se hace."
+        },
+        "sequence": {
+          "title": "La secuencia",
+          "body": "Las series se ven en el orden en que se hacen. Cada ejercicio tiene una letra y cada serie su número: A1, B1, A2, B2… Puedes cambiar el orden y qué ejercicio hace cada serie."
+        },
+        "log": {
+          "title": "Al entrenar",
+          "body": "Apunta y marca cada serie de la secuencia, como en un ejercicio normal. La superserie se completa cuando todas están hechas."
+        }
+      }
+    },
+    "blocks": {
+      "title": "Bloques",
+      "summary": "Normal y Trabajo/Descanso",
+      "intro": "Un bloque agrupa ejercicios de la rutina con un nombre (Calentamiento, Fuerza…). Hay dos tipos.",
+      "sections": {
+        "normal": {
+          "title": "Normal",
+          "body": "La tabla de siempre: haces cada serie a tu ritmo, apuntas lo que hiciste y la marcas."
+        },
+        "workRest": {
+          "title": "Trabajo/Descanso",
+          "body": "Un circuito por tiempo: cada serie tiene un Tiempo de trabajo y un Descanso (30 s y 15 s si no dices otra cosa). Lo marca el reloj, no tú. Se reconoce por el reloj junto a su nombre."
+        },
+        "player": {
+          "title": "El reloj",
+          "body": "Con Empezar, la pantalla cuenta 3-2-1 y lleva el trabajo y el descanso con avisos. Puedes pausar, volver al intervalo anterior o saltar al siguiente. Al cerrar, cada serie se marca con el tiempo que trabajaste: el previsto si llegaste al final, menos si pasaste antes."
+        }
+      }
+    }
   }
 }

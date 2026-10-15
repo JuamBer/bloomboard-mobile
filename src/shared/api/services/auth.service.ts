@@ -13,10 +13,7 @@ export const authService = {
 
   /** Continue with Google: signs in, links the account with the same email,
    *  or creates a member account. Errors are shown inline by the caller. */
-  google: async (dto: {
-    idToken: string;
-    language?: 'es' | 'en';
-  }): Promise<AuthResponse> => {
+  google: async (dto: { idToken: string }): Promise<AuthResponse> => {
     const { data } = await apiClient.post<AuthResponse>('/auth/google', dto, {
       silentErrors: true,
     });
@@ -30,8 +27,6 @@ export const authService = {
     lastName: string;
     email: string;
     acceptTerms: boolean;
-    /** Names the routine the account starts with ("Mi rutina"). */
-    language?: 'es' | 'en';
   }): Promise<void> => {
     await apiClient.post('/register', dto, { silentErrors: true });
   },

@@ -32,6 +32,8 @@ export interface MetricColDef {
   /** A plan's instruction (tempo, rest…): a workout shows the plan's value,
    *  read-only, instead of a field. */
   planOnly?: boolean;
+  /** The catalog's explanation — the header's info sheet falls back to it. */
+  description?: string | null;
   step?: number;
   min?: number;
   max?: number;
@@ -40,6 +42,8 @@ export interface MetricColDef {
   /** The column's minimum width on a phone, in points. The value sits in the
    *  cell and the unit in the header, so a number needs little room. */
   width: number;
+  /** Exactly `width`, never a share of the spare room: RPE's square chip. */
+  fixedWidth?: boolean;
 }
 
 /** How many digits a metric can usefully take before the cursor should move on.
@@ -78,6 +82,8 @@ export function metricToColDef(m: Metric): MetricColDef {
     unit: hasUnitOptions ? undefined : (m.defaultUnit ?? m.units[0]),
     defaultUnit: m.defaultUnit ?? m.units[0],
     planOnly: !!m.isPlanOnly,
+    fixedWidth: m.key.toUpperCase() === 'RPE',
+    description: m.description ?? null,
     maxDigits: m.valueType === 'NUMBER' ? METRIC_MAX_DIGITS[m.key] : undefined,
     width,
   };
@@ -102,6 +108,7 @@ export function compositeMetricToColDef(m: CompositeMetric): MetricColDef {
     unitOptions: hasUnitOptions ? units : undefined,
     unit: hasUnitOptions ? undefined : units[0],
     defaultUnit: compositeDefaultUnit(m),
+    description: m.description ?? null,
     width: 72,
   };
 }
@@ -232,17 +239,20 @@ export const createDefaultSet = (
     return {
       ...previous,
       id: newClientSetId(),
+      // A row of its own: the copied key would make two rows one.
+      key: undefined,
       setType: compound ? 'NORMAL' : previous.setType,
       metrics: { ...previous.metrics },
       // In a workout the copy is the next set to do, not one already done.
       ...(previous.completed !== undefined
-        ? { completed: false, records: [] }
+        ? { completed: false, records: [], recordDetails: [] }
         : {}),
       subSets: compound
         ? undefined
         : previous.subSets?.map((s) => ({
             ...s,
             id: newClientSetId(),
+            key: undefined,
             metrics: { ...s.metrics },
           })),
     };

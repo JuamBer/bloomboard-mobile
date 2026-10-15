@@ -140,40 +140,13 @@
     "subtitle": "What you can create on your own. What your centres prepare for you doesn't count.",
     "usage": "{{used}} of {{max}}",
     "unlimited": "{{used}} · unlimited",
-    "perMonth": "{{price}}/month",
-    "upgrade": "Upgrade to {{plan}}",
-    "comingSoon": "Coming soon",
+    "inDevelopment": "In development",
+    "developing": "We're developing the Pro plan. You'll see it here when it's ready.",
     "see": "See my plan"
   },
   "limits": {
     "reachedTitle": "You've reached your plan's limit",
-    "reached": "Your plan allows up to {{max}} {{noun}}. Upgrade to Pro to create without limits.",
-    "label": {
-      "routines": "Your routines",
-      "workouts": "Your workouts",
-      "exercises": "Your exercises"
-    },
-    "noun": {
-      "routines_one": "routine of your own",
-      "routines_other": "routines of your own",
-      "workouts_one": "workout of your own",
-      "workouts_other": "workouts of your own",
-      "exercises_one": "exercise of your own",
-      "exercises_other": "exercises of your own"
-    },
-    "unlimited": {
-      "routines": "Unlimited routines",
-      "workouts": "Unlimited workouts",
-      "exercises": "Unlimited exercises of your own"
-    },
-    "upTo": {
-      "routines_one": "Up to {{count}} routine",
-      "routines_other": "Up to {{count}} routines",
-      "workouts_one": "Up to {{count}} workout",
-      "workouts_other": "Up to {{count}} workouts",
-      "exercises_one": "Up to {{count}} exercise of your own",
-      "exercises_other": "Up to {{count}} exercises of your own"
-    }
+    "reached": "Your plan allows up to {{max}} {{noun}}. We're developing the Pro plan."
   },
   "sessionControl": {
     "pill": "Session in progress",

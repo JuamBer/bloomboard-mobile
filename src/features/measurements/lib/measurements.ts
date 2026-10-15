@@ -246,19 +246,10 @@ export function parseMeasurementInput(
   return { ok: true, value: Math.round(stored * factor) / factor };
 }
 
-/** How far back the evolution and the list of days reach. */
-export type MeasurementRange = '3M' | '1Y' | 'ALL';
-export const MEASUREMENT_RANGES: MeasurementRange[] = ['3M', '1Y', 'ALL'];
-
-/** Whether a measurement falls in the range, counted back from `now`. */
-export function withinRange(
-  measuredAt: string,
-  range: MeasurementRange,
-  now: Date = new Date(),
-): boolean {
-  if (range === 'ALL') return true;
-  const from = new Date(now);
-  if (range === '3M') from.setMonth(from.getMonth() - 3);
-  else from.setFullYear(from.getFullYear() - 1);
-  return Date.parse(measuredAt) >= from.getTime();
-}
+/** How far back the evolution and the list of days reach (shared with an
+ *  exercise's stats: shared/lib/time-range.ts). */
+export {
+  TIME_RANGES as MEASUREMENT_RANGES,
+  withinRange,
+  type TimeRange as MeasurementRange,
+} from '@shared/lib/time-range';

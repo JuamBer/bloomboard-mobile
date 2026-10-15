@@ -5,6 +5,7 @@ import {
   CircleHelp,
   Crown,
   Download,
+  GraduationCap,
   Info,
   KeyRound,
   Languages,
@@ -126,6 +127,12 @@ export function SettingsScreen() {
         </SettingsGroup>
 
         <SettingsGroup title={t('app:settings.help.title')}>
+          <SettingsRow
+            icon={GraduationCap}
+            title={t('app:guide.title')}
+            subtitle={t('app:guide.rowHint')}
+            onPress={() => router.push('/settings/guide')}
+          />
           <SettingsRow
             icon={CircleHelp}
             title={t('app:settings.help.faq')}

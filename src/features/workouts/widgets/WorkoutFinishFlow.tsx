@@ -11,9 +11,7 @@ import { useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useUnitSystem } from '@features/units/useUnitSystem';
-import { canonicalUnit } from '@features/editor/lib/logged-values';
 import { workoutQueryKey } from '@features/editor/lib/editor-source';
-import { workoutsService } from '@shared/api/services/workouts.service';
 import { flattenExercises, progressSummary } from '@shared/lib/sessionProgress';
 import { radius } from '@shared/theme/theme';
 import { makeStyles, useTheme } from '@shared/theme/ThemeProvider';
@@ -21,39 +19,12 @@ import type { RecordDetail, Workout } from '@shared/types/api.types';
 import { Button } from '@shared/ui/Button';
 import { Sheet } from '@shared/ui/Sheet';
 import { Text } from '@shared/ui/Text';
+import { workoutQuery } from '../hooks';
 import { useFinishFlow } from '../lib/finish-flow';
 import { formatKg } from '../lib/records';
+import { workoutTotals } from '../lib/totals';
 import { EditWorkoutSheet } from './EditWorkoutSheet';
 import { RecordList } from './RecordList';
-
-/** Warm-ups and approach sets prepare the work: not volume (as the server). */
-const NOT_WORK = new Set(['WARMUP', 'APPROACH']);
-const KG_PER: Record<string, number> = { KILOGRAMS: 1, POUNDS: 0.45359237 };
-const number = (v: unknown) => {
-  const n = typeof v === 'number' ? v : typeof v === 'string' ? Number(v) : NaN;
-  return Number.isFinite(n) ? n : null;
-};
-
-/** Sets ticked and kilos moved — the same sums the history list shows. */
-export function workoutTotals(workout: Workout) {
-  let sets = 0;
-  let volume = 0;
-  for (const block of workout.blocks ?? []) {
-    for (const entry of block.exercises) {
-      for (const set of entry.sets) {
-        if (!set.completedAt) continue;
-        sets++;
-        if (NOT_WORK.has(set.setType)) continue;
-        const weight = set.metrics.WEIGHT;
-        const kg = number(weight?.value);
-        const reps = number(set.metrics.REPS?.value);
-        const factor = KG_PER[canonicalUnit(weight?.unit) ?? 'KILOGRAMS'];
-        if (kg != null && reps != null && factor) volume += kg * factor * reps;
-      }
-    }
-  }
-  return { sets, volume: Math.round(volume * 10) / 10 };
-}
 
 /** Each exercise's records, in workout order. */
 function recordsByExercise(workout: Workout) {
@@ -95,10 +66,7 @@ function FinishSteps({ workoutId }: { workoutId: string }) {
   const queryClient = useQueryClient();
   const [step, setStep] = useState<'summary' | 'wrapUp'>('summary');
   // Already cached: the screen that finished it wrote the result there.
-  const { data: workout } = useQuery({
-    queryKey: workoutQueryKey(workoutId),
-    queryFn: () => workoutsService.getById(workoutId),
-  });
+  const { data: workout } = useQuery(workoutQuery(queryClient, workoutId));
   if (!workout) return null;
   return (
     <>

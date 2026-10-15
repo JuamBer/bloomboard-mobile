@@ -16,7 +16,12 @@ import {
   useTrainingSummary,
   useWorkoutHistory,
 } from '@features/workouts/hooks';
-import { WorkoutCard } from '@features/workouts/widgets/WorkoutCard';
+import { useWorkoutActions } from '@features/workouts/widgets/WorkoutActions';
+import {
+  WorkoutCard,
+  workoutRef,
+} from '@features/workouts/widgets/WorkoutCard';
+import { ActionSheet } from '@shared/ui/ActionSheet';
 import { radius } from '@shared/theme/theme';
 import { makeStyles, useTheme } from '@shared/theme/ThemeProvider';
 import { Button, IconButton } from '@shared/ui/Button';
@@ -50,6 +55,10 @@ export function ProfileScreen() {
   const history = useWorkoutHistory();
   const workouts = history.data?.pages.flatMap((p) => p.data) ?? [];
   const [refreshing, setRefreshing] = useState(false);
+  const [menuFor, setMenuFor] = useState<(typeof workouts)[number] | null>(
+    null,
+  );
+  const menu = useWorkoutActions(menuFor && workoutRef(menuFor));
 
   // What they go by: the nickname when they have one.
   const displayName = profile
@@ -180,9 +189,20 @@ export function ProfileScreen() {
           />
         }
         renderItem={({ item }) => (
-          <WorkoutCard workout={item} onPress={() => openWorkout(item.id)} />
+          <WorkoutCard
+            workout={item}
+            onPress={() => openWorkout(item.id)}
+            onMenu={() => setMenuFor(item)}
+          />
         )}
       />
+      <ActionSheet
+        open={!!menuFor}
+        onClose={() => setMenuFor(null)}
+        title={menuFor?.name}
+        actions={menu.actions}
+      />
+      {menu.dialogs}
     </View>
   );
 }

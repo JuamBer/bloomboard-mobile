@@ -1,27 +1,24 @@
 import { useRouter } from 'expo-router';
-import { Check, Crown, Sparkles } from 'lucide-react-native';
-import type { TFunction } from 'i18next';
+import { Crown } from 'lucide-react-native';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { formatEuros } from '@shared/lib/format';
 import { radius } from '@shared/theme/theme';
 import { makeStyles, useTheme } from '@shared/theme/ThemeProvider';
-import type {
-  MemberLimitKey,
-  MemberLimits,
-  MemberPlan,
-} from '@shared/types/api.types';
+import type { MemberLimitKey, MemberPlan } from '@shared/types/api.types';
 import { Button } from '@shared/ui/Button';
 import { Badge, ProgressBar, Section } from '@shared/ui/controls';
 import { Sheet } from '@shared/ui/Sheet';
 import { Text } from '@shared/ui/Text';
 import { useMemberPlan } from '../hooks';
 
-const LIMIT_ORDER: MemberLimitKey[] = ['routines', 'workouts', 'exercises'];
+// Folders (the API's routines) are free and unlimited in the app: never shown
+// as a limit (app 2.6.0). What the app calls a routine is the API's
+// `workouts` (a workout template), so the words are the app's (`app:limits`).
+const LIMIT_ORDER: MemberLimitKey[] = ['workouts', 'exercises'];
 
 /** The profile's plan section: the plan, what is used of each limit, and Pro. */
 export function MemberPlanCard() {
-  const { t } = useTranslation(['member']);
+  const { t } = useTranslation(['member', 'app']);
   const styles = useStyles();
   const { data } = useMemberPlan();
   if (!data) return null;
@@ -35,7 +32,7 @@ export function MemberPlanCard() {
         {LIMIT_ORDER.map((key) => (
           <UsageRow
             key={key}
-            label={t(`member:limits.label.${key}`)}
+            label={t(`app:limits.label.${key}`)}
             used={data.usage[key]}
             max={data.limits[key]}
           />
@@ -89,64 +86,35 @@ function UsageRow({
   );
 }
 
-const describeLimit = (
-  t: TFunction,
-  key: MemberLimitKey,
-  limits: MemberLimits,
-) =>
-  limits[key] === null
-    ? t(`member:limits.unlimited.${key}`)
-    : t(`member:limits.upTo.${key}`, { count: limits[key] as number });
-
 /**
- * Pro, as it is offered today: what it unlocks and its price, with the button
- * saying it is coming — members cannot pay yet (the business chose to show it
- * rather than hide it). Store rules: when it can be bought, on iOS it has to
- * be an in-app purchase (docs/ENVIRONMENTS.md).
+ * Pro, as it stands: in development — no price and no list of what it
+ * unlocks until the business decides them (2026-10-15: the 4,99 € shown
+ * until then was never set). Store rules: when it can be bought, on iOS it
+ * has to be an in-app purchase (docs/ENVIRONMENTS.md).
  */
 function ProOffer({ plan }: { plan: MemberPlan }) {
-  const { t, i18n } = useTranslation(['member']);
+  const { t } = useTranslation(['member']);
   const styles = useStyles();
   const theme = useTheme();
-  const { upgrade } = plan;
   return (
     <View style={styles.pro}>
       <View style={styles.proHead}>
         <Crown size={17} color={theme.colors.accentInk} />
         <Text variant="bodySmall" weight="bold" accent style={styles.flex}>
-          {upgrade.name}
+          {plan.upgrade.name}
         </Text>
-        <Text variant="bodySmall" weight="bold" style={styles.tabular}>
-          {t('member:plan.perMonth', {
-            price: formatEuros(upgrade.monthlyCents, i18n.language),
-          })}
-        </Text>
+        <Badge label={t('member:plan.inDevelopment')} tone="accent" />
       </View>
-      {LIMIT_ORDER.map((key) => (
-        <View key={key} style={styles.proLine}>
-          <Check size={15} color={theme.colors.accentInk} strokeWidth={2.5} />
-          <Text variant="caption" muted={0.7}>
-            {describeLimit(t, key, upgrade.limits)}
-          </Text>
-        </View>
-      ))}
-      <Button
-        icon={Sparkles}
-        disabled={!upgrade.available}
-        label={
-          upgrade.available
-            ? t('member:plan.upgrade', { plan: upgrade.name })
-            : t('member:plan.comingSoon')
-        }
-        fullWidth
-      />
+      <Text variant="caption" muted={0.7}>
+        {t('member:plan.developing')}
+      </Text>
     </View>
   );
 }
 
 /**
  * What a member sees on trying to create past their plan: which limit, and
- * what Pro would give them. Opened by useLimitGuard before the request.
+ * that Pro is on its way. Opened by useLimitGuard before the request.
  */
 export function UpgradeSheet({
   limit,
@@ -155,7 +123,7 @@ export function UpgradeSheet({
   limit: MemberLimitKey | null;
   onClose: () => void;
 }) {
-  const { t } = useTranslation(['member', 'common']);
+  const { t } = useTranslation(['member', 'common', 'app']);
   const router = useRouter();
   const { data } = useMemberPlan();
   const max = (limit && data?.limits[limit]) ?? 0;
@@ -188,7 +156,7 @@ export function UpgradeSheet({
         <Text variant="bodySmall" muted={0.7}>
           {t('member:limits.reached', {
             max,
-            noun: t(`member:limits.noun.${limit}`, { count: max }),
+            noun: t(`app:limits.noun.${limit}`, { count: max }),
           })}
         </Text>
       )}
@@ -216,6 +184,5 @@ const useStyles = makeStyles((t) => ({
     backgroundColor: t.ink(0.1),
   },
   proHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  proLine: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   flex: { flex: 1 },
 }));

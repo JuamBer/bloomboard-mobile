@@ -59,8 +59,11 @@ import need **2.5.0** (on an older one both screens are 404s); Google sign-in
 needs **2.6.0** (on an older one "Continuar con Google" ends in a generic error);
 units and the new composite units need **2.7.0** (on an older one Unidades does not stick and a
 set with a speed or a pace is refused); the profile's workout count, the calendar's streak, the
-password change, the FAQ and Contáctanos need **2.9.0** (on an older one they are 404s).
-**App 2.2.0 needs backend 2.5.0 live first; app 2.3.0 needs 2.6.0; app 2.4.0 needs 2.7.0; app 2.5.0 needs 2.9.0.** A change that needs a new backend route ships the
+password change, the FAQ and Contáctanos need **2.9.0** (on an older one they are 404s); routines
+outside folders, *Guardar como rutina*, deleting a folder but keeping its routines, the Free plan's
+4 routines with unlimited folders and a session's shared Work/Rest run need **2.10.0** (on an older one
+Rutinas shows only folders, those actions fail with a toast, and *Empezar* in a session is a 404).
+**App 2.2.0 needs backend 2.5.0 live first; app 2.3.0 needs 2.6.0; app 2.4.0 needs 2.7.0; app 2.5.0 needs 2.9.0; app 2.6.0 needs 2.10.0.** A change that needs a new backend route ships the
 backend first. How the store build 2.1.0 behaves against backend 2.4.0:
 `specs/member-app.md` → Known issues.
 
@@ -211,6 +214,20 @@ leaves a draft in Play Console → Producción, where the release notes (EAS
 Submit cannot attach them; drafted in `store/google-play/README.md`) are pasted
 and the release is sent for review by hand. An EAS build on the free
 plan waits 2–3 hours in a queue.
+
+**2.6.0 is the review round** (2026-10-15, `specs/member-app.md` decision 18): the app
+calls a workout template a *rutina* and a Routine a *carpeta* (folders optional), saves a workout
+as a routine, shares a workout as an image or text, has a training guide, and a calmer editor
+(swipe to delete sets, fixed-width fields, Work/Rest skips and logs times). **Native modules**
+(`react-native-view-shot`, `expo-media-library` — its photo-reading permissions blocked in
+`app.config.ts` —, `expo-sharing`, `expo-clipboard`): a store build, after backend 2.10.0 is live.
+A development build made before it needs rebuilding. Pro shows as *En desarrollo*, with no price
+(not decided). **Release builds run R8** from 2.6.0 (Play's DEX remark): only a release build shows
+what it breaks, so prove a change to `app.config.ts`'s ProGuard settings or a new native module
+with a local release build on the emulator (`docs/RELEASING.md` → *R8*). In a session
+(`specs/member-app.md` decision 19) every exercise has a tick that completes its sets without
+filling in values, and a Work/Rest block runs the room's clock — started, paused or skipped from
+the phone, the trainer's board or both, the TV following (`features/member/session-run.ts`).
 
 **2.4.0 adds units and the metrics cleanup** (2026-10-12, `specs/member-app.md`
 decision 15): Unidades (metric or imperial) on Perfil, everything shown in the member's units,

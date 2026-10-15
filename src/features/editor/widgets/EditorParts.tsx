@@ -7,7 +7,14 @@ import {
   SkipForward,
   type LucideIcon,
 } from 'lucide-react-native';
-import { Platform, Pressable, TextInput, View } from 'react-native';
+import {
+  Platform,
+  Pressable,
+  TextInput,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { EXERCISE_MEDIA_BG, exerciseMedia } from '@shared/lib/exercise-media';
 import { fonts, radius } from '@shared/theme/theme';
@@ -20,26 +27,38 @@ import { statusOfAll, useTemplateSession } from '../lib/template-session';
 // ─── Live-session control ────────────────────────────────────────────────────
 
 /**
- * The tick at the head of an exercise — only for one with no sets to tick (no
- * metrics yet), which would otherwise have no way to be done. Everywhere else
- * the sets' ticks are the only ones on a phone: the web's exercise tick is the
- * trainer's, on the board and on a wide screen (specs/member-app.md). Renders
- * nothing outside a live workout, so the cards place it unconditionally. It
- * acts on `entryIds` (a super-set passes every member: completed as one). A
- * done one goes back to pending, which is how a mis-tap is undone.
+ * The tick at the head of an exercise — for one with no sets to tick (no
+ * metrics yet), which would otherwise have no way to be done, and, in a
+ * session's workout, for every exercise (`exerciseTicks`): the board's
+ * Completar from the phone. Elsewhere the sets' ticks are the only ones on a
+ * phone (specs/member-app.md). Renders nothing outside a live workout, so the
+ * cards place it unconditionally. It acts on `entryIds` (a super-set passes
+ * every member: completed as one). A done one goes back to pending, which is
+ * how a mis-tap is undone.
+ *
+ * With sets, the card ticks them itself (`onTickAll`): every set done,
+ * nothing filled in — a set's own tick copies its hints as values, this one
+ * does not — saved at once like a tick, so the card stays the only writer of
+ * its sets; then the view moves on to the next exercise.
  */
 export function SessionStatusToggle({
   entryIds,
   hasSets,
+  onTickAll,
+  style,
 }: {
   entryIds: string[];
   /** Whether the entries show set ticks of their own. */
   hasSets: boolean;
+  /** Ticks (true) or unticks every set in the card's draft, values left as
+   *  they are. */
+  onTickAll?: (done: boolean) => void;
+  style?: StyleProp<ViewStyle>;
 }) {
   const { t } = useTranslation(['templates']);
   const theme = useTheme();
   const session = useTemplateSession();
-  if (!session || hasSets) return null;
+  if (!session || (hasSets && !session.exerciseTicks)) return null;
   const status = statusOfAll(session, entryIds);
   const resolved = status !== 'PENDING';
   const isCurrent =
@@ -55,34 +74,43 @@ export function SessionStatusToggle({
             Haptics.NotificationFeedbackType.Success,
           );
         }
+        // A skip is the board's; its sets were never ticked — reopen it there.
+        if (hasSets && onTickAll && status !== 'SKIPPED') {
+          onTickAll(!resolved);
+          if (!resolved) session.follow?.();
+          return;
+        }
         session.mark(entryIds[0], resolved ? 'PENDING' : 'COMPLETED');
       }}
       hitSlop={8}
       accessibilityRole="checkbox"
       accessibilityState={{ checked: resolved }}
       accessibilityLabel={label}
-      style={{
-        width: 30,
-        height: 30,
-        borderRadius: radius.lg,
-        borderWidth: 2,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderColor:
-          status === 'COMPLETED'
-            ? 'rgba(255,255,255,0.9)'
-            : status === 'SKIPPED'
-              ? 'rgba(245,158,11,0.5)'
-              : isCurrent
-                ? theme.colors.accentInk
-                : theme.line(0.2),
-        backgroundColor:
-          status === 'COMPLETED'
-            ? theme.colors.success
-            : status === 'SKIPPED'
-              ? 'rgba(245,158,11,0.15)'
-              : 'transparent',
-      }}
+      style={[
+        {
+          width: 30,
+          height: 30,
+          borderRadius: radius.lg,
+          borderWidth: 2,
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderColor:
+            status === 'COMPLETED'
+              ? 'rgba(255,255,255,0.9)'
+              : status === 'SKIPPED'
+                ? 'rgba(245,158,11,0.5)'
+                : isCurrent
+                  ? theme.colors.accentInk
+                  : theme.line(0.2),
+          backgroundColor:
+            status === 'COMPLETED'
+              ? theme.colors.success
+              : status === 'SKIPPED'
+                ? 'rgba(245,158,11,0.15)'
+                : 'transparent',
+        },
+        style,
+      ]}
     >
       {status === 'COMPLETED' ? (
         <Check size={16} color="#ffffff" strokeWidth={3} />
@@ -255,8 +283,11 @@ export function AddZone({
         pressed && { backgroundColor: theme.fill(0.05) },
       ]}
     >
-      <Icon size={large ? 22 : 16} color={theme.text(0.4)} />
-      <View style={large ? styles.zoneTexts : undefined}>
+      {/* Never squeezed out by a label that wraps (half-width zones). */}
+      <View style={styles.zoneIcon}>
+        <Icon size={large ? 22 : 16} color={theme.text(0.4)} />
+      </View>
+      <View style={large ? styles.zoneTexts : styles.zoneText}>
         <Text variant="bodySmall" weight="bold" muted={0.6} center={large}>
           {label}
         </Text>
@@ -298,6 +329,8 @@ const useStyles = makeStyles((t) => ({
     borderStyle: 'dashed',
     borderColor: t.line(0.15),
   },
+  zoneIcon: { flexShrink: 0 },
+  zoneText: { flexShrink: 1 },
   zoneLarge: {
     flexDirection: 'column',
     paddingVertical: 22,

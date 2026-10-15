@@ -94,9 +94,11 @@ production identifiers are final.
 
 ## Monetisation note
 
-The member plan's **Pro** is "Próximamente" today. When it becomes a purchase,
-Apple and Google expect a digital subscription sold inside the app to go
-through their own in-app purchase; a link out to a web checkout is allowed only
-in some storefronts and under each store's conditions. Plan the billing
-integration (StoreKit / Play Billing, e.g. through RevenueCat) together with
-the backend's member billing, rather than as a web link.
+The member plan's **Pro** is "En desarrollo" today, with no price (since
+2026-10-15: the API's 4,99 € is a placeholder, and the app does not show it).
+When it becomes a purchase, Apple and Google expect a digital subscription
+sold inside the app to go through their own in-app purchase; a link out to a
+web checkout is allowed only in some storefronts and under each store's
+conditions. Plan the billing integration (StoreKit / Play Billing, e.g.
+through RevenueCat) together with the backend's member billing, rather than
+as a web link.

@@ -13,6 +13,7 @@ import {
   type WorkoutSuperSetSlotPayload,
 } from '@shared/api/services/workouts.service';
 import type { EditorBlock, EditorExercise } from '@shared/types/api.types';
+import { trackWrite } from './write-tracker';
 
 /**
  * What the shared editor is editing: a plan (a workout template) or a workout
@@ -102,18 +103,49 @@ export interface EditorSource {
 export const templateQueryKey = (id: string) => ['workout-template', id];
 export const workoutQueryKey = (id: string) => ['workout', id];
 
+/** The tracker's name for a document (lib/write-tracker.ts). */
+export const docWriteKey = (kind: EditorKind, id: string) => `${kind}:${id}`;
+
+const WRITES: (keyof EditorApi)[] = [
+  'addBlock',
+  'updateBlock',
+  'removeBlock',
+  'reorderBlocks',
+  'createSuperSetGroup',
+  'deleteSuperSetGroup',
+  'updateSuperSetSequence',
+  'addExercise',
+  'updateExercise',
+  'removeExercise',
+  'reorderExercises',
+];
+
+/** The service's editor calls, every write tracked against the document. */
+const trackedApi = (service: unknown, docKey: string): EditorApi => {
+  const api = service as Record<string, (...args: unknown[]) => unknown>;
+  return Object.fromEntries(
+    (['getById', ...WRITES] as const).map((name) => [
+      name,
+      (...args: unknown[]) => {
+        const call = api[name](...args) as Promise<unknown>;
+        return name === 'getById' ? call : trackWrite(docKey, call);
+      },
+    ]),
+  ) as unknown as EditorApi;
+};
+
 export const templateEditorSource = (id: string): EditorSource => ({
   kind: 'template',
   id,
   queryKey: templateQueryKey(id),
-  api: workoutTemplatesService as unknown as EditorApi,
+  api: trackedApi(workoutTemplatesService, docWriteKey('template', id)),
 });
 
 export const workoutEditorSource = (id: string): EditorSource => ({
   kind: 'workout',
   id,
   queryKey: workoutQueryKey(id),
-  api: workoutsService as unknown as EditorApi,
+  api: trackedApi(workoutsService, docWriteKey('workout', id)),
 });
 
 const EditorSourceContext = createContext<EditorSource | null>(null);

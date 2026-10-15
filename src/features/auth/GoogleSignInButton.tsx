@@ -33,7 +33,6 @@ const API_CODES = [
  */
 export function useGoogleSignIn(onError: (message: string | null) => void) {
   const { t } = useTranslation(['auth', 'app', 'common']);
-  const language = useLanguageStore((s) => s.language);
   const signIn = useAuthStore((s) => s.signIn);
   const [pending, setPending] = useState(false);
 
@@ -42,7 +41,7 @@ export function useGoogleSignIn(onError: (message: string | null) => void) {
     setPending(true);
     try {
       const idToken = await googleIdToken();
-      const response = await authService.google({ idToken, language });
+      const response = await authService.google({ idToken });
       if (response.user.role !== 'CLIENT') {
         onError(
           `${t('app:auth.staffTitle')}. ${t('app:auth.staffDescription')}`,

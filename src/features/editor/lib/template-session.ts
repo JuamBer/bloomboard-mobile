@@ -17,6 +17,13 @@ export interface TemplateSessionView {
   /** The first PENDING exercise in training order; null once all are done. */
   currentEntryId: string | null;
   mark: (entryId: string, status: ExerciseProgressStatus) => void;
+  /** Every exercise has a tick of its own beside its sets' — a session's
+   *  workout, the board's Completar from the phone (app 2.6.0). Elsewhere
+   *  only an exercise with no sets has one. */
+  exerciseTicks?: boolean;
+  /** Scroll to the exercise that is up once a change made here moves it on
+   *  (a whole-exercise tick, saved through its card). */
+  follow?: () => void;
 }
 
 export const TemplateSessionContext = createContext<TemplateSessionView | null>(

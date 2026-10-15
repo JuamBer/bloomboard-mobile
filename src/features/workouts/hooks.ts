@@ -7,10 +7,14 @@ import {
 } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { workoutQueryKey } from '@features/editor/lib/editor-source';
+import {
+  docWriteKey,
+  workoutQueryKey,
+} from '@features/editor/lib/editor-source';
+import { readGuarded } from '@features/editor/lib/write-tracker';
 import { errorBody } from '@shared/api/errors';
 import { workoutsService } from '@shared/api/services/workouts.service';
-import type { ActiveWorkout } from '@shared/types/api.types';
+import type { ActiveWorkout, Workout } from '@shared/types/api.types';
 import { toast } from '@shared/ui/toast/toast.store';
 import { deviceTimeZone } from './lib/training';
 
@@ -18,6 +22,27 @@ export const ACTIVE_WORKOUT_KEY = ['me', 'workouts', 'active'] as const;
 export const MY_WORKOUTS_KEY = ['me', 'workouts', 'list'] as const;
 // Under ['me', 'workouts'], so whatever refreshes the history refreshes it.
 export const TRAINING_SUMMARY_KEY = ['me', 'workouts', 'summary'] as const;
+
+/**
+ * One workout's query, as every screen reads it (the workout, the session
+ * detail, the finish flow, the notification): TanStack runs whichever
+ * observer's function, so they must all be this one. A read that overlapped
+ * an editor save keeps the cached copy instead (lib/write-tracker.ts).
+ */
+export const workoutQuery = (
+  queryClient: QueryClient,
+  workoutId: string,
+  /** A read nobody asked for on screen (the notification's): not toasted. */
+  { silent = false }: { silent?: boolean } = {},
+) => ({
+  queryKey: workoutQueryKey(workoutId),
+  queryFn: () =>
+    readGuarded(
+      docWriteKey('workout', workoutId),
+      () => workoutsService.getById(workoutId, { silent }),
+      () => queryClient.getQueryData<Workout>(workoutQueryKey(workoutId)),
+    ),
+});
 
 /** The member's workout under way, if any — a center session's too. */
 export function useActiveWorkout() {

@@ -13,6 +13,12 @@ import { toStoredMetrics } from '@shared/lib/unit-system';
 /** Working copy of a set/sub-set while it's being edited in the UI. */
 export interface EditableWorkoutSet {
   id?: string;
+  /** The row's identity on screen. The server recreates every set row on
+   *  each save, so `id` changes under a field being typed in; keyed by it,
+   *  the row remounted and the keyboard's focus fell elsewhere (the notes).
+   *  Seeded from the id and carried across server copies (`withRowKeys`);
+   *  never sent. */
+  key?: string;
   setType: SetType;
   /** A plan's targets, or — in a workout — what was done (exact values). */
   metrics: SetMetrics;
@@ -33,6 +39,7 @@ export interface EditableWorkoutSet {
 
 export const toEditableSet = (set: EditorSet): EditableWorkoutSet => ({
   id: set.id,
+  key: set.id,
   setType: set.setType,
   metrics: set.metrics,
   notes: set.notes ?? '',
@@ -47,6 +54,32 @@ export const toEditableSet = (set: EditorSet): EditableWorkoutSet => ({
       }
     : {}),
 });
+
+/** A row's key: its own, else its id (a set added here carries a client id). */
+export const rowKey = (set: EditableWorkoutSet, index: number) =>
+  set.key ?? set.id ?? `row-${index}`;
+
+/**
+ * A server copy taken into a draft keeps the draft's row keys, position by
+ * position (a save never reorders), so no row remounts when the server hands
+ * back new set ids — the same goes for sub-sets.
+ */
+export function withRowKeys(
+  previous: EditableWorkoutSet[],
+  next: EditableWorkoutSet[],
+): EditableWorkoutSet[] {
+  return next.map((set, i) => {
+    const before = previous[i];
+    if (!before) return set;
+    return {
+      ...set,
+      key: rowKey(before, i),
+      ...(set.subSets
+        ? { subSets: withRowKeys(before.subSets ?? [], set.subSets) }
+        : {}),
+    };
+  });
+}
 
 export const toUpsertPayload = (
   set: EditableWorkoutSet,

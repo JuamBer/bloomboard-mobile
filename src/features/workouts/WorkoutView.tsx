@@ -47,9 +47,10 @@ import { ElapsedTimer } from '@shared/ui/misc';
 import { QueryState } from '@shared/ui/states';
 import { Text } from '@shared/ui/Text';
 import { formatMinutes, formatTime, formatWorkoutDate } from './lib/dates';
-import { forgetWorkout } from './hooks';
+import { forgetWorkout, workoutQuery } from './hooks';
 import { useFinishFlow } from './lib/finish-flow';
 import { EditWorkoutSheet } from './widgets/EditWorkoutSheet';
+import { useWorkoutActions } from './widgets/WorkoutActions';
 
 const KEEP_AWAKE_TAG = 'bloom-workout';
 
@@ -60,25 +61,34 @@ const KEEP_AWAKE_TAG = 'bloom-workout';
  * open, the sets carry the ticks (an exercise without sets keeps one of its
  * own), the exercise that is up is marked and finishing it scrolls to the
  * next, and the screen stays awake (the phone sits on the bench between sets).
- * Unlike the web on a wide screen, nothing folds and there is no exercise tick
- * beside the sets' (specs/member-app.md).
+ * Unlike the web on a wide screen, nothing folds; and only a session's workout
+ * has an exercise tick beside the sets' — the board's Completar, which ticks
+ * them all without filling in a value (specs/member-app.md).
  *
  * The member finishes it here — their own, or their session's, which also
  * takes them off the board (the trainer's Finish does the same there) — and
  * the finish flow follows. One of their own under way can be discarded.
  *
  * Once finished it opens as a record: read-only, so a scroll through it never
- * nudges a value. Editar turns the editor back on (the same cards as while
- * training, without the live marks) until Hecho.
+ * nudges a value — no ticks, no green, only the notes someone wrote. Editar
+ * turns the editor back on (the same cards as while training, without the
+ * live marks) until Hecho.
+ *
+ * Its name is the screen's title (the bar above, app 2.6.0); under it, the
+ * when and where, the clock, the progress and Finish — no card around them.
  */
 export function WorkoutView({
   workoutId,
   top,
   aside,
+  showName = false,
   onFinished,
   onDeleted,
 }: {
   workoutId: string;
+  /** The name over the details — where the bar above names something else
+   *  (the session control: the service). */
+  showName?: boolean;
   /** Pinned above the scroll — the session control's bar. Given Finish
    *  once the header (and its Finish) has scrolled away. */
   top?: (pinnedFinish: ReactNode) => ReactNode;
@@ -123,13 +133,24 @@ export function WorkoutView({
     isError,
     refetch,
   } = useQuery({
-    queryKey: key,
-    queryFn: () => workoutsService.getById(workoutId),
+    ...workoutQuery(queryClient, workoutId),
     // Written from more than one place (the board, the member's phone):
     // keep this copy close to the server's while it is under way.
     refetchInterval: (query) =>
       query.state.data && !query.state.data.finishedAt ? 8_000 : false,
   });
+  // Guardar como rutina and Compartir; Eliminar is this screen's own.
+  const extra = useWorkoutActions(
+    workout
+      ? {
+          id: workout.id,
+          name: workout.name,
+          finishedAt: workout.finishedAt,
+          fromSession: !!workout.sessionUser,
+        }
+      : null,
+    { withDelete: false },
+  );
 
   const live = !!workout && !workout.finishedAt;
 
@@ -209,6 +230,12 @@ export function WorkoutView({
           statusOf: (id) => statusById.get(id) ?? 'PENDING',
           currentEntryId,
           mark: markEntry,
+          // A session's: the trainer's board ticks exercises whole, and so
+          // can the member here.
+          exerciseTicks: !!workout.sessionUser,
+          follow: () => {
+            scrollToCurrent.current = true;
+          },
         }
       : null;
 
@@ -305,9 +332,9 @@ export function WorkoutView({
             headerHeight.current = e.nativeEvent.layout.height;
           }}
         >
+          {showName && <Text variant="title">{workout.name}</Text>}
           <View style={styles.headerTop}>
             <View style={styles.flex}>
-              <Text variant="title">{workout.name}</Text>
               <View style={styles.meta}>
                 <MetaLine icon={CalendarClock}>
                   {formatWorkoutDate(workout.startedAt, i18n.language)} ·{' '}
@@ -464,28 +491,23 @@ export function WorkoutView({
       {!top && pinDone && (
         <View style={styles.pinned}>
           <Text
-            variant="bodySmall"
+            variant="caption"
             weight="bold"
+            accent
             numberOfLines={1}
             style={styles.flex}
           >
-            {workout.name}
+            {t('app:workout.editing')}
           </Text>
           {doneButton}
         </View>
       )}
 
       {/* Once the header has scrolled away: the clock, the progress and Finish. */}
+      {/* The name is the bar's above it (WorkoutScreen). */}
       {!top && pinFinish && (
         <View style={styles.pinned}>
-          <Text
-            variant="bodySmall"
-            weight="bold"
-            numberOfLines={1}
-            style={styles.flex}
-          >
-            {workout.name}
-          </Text>
+          <View style={styles.flex} />
           {total > 0 && (
             <Text
               variant="caption"
@@ -512,6 +534,7 @@ export function WorkoutView({
             icon: Pencil,
             onPress: () => setEditing(true),
           },
+          ...extra.actions,
           !fromSession &&
             !!workout.finishedAt && {
               key: 'resume',
@@ -530,6 +553,8 @@ export function WorkoutView({
           },
         ]}
       />
+
+      {extra.dialogs}
 
       <EditWorkoutSheet
         open={editing}
@@ -622,18 +647,17 @@ const useStyles = makeStyles((t) => ({
   root: { flex: 1, backgroundColor: t.colors.background },
   state: { padding: 16 },
   flex: { flex: 1, minWidth: 0 },
+  // No card: the details sit under the bar that names the workout.
   header: {
     gap: 12,
-    padding: 16,
     marginBottom: 20,
-    borderRadius: radius['2xl'],
-    borderWidth: 1,
-    borderColor: t.line(0.06),
-    backgroundColor: t.fill(0.03),
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: t.line(0.06),
   },
-  headerTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+  headerTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   headerSide: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  meta: { gap: 3, marginTop: 6 },
+  meta: { gap: 3 },
   doneBadge: {
     flexDirection: 'row',
     alignItems: 'center',

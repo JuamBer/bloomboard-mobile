@@ -37,9 +37,11 @@ REGISTRA CADA ENTRENAMIENTO
 • Marca las series según las haces. Con el móvil bloqueado, el ejercicio y la serie que tocan están en la barra de notificaciones, con un botón para completarla.
 • La pantalla no se apaga mientras entrenas.
 • Al terminar, el resumen: duración, series, volumen y tus récords personales.
+• Comparte cada entrenamiento como imagen (clara, oscura o transparente) o como texto.
 
 TUS RUTINAS Y PLANES
-• Crea tus propias rutinas y entrenamientos con bloques, superseries y series compuestas.
+• Crea tus propias rutinas con bloques, superseries y series compuestas, y ordénalas en carpetas.
+• Guarda como rutina un entrenamiento que hayas hecho.
 • Si entrenas con un centro o un entrenador que usa Bloom Board, ves también las rutinas que te preparan.
 
 TU PERFIL Y TU PROGRESO
@@ -55,6 +57,7 @@ TUS SESIONES EN EL CENTRO
 TU CUENTA
 • Tema claro u oscuro, español o inglés, kilos o libras.
 • Plan gratuito para empezar.
+• Una guía de entrenamiento: tipos de serie, métricas, superseries y bloques.
 • Preguntas frecuentes y un buzón para enviarnos sugerencias o avisarnos de un problema.
 
 Bloom Board también está en la web: app.bloomboard.pro
@@ -78,9 +81,11 @@ LOG EVERY WORKOUT
 • Tick sets as you go. With your phone locked, the exercise and set you're on are in the notification shade, with a button to complete it.
 • The screen stays on while you train.
 • When you finish: duration, sets, volume and your personal records.
+• Share each workout as an image (light, dark or transparent) or as text.
 
 YOUR ROUTINES AND PLANS
-• Build your own routines and workouts with blocks, super-sets and compound sets.
+• Build your own routines with blocks, super-sets and compound sets, and sort them into folders.
+• Save a workout you've done as a routine.
 • If you train with a center or coach that uses Bloom Board, you also see the routines they prepare for you.
 
 YOUR PROFILE AND YOUR PROGRESS
@@ -96,6 +101,7 @@ YOUR SESSIONS AT THE CENTER
 YOUR ACCOUNT
 • Light or dark theme, Spanish or English, kilograms or pounds.
 • A free plan to start.
+• A training guide: set types, metrics, super-sets and blocks.
 • An FAQ and an inbox to send us suggestions or report a problem.
 
 Bloom Board is also on the web: app.bloomboard.pro

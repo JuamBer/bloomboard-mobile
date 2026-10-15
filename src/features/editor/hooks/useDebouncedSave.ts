@@ -11,6 +11,9 @@ interface UseDebouncedSaveOptions<T> {
   save: (payload: T) => Promise<unknown>;
   /** Read-only surfaces never save. */
   disabled?: boolean;
+  /** When `disabled` turns on (the editor closing: Hecho), save what is
+   *  still pending first — otherwise the last 1.5 s of typing is lost. */
+  flushOnDisable?: boolean;
   delay?: number;
 }
 
@@ -42,6 +45,7 @@ export function useDebouncedSave<T>({
   initialPayload,
   save,
   disabled = false,
+  flushOnDisable = false,
   delay = DEFAULT_DELAY,
 }: UseDebouncedSaveOptions<T>): DebouncedSave<T> {
   const [isSaving, setIsSaving] = useState(false);
@@ -59,15 +63,15 @@ export function useDebouncedSave<T>({
   const buildRef = useRef(buildPayload);
   const saveFnRef = useRef(save);
   const disabledRef = useRef(disabled);
-  const performSaveRef = useRef<() => void>(() => {});
+  const performSaveRef = useRef<(force?: boolean) => void>(() => {});
 
   const lastSavedSigRef = useRef<string | null>(null);
   if (lastSavedSigRef.current === null) {
     lastSavedSigRef.current = JSON.stringify(initialPayload());
   }
 
-  const performSave = () => {
-    if (disabledRef.current) return;
+  const performSave = (force = false) => {
+    if (disabledRef.current && !force) return;
     const payload = buildRef.current();
     const sig = JSON.stringify(payload);
     if (sig === lastSavedSigRef.current) return; // nothing to save
@@ -120,6 +124,15 @@ export function useDebouncedSave<T>({
     disabledRef.current = disabled;
     performSaveRef.current = performSave;
   });
+
+  // The editor closing (Hecho): what is pending goes now, not never.
+  const wasDisabledRef = useRef(disabled);
+  useEffect(() => {
+    if (disabled && !wasDisabledRef.current && flushOnDisable) {
+      performSaveRef.current(true);
+    }
+    wasDisabledRef.current = disabled;
+  }, [disabled, flushOnDisable]);
 
   // Restarts the countdown whenever the payload actually changes.
   const signature = disabled ? null : JSON.stringify(buildPayload());

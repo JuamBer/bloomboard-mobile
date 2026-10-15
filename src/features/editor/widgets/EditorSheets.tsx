@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Check, Layers, Rows3, Timer } from 'lucide-react-native';
+import { Layers, Rows3, Timer } from 'lucide-react-native';
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { radius } from '@shared/theme/theme';
-import { makeStyles, useTheme } from '@shared/theme/ThemeProvider';
+import { makeStyles } from '@shared/theme/ThemeProvider';
 import type {
   BlockMode,
   EditorBlock,
@@ -15,27 +15,15 @@ import { Checkbox, Segmented } from '@shared/ui/controls';
 import { Sheet } from '@shared/ui/Sheet';
 import { Text } from '@shared/ui/Text';
 import { TextField } from '@shared/ui/TextField';
-import { PREDEFINED_BLOCKS } from '../constants/predefined-blocks';
 import { useEditorSource, type EditorDoc } from '../lib/editor-source';
 import { ExerciseThumb } from './EditorParts';
 
-// The block colours offered — the presets' and a few more, as swatches.
-const BLOCK_COLORS = [
-  '#f59e0b',
-  '#22c55e',
-  '#ef4444',
-  '#3b82f6',
-  '#a855f7',
-  '#ec4899',
-  '#06b6d4',
-  '#64748b',
-];
-
 /**
- * A block: its name, colour and how it is performed — the classic table, or a
- * timed Work/Rest circuit the TV runs on its own. New blocks can start from a
- * preset. Switching a block to Work/Rest makes the server seed TIME and REST
- * on every set, so it says so before saving.
+ * A block on a phone: its name and how it is performed — the classic table,
+ * or a timed Work/Rest circuit. Nothing else (app 2.6.0): no colour, no
+ * description, no presets, no hint under the choice; a block made on the web
+ * keeps its colour and description, saved back untouched. Switching to
+ * Work/Rest makes the server seed TIME and REST on the sets that lack them.
  */
 export function BlockEditorSheet({
   open,
@@ -50,31 +38,26 @@ export function BlockEditorSheet({
 }) {
   const { t } = useTranslation(['templates', 'common']);
   const styles = useStyles();
-  const theme = useTheme();
   const queryClient = useQueryClient();
   const editor = useEditorSource();
   const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [color, setColor] = useState('');
   const [mode, setMode] = useState<BlockMode>('NORMAL');
   const [wasOpen, setWasOpen] = useState(false);
   if (open !== wasOpen) {
     setWasOpen(open);
     if (open) {
       setName(block?.name ?? '');
-      setDescription(block?.description ?? '');
-      setColor(block?.color ?? '');
       setMode(block?.mode ?? 'NORMAL');
     }
   }
-  const willSeed = mode === 'WORK_REST' && block?.mode !== 'WORK_REST';
 
   const save = useMutation({
     mutationFn: () => {
       const payload = {
         name: name.trim(),
-        description: description.trim() || undefined,
-        color: color || undefined,
+        // What the phone does not edit goes back as it was.
+        description: block?.description ?? undefined,
+        color: block?.color ?? undefined,
         mode,
       };
       return block
@@ -127,67 +110,12 @@ export function BlockEditorSheet({
         </>
       }
     >
-      {!block && (
-        <View style={styles.group}>
-          <Text variant="label" muted={0.6}>
-            {t('templates:blockEditor.presetsLabel')}
-          </Text>
-          <View style={styles.presets}>
-            {PREDEFINED_BLOCKS.map((preset) => (
-              <Pressable
-                key={preset.name}
-                onPress={() => {
-                  setName(preset.name);
-                  setDescription(preset.description);
-                  setColor(preset.color);
-                  setMode(preset.mode);
-                }}
-                accessibilityRole="button"
-                style={styles.preset}
-              >
-                <View
-                  style={[styles.swatch, { backgroundColor: preset.color }]}
-                />
-                <Text variant="caption" weight="bold">
-                  {preset.name}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        </View>
-      )}
       <TextField
         label={t('templates:blockEditor.nameLabel')}
         value={name}
         onChangeText={setName}
         placeholder={t('templates:blockEditor.namePlaceholder')}
-      />
-      <View style={styles.group}>
-        <Text variant="label" muted={0.6}>
-          {t('templates:blockEditor.colorLabel')}
-        </Text>
-        <View style={styles.colors}>
-          {BLOCK_COLORS.map((c) => (
-            <Pressable
-              key={c}
-              onPress={() => setColor(color === c ? '' : c)}
-              accessibilityRole="radio"
-              accessibilityState={{ checked: color === c }}
-              accessibilityLabel={c}
-              style={[styles.colorDot, { backgroundColor: c }]}
-            >
-              {color === c && (
-                <Check size={16} color="#ffffff" strokeWidth={3} />
-              )}
-            </Pressable>
-          ))}
-        </View>
-      </View>
-      <TextField
-        value={description}
-        onChangeText={setDescription}
-        placeholder={t('templates:blockEditor.descriptionPlaceholder')}
-        multiline
+        autoFocus={!block}
       />
       <View style={styles.group}>
         <Text variant="label" muted={0.6}>
@@ -209,16 +137,6 @@ export function BlockEditorSheet({
             },
           ]}
         />
-        <Text variant="caption" muted={0.5}>
-          {mode === 'NORMAL'
-            ? t('templates:blockMode.NORMALHint')
-            : t('templates:blockMode.WORK_RESTHint')}
-        </Text>
-        {willSeed && (
-          <Text variant="caption" color={theme.colors.warningInk}>
-            {t('templates:blockMode.seedNotice')}
-          </Text>
-        )}
       </View>
     </Sheet>
   );
@@ -469,27 +387,6 @@ export function CreateSuperSetSheet({
 
 const useStyles = makeStyles((t) => ({
   group: { gap: 8 },
-  presets: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  preset: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    height: 36,
-    borderRadius: radius.xl,
-    borderWidth: 1,
-    borderColor: t.line(0.1),
-    backgroundColor: t.fill(0.04),
-  },
-  swatch: { width: 10, height: 10, borderRadius: 5 },
-  colors: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  colorDot: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   memberRow: {
     padding: 10,
     borderRadius: radius.xl,

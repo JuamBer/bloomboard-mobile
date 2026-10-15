@@ -16,6 +16,7 @@ import type {
   MemberRoutine,
   MemberSession,
   MemberSessionDetail,
+  MemberTemplateCard,
   PaginatedResponse,
   QueryMemberExercisesParams,
   WorkoutTemplate,
@@ -152,6 +153,31 @@ export const meService = {
     await apiClient.post(`/me/sessions/${sessionId}/finish`);
   },
 
+  /** Drives the member's Work/Rest run in a session — the one the board and
+   *  the TV play: start their current timed block, pause, resume, finish it
+   *  now or call it off. Answers with the active session, run included. */
+  workRest: async (
+    sessionId: string,
+    action: 'start' | 'pause' | 'resume' | 'finish' | 'cancel',
+  ): Promise<MemberActiveSession | null> => {
+    const { data } = await apiClient.post<MemberActiveSession | ''>(
+      `/me/sessions/${sessionId}/work-rest/${action}`,
+    );
+    return orNull(data);
+  },
+
+  /** Moves the run to this point of its timeline (previous / next interval). */
+  seekWorkRest: async (
+    sessionId: string,
+    elapsedMs: number,
+  ): Promise<MemberActiveSession | null> => {
+    const { data } = await apiClient.post<MemberActiveSession | ''>(
+      `/me/sessions/${sessionId}/work-rest/seek`,
+      { elapsedMs },
+    );
+    return orNull(data);
+  },
+
   /** Puts the member on one of the center's TVs, or on none (null). */
   setScreen: async (
     sessionId: string,
@@ -195,8 +221,12 @@ export const meService = {
     return data;
   },
 
-  removeRoutine: async (id: string) => {
-    const { data } = await apiClient.delete(`/me/routines/${id}`);
+  /** `keepWorkouts`: only the folder goes; its routines stay, in none
+   *  (backend 2.10.0 — an older one ignores it and deletes them too). */
+  removeRoutine: async (id: string, { keepWorkouts = false } = {}) => {
+    const { data } = await apiClient.delete(`/me/routines/${id}`, {
+      params: keepWorkouts ? { keepWorkouts: true } : undefined,
+    });
     return data;
   },
 
@@ -229,6 +259,56 @@ export const meService = {
     const { data } = await apiClient.delete<MemberRoutine>(
       `/me/routines/${routineId}/workouts/${routineWorkoutId}`,
     );
+    return data;
+  },
+
+  // ─── Routines outside folders (backend 2.10.0) ──────────────────────────────
+  // The app calls a Routine a folder and a WorkoutTemplate a routine; folders
+  // are optional (specs/member-app.md, decision 18).
+
+  /** The member's own templates in no folder, oldest first. Silent: an
+   *  older backend has no such list, and Rutinas still shows the folders. */
+  getLooseTemplates: async (): Promise<MemberTemplateCard[]> => {
+    const { data } = await apiClient.get<MemberTemplateCard[]>(
+      '/me/templates',
+      { silentErrors: true },
+    );
+    return data;
+  },
+
+  /** A blank template of their own, in no folder. 403 MEMBER_LIMIT_REACHED
+   *  past the plan's `workouts`. */
+  createTemplate: async (dto: {
+    name: string;
+    description?: string;
+  }): Promise<WorkoutTemplate> => {
+    const { data } = await apiClient.post<WorkoutTemplate>(
+      '/me/templates',
+      dto,
+    );
+    return data;
+  },
+
+  /** Into one of their folders (at the end), or out of any (null). */
+  moveTemplate: async (id: string, routineId: string | null): Promise<void> => {
+    await apiClient.patch(`/me/templates/${id}/routine`, { routineId });
+  },
+
+  /** Deletes one of their templates wherever it is; its workouts stay. */
+  removeTemplate: async (id: string): Promise<void> => {
+    await apiClient.delete(`/me/templates/${id}`);
+  },
+
+  /** "Guardar como rutina": a template of their own from one of their
+   *  workouts, in no folder. A company's exercises are left out — their ids
+   *  come back in `skippedExerciseIds`. */
+  saveWorkoutAsTemplate: async (
+    workoutId: string,
+    name?: string,
+  ): Promise<WorkoutTemplate & { skippedExerciseIds: string[] }> => {
+    const { data } = await apiClient.post<
+      WorkoutTemplate & { skippedExerciseIds: string[] }
+    >(`/me/workouts/${workoutId}/template`, name ? { name } : {});
     return data;
   },
 

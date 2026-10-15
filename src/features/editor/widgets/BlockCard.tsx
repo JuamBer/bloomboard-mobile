@@ -4,12 +4,13 @@ import {
   Dumbbell,
   ListOrdered,
   MoreVertical,
+  Pause,
   Pencil,
   Play,
   Timer,
   Trash2,
 } from 'lucide-react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { radius } from '@shared/theme/theme';
@@ -20,13 +21,15 @@ import { Button, IconButton } from '@shared/ui/Button';
 import { ConfirmDialog } from '@shared/ui/ConfirmDialog';
 import { ReorderSheet } from '@shared/ui/ReorderSheet';
 import { Text } from '@shared/ui/Text';
+import { useSessionRun, type SessionRun } from '@features/member/session-run';
+import { runElapsedMs } from '@features/workouts/lib/work-rest-controls';
 import { WorkRestPlayer } from '@features/workouts/widgets/WorkRestPlayer';
 import {
   useEditorSource,
   useIsWorkout,
   type EditorDoc,
 } from '../lib/editor-source';
-import { hasIncompleteWorkRest } from '../lib/workout-time';
+import { formatDuration, hasIncompleteWorkRest } from '../lib/workout-time';
 import { AddZone } from './EditorParts';
 import { ExerciseEntryCard } from './ExerciseEntryCard';
 import { ExercisePickerSheet } from './ExercisePickerSheet';
@@ -89,6 +92,21 @@ export function BlockCard({
     exercises.length > 0;
   const [running, setRunning] = useState(false);
 
+  // In a session's control the block that is up runs the room's clock — the
+  // one the board and the TV play — and the player opens on its own when the
+  // trainer starts it; closed, it stays closed for that run (its strip below
+  // reopens it). Elsewhere a timed block runs on the phone's own clock.
+  const sessionRun = useSessionRun();
+  const synced = !!sessionRun && isWorkRest;
+  const myRun =
+    synced && sessionRun.run?.blockId === block.id ? sessionRun.run : null;
+  const [hiddenRun, setHiddenRun] = useState<string | null>(null);
+  const playerOpen = synced ? !!myRun && hiddenRun !== myRun.key : running;
+  // As on the board: only the block that is up starts, and only with no run.
+  const canStart = synced
+    ? canRun && !sessionRun.run && sessionRun.readyBlockId === block.id
+    : canRun;
+
   const writeDoc = (updated: EditorDoc) =>
     queryClient.setQueryData(editor.queryKey, updated);
 
@@ -145,44 +163,45 @@ export function BlockCard({
             ]}
           />
           <View style={styles.titleBox}>
-            <Text variant="subheading" numberOfLines={2}>
-              {block.name}
-            </Text>
-            <View style={styles.badges}>
+            <View style={styles.titleRow}>
+              {/* A timed block says so with its clock, and nothing more. */}
               {isWorkRest && (
-                <View style={[styles.badge, styles.badgeAccent]}>
-                  <Timer size={11} color={theme.colors.accentInk} />
-                  <Text variant="micro" accent uppercase>
-                    {t('templates:blockMode.WORK_REST')}
-                  </Text>
-                </View>
+                <Timer
+                  size={17}
+                  color={theme.colors.accentInk}
+                  accessibilityLabel={t('templates:blockMode.WORK_REST')}
+                />
               )}
-              {incomplete && (
-                <View style={[styles.badge, styles.badgeWarning]}>
-                  <AlertTriangle size={11} color={theme.colors.warningInk} />
-                  <Text
-                    variant="micro"
-                    color={theme.colors.warningInk}
-                    uppercase
-                  >
-                    {t('templates:blockMode.incomplete')}
-                  </Text>
-                </View>
-              )}
+              <Text variant="subheading" numberOfLines={2} style={styles.flex}>
+                {block.name}
+              </Text>
             </View>
+            {incomplete && (
+              <View style={[styles.badge, styles.badgeWarning]}>
+                <AlertTriangle size={11} color={theme.colors.warningInk} />
+                <Text variant="micro" color={theme.colors.warningInk} uppercase>
+                  {t('templates:blockMode.incomplete')}
+                </Text>
+              </View>
+            )}
             {block.description ? (
               <Text variant="caption" muted={0.5}>
                 {block.description}
               </Text>
             ) : null}
           </View>
-          {canRun && (
+          {canStart && (
             <Button
               label={t('workouts:workRest.start')}
               icon={Play}
               size="sm"
               accessibilityLabel={t('workouts:workRest.startHint')}
-              onPress={() => setRunning(true)}
+              loading={synced && sessionRun.starting}
+              onPress={() => {
+                if (!synced) return setRunning(true);
+                setHiddenRun(null);
+                sessionRun.start();
+              }}
             />
           )}
           {!isReadOnly && (
@@ -194,6 +213,14 @@ export function BlockCard({
             />
           )}
         </View>
+      )}
+
+      {myRun && sessionRun && (
+        <RunStrip
+          run={myRun}
+          controls={sessionRun}
+          onOpen={() => setHiddenRun(null)}
+        />
       )}
 
       <View>
@@ -347,27 +374,124 @@ export function BlockCard({
         }}
       />
 
-      {running && (
-        <WorkRestPlayer block={block} onClose={() => setRunning(false)} />
+      {playerOpen && (
+        <WorkRestPlayer
+          block={block}
+          sync={
+            myRun && sessionRun
+              ? {
+                  startedAt: myRun.startedAt,
+                  pausedAt: myRun.pausedAt,
+                  onPause: sessionRun.pause,
+                  onSeek: sessionRun.seek,
+                  onOver: sessionRun.over,
+                }
+              : undefined
+          }
+          onClose={() => (myRun ? setHiddenRun(myRun.key) : setRunning(false))}
+        />
       )}
+    </View>
+  );
+}
+
+/**
+ * A session's run under way on this block, under its heading: running or
+ * paused, how long is left, and the way back into the player — with the
+ * board's two escapes, Cancelar (a false start) and Terminar (done early).
+ * Its own clock, so the block's cards never re-render with it.
+ */
+function RunStrip({
+  run,
+  controls,
+  onOpen,
+}: {
+  run: NonNullable<SessionRun['run']>;
+  controls: SessionRun;
+  onOpen: () => void;
+}) {
+  const { t } = useTranslation(['app', 'workouts']);
+  const styles = useStyles();
+  const theme = useTheme();
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 500);
+    return () => clearInterval(id);
+  }, []);
+  const paused = run.pausedAt !== null;
+  const total = Date.parse(run.endsAt) - Date.parse(run.startedAt);
+  const elapsed =
+    runElapsedMs(
+      { workRestStartedAt: run.startedAt, workRestPausedAt: run.pausedAt },
+      now,
+    ) ?? 0;
+  const left = Math.max(0, Math.ceil((total - elapsed) / 1000));
+  return (
+    <View style={styles.run}>
+      <View style={styles.runHead}>
+        {paused ? (
+          <Pause size={13} color={theme.colors.accentInk} />
+        ) : (
+          <View style={styles.runDot} />
+        )}
+        <Text
+          variant="caption"
+          weight="bold"
+          accent
+          uppercase
+          style={styles.flex}
+        >
+          {paused ? t('workouts:workRest.paused') : t('app:workRest.running')}
+        </Text>
+        <Text variant="bodySmall" weight="bold" accent style={styles.tabular}>
+          {formatDuration(left)}
+        </Text>
+      </View>
+      <View style={styles.runActions}>
+        <Button
+          label={t('app:workRest.cancel')}
+          variant="secondary"
+          size="sm"
+          flex
+          onPress={controls.cancel}
+        />
+        <Button
+          label={t('app:workRest.finish')}
+          variant="secondary"
+          size="sm"
+          flex
+          onPress={controls.finish}
+        />
+        <Button
+          label={t('app:workRest.open')}
+          icon={Play}
+          size="sm"
+          flex
+          onPress={onOpen}
+        />
+      </View>
     </View>
   );
 }
 
 const useStyles = makeStyles((t) => ({
   block: { gap: 4 },
+  // Centred: a block with only a name sat at the top of a row as tall as
+  // its buttons.
   header: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: 10,
     paddingBottom: 8,
     borderBottomWidth: 1,
     borderBottomColor: t.line(0.08),
   },
   stripe: { width: 5, alignSelf: 'stretch', borderRadius: 3 },
-  titleBox: { flex: 1, minWidth: 0, gap: 4 },
-  badges: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  titleBox: { flex: 1, minWidth: 0, gap: 4, justifyContent: 'center' },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  flex: { flex: 1, minWidth: 0 },
   badge: {
+    alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -376,10 +500,27 @@ const useStyles = makeStyles((t) => ({
     borderRadius: radius.md,
     borderWidth: 1,
   },
-  badgeAccent: { backgroundColor: t.ink(0.1), borderColor: t.ink(0.2) },
   badgeWarning: {
     backgroundColor: 'rgba(245,158,11,0.1)',
     borderColor: 'rgba(245,158,11,0.25)',
   },
   empty: { alignItems: 'center', gap: 6, paddingVertical: 24 },
+  run: {
+    gap: 10,
+    padding: 12,
+    marginTop: 6,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: t.ink(0.2),
+    backgroundColor: t.ink(0.08),
+  },
+  runHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  runDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: t.colors.accent,
+  },
+  runActions: { flexDirection: 'row', gap: 8 },
+  tabular: { fontVariant: ['tabular-nums'] },
 }));

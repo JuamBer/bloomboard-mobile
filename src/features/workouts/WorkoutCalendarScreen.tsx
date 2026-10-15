@@ -29,7 +29,9 @@ import { QueryState } from '@shared/ui/states';
 import { Text } from '@shared/ui/Text';
 import { useTrainingSummary } from './hooks';
 import { restDays } from './lib/training';
-import { WorkoutCard } from './widgets/WorkoutCard';
+import { useWorkoutActions } from './widgets/WorkoutActions';
+import { WorkoutCard, workoutRef } from './widgets/WorkoutCard';
+import { ActionSheet } from '@shared/ui/ActionSheet';
 
 /**
  * The member's training by the month (Perfil › Calendario): every day with a
@@ -44,6 +46,8 @@ export function WorkoutCalendarScreen() {
   const locale = dateLocale(i18n.language);
   const [month, setMonth] = useState(() => new Date());
   const [selected, setSelected] = useState(() => new Date());
+  const [menuFor, setMenuFor] = useState<WorkoutSummary | null>(null);
+  const menu = useWorkoutActions(menuFor && workoutRef(menuFor));
   const summary = useTrainingSummary();
 
   const range = gridRange(month);
@@ -170,6 +174,7 @@ export function WorkoutCalendarScreen() {
                     key={w.id}
                     workout={w}
                     onPress={() => openWorkout(w.id)}
+                    onMenu={() => setMenuFor(w)}
                   />
                 ))}
               </View>
@@ -177,6 +182,13 @@ export function WorkoutCalendarScreen() {
           </>
         )}
       </Screen>
+      <ActionSheet
+        open={!!menuFor}
+        onClose={() => setMenuFor(null)}
+        title={menuFor?.name}
+        actions={menu.actions}
+      />
+      {menu.dialogs}
     </View>
   );
 }

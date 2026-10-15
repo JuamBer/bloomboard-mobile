@@ -48,8 +48,6 @@ export function RegisterScreen() {
         lastName: form.lastName.trim(),
         email: form.email.trim(),
         acceptTerms,
-        // Names the routine the account starts with: "Mi rutina".
-        language,
       }),
     onError: () => setError(t('auth:register.errors.generic')),
   });

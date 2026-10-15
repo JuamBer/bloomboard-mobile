@@ -269,9 +269,12 @@ describe('a set ticked as done', () => {
 });
 
 describe("a set's comment row", () => {
-  it("shows for the trainee's comment or the plan's", () => {
+  it("shows for the trainee's comment or, while logging, the plan's", () => {
     expect(showsSetComment({ notes: 'Me costó' }, false, false)).toBe(true);
-    expect(showsSetComment({ planNotes: 'Lento' }, false, true)).toBe(true);
+    expect(showsSetComment({ notes: 'Me costó' }, false, true)).toBe(true);
+    expect(showsSetComment({ planNotes: 'Lento' }, false, false)).toBe(true);
+    // A finished workout read back shows only what was written (app 2.6.0).
+    expect(showsSetComment({ planNotes: 'Lento' }, false, true)).toBe(false);
     expect(showsSetComment({ notes: ' ', planNotes: null }, false, false)).toBe(
       false,
     );

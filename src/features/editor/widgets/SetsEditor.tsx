@@ -1,4 +1,4 @@
-import { CornerDownRight, Plus, Trash2, X } from 'lucide-react-native';
+import { CornerDownRight, Plus } from 'lucide-react-native';
 import { Fragment, useMemo } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +21,6 @@ import type {
   SetMetrics,
   SetType,
 } from '@shared/types/api.types';
-import { IconButton } from '@shared/ui/Button';
 import {
   buildColDefs,
   createDefaultSet,
@@ -38,7 +37,7 @@ import {
   previousPlaceholder,
   withPlaceholderValues,
 } from '../lib/workout-cells';
-import type { EditableWorkoutSet } from '../types/workout-set.types';
+import { rowKey, type EditableWorkoutSet } from '../types/workout-set.types';
 import { MetricCell } from './MetricCell';
 import { SetTick, SetTypeBadge, useRowTint } from './SetControls';
 import {
@@ -51,6 +50,7 @@ import {
   ModeEditingBanner,
   SetCommentRow,
   SetGrid,
+  SwipeRow,
 } from './SetGrid';
 
 interface SetsEditorProps {
@@ -79,8 +79,12 @@ interface SetsEditorProps {
 /**
  * One exercise's sets, as the web's SetsEditor: a row per set (its type, a
  * cell per metric, in a workout the tick), the rows of a compound set's
- * sub-sets under it, and the add button. Every change is handed up whole;
- * the card autosaves.
+ * sub-sets under it, and the add button. A set is deleted by swiping it to
+ * the left (or from its type's sheet). Every change is handed up whole; the
+ * card autosaves.
+ *
+ * A finished workout read as a record shows no ticks and no green: what was
+ * done is the values (the ticks come back with Editar).
  */
 export function SetsEditor({
   metrics: storedMetrics,
@@ -124,6 +128,8 @@ export function SetsEditor({
   const unitAcronym = useUnitAcronym();
   // A locked plan has nothing to edit, modes included; a workout has none.
   const modeEdit = modeEditing && !isReadOnly && !logging;
+  // The ticks (and a done set's green) are for logging, not for reading back.
+  const ticks = logging && !isReadOnly;
   const cols = useMemo(
     () => buildColDefs(metrics, compositeMetrics, columnOrder),
     [metrics, compositeMetrics, columnOrder],
@@ -278,7 +284,7 @@ export function SetsEditor({
       {modeEdit && onExitModeEditing && (
         <ModeEditingBanner onDone={onExitModeEditing} />
       )}
-      <SetGrid>
+      <SetGrid cols={cols} fixedWidth={COL.type + (ticks ? COL.tick : 0)}>
         {/* Header: only the metrics are named; the badge reads on its own. */}
         <GridRow>
           <FixedCell width={COL.type} />
@@ -296,111 +302,108 @@ export function SetsEditor({
               />
             );
           })}
-          {logging && <FixedCell width={COL.tick} />}
-          {!isReadOnly && <FixedCell width={COL.action} />}
+          {ticks && <FixedCell width={COL.tick} />}
         </GridRow>
 
         {sets.map((set, index) => {
           const compound = isCompoundSetType(set.setType);
           const subSets = set.subSets ?? [];
-          const tint = rowTint(set.setType, logging && !!set.completed);
+          const done = ticks && !!set.completed;
+          const tint = rowTint(set.setType, done);
+          const key = rowKey(set, index);
+          const deletable = !isReadOnly && sets.length > 1;
           return (
-            <Fragment key={set.id ?? index}>
-              <GridRow tint={tint} last={!compound || subSets.length === 0}>
-                <FixedCell width={COL.type}>
-                  <SetTypeBadge
-                    setType={set.setType}
-                    onChange={(v) => handleSetTypeChange(index, v)}
-                    isReadOnly={isReadOnly}
-                    records={logging ? set.recordDetails : undefined}
-                  />
-                </FixedCell>
-                {cols.map((col, colIndex) => (
-                  <MetricColumn key={col.key} col={col}>
-                    <MetricCell
-                      col={col}
-                      value={set.metrics[col.key]}
-                      onChange={(value) =>
-                        updateSetMetric(index, col.key, value)
-                      }
+            <Fragment key={key}>
+              <SwipeRow
+                id={key}
+                enabled={deletable}
+                onDelete={() => removeSet(index)}
+              >
+                <GridRow tint={tint} last={!compound || subSets.length === 0}>
+                  <FixedCell width={COL.type}>
+                    <SetTypeBadge
+                      setType={set.setType}
+                      onChange={(v) => handleSetTypeChange(index, v)}
                       isReadOnly={isReadOnly}
-                      modeEditing={modeEdit}
-                      logging={logging}
-                      placeholder={placeholderFor(index, col.key)}
-                      unit={activeUnitKey(col)}
-                      planValue={set.targetMetrics?.[col.key]}
-                      position={fieldPosition(index, colIndex)}
-                    />
-                  </MetricColumn>
-                ))}
-                {logging && (
-                  <FixedCell width={COL.tick}>
-                    <SetTick
-                      done={!!set.completed}
-                      isReadOnly={isReadOnly}
-                      onToggle={() => toggleDone(index)}
+                      records={logging ? set.recordDetails : undefined}
+                      onDelete={deletable ? () => removeSet(index) : undefined}
                     />
                   </FixedCell>
-                )}
-                {!isReadOnly && (
-                  <FixedCell width={COL.action}>
-                    <IconButton
-                      icon={Trash2}
-                      size={30}
-                      accessibilityLabel={t('common:delete')}
-                      onPress={() => removeSet(index)}
-                      disabled={sets.length <= 1}
-                      color={theme.text(0.35)}
-                    />
-                  </FixedCell>
-                )}
-              </GridRow>
+                  {cols.map((col, colIndex) => (
+                    <MetricColumn key={col.key} col={col}>
+                      <MetricCell
+                        col={col}
+                        value={set.metrics[col.key]}
+                        onChange={(value) =>
+                          updateSetMetric(index, col.key, value)
+                        }
+                        isReadOnly={isReadOnly}
+                        modeEditing={modeEdit}
+                        logging={logging}
+                        placeholder={placeholderFor(index, col.key)}
+                        unit={activeUnitKey(col)}
+                        planValue={set.targetMetrics?.[col.key]}
+                        position={fieldPosition(index, colIndex)}
+                        completed={done}
+                      />
+                    </MetricColumn>
+                  ))}
+                  {ticks && (
+                    <FixedCell width={COL.tick}>
+                      <SetTick
+                        done={!!set.completed}
+                        onToggle={() => toggleDone(index)}
+                      />
+                    </FixedCell>
+                  )}
+                </GridRow>
+              </SwipeRow>
 
               {compound &&
                 subSets.map((sub, subIndex) => (
-                  <GridRow
-                    key={sub.id ?? `sub-${subIndex}`}
-                    tint={tint}
-                    first={false}
-                    last={subIndex === subSets.length - 1}
+                  <SwipeRow
+                    key={rowKey(sub, subIndex)}
+                    id={`${key}:${rowKey(sub, subIndex)}`}
+                    enabled={!isReadOnly && subSets.length > 1}
+                    onDelete={() => removeSubSet(index, subIndex)}
                   >
-                    <FixedCell width={COL.type}>
-                      <CornerDownRight size={14} color={theme.text(0.3)} />
-                    </FixedCell>
-                    {cols.map((col, colIndex) => (
-                      <MetricColumn key={col.key} col={col}>
-                        <MetricCell
-                          col={col}
-                          value={sub.metrics[col.key]}
-                          onChange={(value) =>
-                            updateSubSetMetric(index, subIndex, col.key, value)
-                          }
-                          isReadOnly={isReadOnly}
-                          modeEditing={modeEdit}
-                          logging={logging}
-                          placeholder={formatTarget(
-                            sub.targetMetrics?.[col.key],
-                          )}
-                          unit={activeUnitKey(col)}
-                          planValue={sub.targetMetrics?.[col.key]}
-                          position={fieldPosition(index, colIndex, subIndex)}
-                        />
-                      </MetricColumn>
-                    ))}
-                    {logging && <FixedCell width={COL.tick} />}
-                    {!isReadOnly && (
-                      <FixedCell width={COL.action}>
-                        <IconButton
-                          icon={X}
-                          size={30}
-                          accessibilityLabel={t('common:remove')}
-                          onPress={() => removeSubSet(index, subIndex)}
-                          disabled={subSets.length <= 1}
-                          color={theme.text(0.35)}
-                        />
+                    <GridRow
+                      tint={tint}
+                      first={false}
+                      last={subIndex === subSets.length - 1}
+                    >
+                      <FixedCell width={COL.type}>
+                        <CornerDownRight size={14} color={theme.text(0.3)} />
                       </FixedCell>
-                    )}
-                  </GridRow>
+                      {cols.map((col, colIndex) => (
+                        <MetricColumn key={col.key} col={col}>
+                          <MetricCell
+                            col={col}
+                            value={sub.metrics[col.key]}
+                            onChange={(value) =>
+                              updateSubSetMetric(
+                                index,
+                                subIndex,
+                                col.key,
+                                value,
+                              )
+                            }
+                            isReadOnly={isReadOnly}
+                            modeEditing={modeEdit}
+                            logging={logging}
+                            placeholder={formatTarget(
+                              sub.targetMetrics?.[col.key],
+                            )}
+                            unit={activeUnitKey(col)}
+                            planValue={sub.targetMetrics?.[col.key]}
+                            position={fieldPosition(index, colIndex, subIndex)}
+                            completed={done}
+                          />
+                        </MetricColumn>
+                      ))}
+                      {ticks && <FixedCell width={COL.tick} />}
+                    </GridRow>
+                  </SwipeRow>
                 ))}
 
               {showsSetComment(set, commentsEditing, isReadOnly) && (
